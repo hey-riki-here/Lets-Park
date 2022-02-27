@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "416164685068",
+    "project_id": "let-s-park-5c05c",
+    "storage_bucket": "let-s-park-5c05c.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:416164685068:android:4f0ffe0f726203ff851529",
+        "android_client_info": {
+          "package_name": "com.u7thdevs.lets_park"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "416164685068-g8tq6bs34bijfcmd50e36j2229b43ao7.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAmZjydpqe8_PFwNy3eZ4PxAo8GyzRNhLI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "416164685068-g8tq6bs34bijfcmd50e36j2229b43ao7.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

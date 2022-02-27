@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+<string name="app_name">Lets Park</string>
+<string name="facebook_app_id">490561699169953</string>
+<string name="fb_login_protocol_scheme">fb490561699169953</string>
+<string name="facebook_client_token">9dfb8817b01ddaf1111e63ef4a2e432a</string>
+</resources>
