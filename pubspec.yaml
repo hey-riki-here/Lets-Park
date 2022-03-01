@@ -45,7 +45,7 @@ dependencies:
   pinput: ^1.2.2
   google_maps_flutter: ^2.1.1
   geocoding: ^2.0.2
-  geolocator: ^8.2.0
+  geolocator: 4.0.3
   location: ^4.3.0
   flutter_screenutil: ^5.3.1
   permission_handler: ^9.1.0

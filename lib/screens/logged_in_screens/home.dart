@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:lets_park/screens/logged_in_screens/google_map_screen.dart';
 import 'package:lets_park/shared/NavigationDrawer.dart';
+import 'package:location/location.dart';
 
 class Home extends StatefulWidget {
   final int _pageId = 2;
@@ -47,15 +47,16 @@ class _HomeState extends State<Home> {
   }
 
   void grantPermission() async {
-    LocationPermission permission;
+    Location location = Location();
 
-    permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-    } else {}
+    PermissionStatus _permissionGranted;
 
-    if (permission == LocationPermission.deniedForever) {
-      // Some popup or instuctions to enable Location permission
+    _permissionGranted = await location.hasPermission();
+    if (_permissionGranted == PermissionStatus.denied) {
+      _permissionGranted = await location.requestPermission();
+      if (_permissionGranted != PermissionStatus.granted) {
+        return;
+      }
     }
   }
 }

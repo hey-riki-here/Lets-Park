@@ -1,9 +1,10 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:geolocator/geolocator.dart';
+import 'package:geolocator/geolocator.dart' as geolocator;
 import 'package:lets_park/main.dart';
 import 'package:lets_park/screens/popups/notice_dialog.dart';
+import 'package:location/location.dart';
 
 class GoogleMapScreen extends StatefulWidget {
   const GoogleMapScreen({Key? key}) : super(key: key);
@@ -15,12 +16,8 @@ class GoogleMapScreen extends StatefulWidget {
 class _GoogleMapState extends State<GoogleMapScreen> {
   final double mapMinZoom = 15, mapMaxZoom = 18;
   final Completer<GoogleMapController> _controller = Completer();
-  final LocationSettings locSettings = const LocationSettings(
-    accuracy: LocationAccuracy.high,
-    distanceFilter: 0,
-  );
   GoogleMapController? googleMapController;
-  Position? position;
+  geolocator.Position? position;
   bool locationEnabled = false;
   CameraPosition cameraPosition = const CameraPosition(
     zoom: 15,
@@ -50,47 +47,6 @@ class _GoogleMapState extends State<GoogleMapScreen> {
         onMapCreated: (GoogleMapController controller) async {
           _controller.complete(controller);
           googleMapController = controller;
-        
-          StreamSubscription<ServiceStatus> serviceStatus =
-              Geolocator.getServiceStatusStream().listen(
-            (ServiceStatus status) {
-              if (status == ServiceStatus.enabled) {
-                locationEnabled = true;
-              } else {
-                locationEnabled = false;
-              }
-              setState(() {});
-            },
-          );
-
-          bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
-          if (serviceEnabled) {
-            StreamSubscription<Position> positionStream =
-                Geolocator.getPositionStream(
-              locationSettings: locSettings,
-            ).listen(
-              (Position? position) async {
-                googleMapController = await _controller.future;
-                double zoom = await googleMapController!.getZoomLevel();
-                LatLngBounds bounds =
-                    await googleMapController!.getVisibleRegion();
-
-                if ((position!.latitude < bounds.northeast.latitude &&
-                        position.longitude < bounds.northeast.longitude) &&
-                    (position.latitude > bounds.southwest.latitude &&
-                        position.longitude > bounds.southwest.longitude)) {
-                  googleMapController!.animateCamera(
-                    CameraUpdate.newCameraPosition(
-                      CameraPosition(
-                        target: LatLng(position.latitude, position.longitude),
-                        zoom: zoom,
-                      ),
-                    ),
-                  );
-                }
-              },
-            );
-          }
         },
       ),
       floatingActionButton: FloatingActionButton(
@@ -111,12 +67,16 @@ class _GoogleMapState extends State<GoogleMapScreen> {
   void getLocation(BuildContext context) async {
     bool serviceEnabled;
 
-// Test if location services are enabled.
-    serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    if (!serviceEnabled) {
-      await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high,
-      );
+    Location location = Location();
+
+    bool _serviceEnabled;
+
+    _serviceEnabled = await location.serviceEnabled();
+    if (!_serviceEnabled) {
+      _serviceEnabled = await location.requestService();
+      if (!_serviceEnabled) {
+        return;
+      }
     } else {
       showDialog(
         context: context,
@@ -128,9 +88,8 @@ class _GoogleMapState extends State<GoogleMapScreen> {
         ),
       );
 
-      position = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high,
-      );
+      position = await geolocator.Geolocator().getCurrentPosition(
+          desiredAccuracy: geolocator.LocationAccuracy.high);
       googleMapController = await _controller.future;
       googleMapController!.animateCamera(
         CameraUpdate.newCameraPosition(
