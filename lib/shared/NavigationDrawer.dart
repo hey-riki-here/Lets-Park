@@ -5,6 +5,7 @@ import 'package:lets_park/screens/drawer_screens/messages.dart';
 import 'package:lets_park/screens/drawer_screens/my_parkings.dart';
 import 'package:lets_park/screens/drawer_screens/notifications.dart';
 import 'package:lets_park/screens/drawer_screens/profile.dart';
+import 'package:lets_park/screens/drawer_screens/register_area.dart';
 import 'package:lets_park/screens/logged_in_screens/home.dart';
 
 class NavigationDrawer extends StatefulWidget {
@@ -274,6 +275,14 @@ class Item extends StatelessWidget {
           Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => const AboutUs()),
+          );
+        }
+        break;
+        case 'Rent out your own space':
+        if (currentPage != id) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const RegisterArea()),
           );
         }
         break;

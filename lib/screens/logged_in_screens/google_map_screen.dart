@@ -82,7 +82,7 @@ class _GoogleMapState extends State<GoogleMapScreen> {
         context: context,
         barrierDismissible: false,
         builder: (context) => const NoticeDialog(
-          imageLink: "assets/logo/marker.png",
+          imageLink: "assets/icons/marker.png",
           message: "Please wait while we are locating your current location...",
           forLoading: true,
         ),
