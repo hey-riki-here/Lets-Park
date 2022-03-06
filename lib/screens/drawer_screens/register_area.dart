@@ -1,11 +1,11 @@
-import 'dart:ui';
-
+import 'dart:io';
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:lets_park/shared/shared_widgets.dart';
 
 class RegisterArea extends StatefulWidget {
@@ -17,6 +17,9 @@ class RegisterArea extends StatefulWidget {
 }
 
 class _RegisterAreaState extends State<RegisterArea> {
+  final SharedWidget _sharedWidget = SharedWidget();
+  final ScrollController _scrollController = ScrollController();
+  bool needScroll = false;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -31,31 +34,49 @@ class _RegisterAreaState extends State<RegisterArea> {
           ),
         ),
       ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: const [
-              Text(
-                "Location",
-                style: TextStyle(
-                  fontSize: 32,
-                  color: Colors.blue,
+      body: Scrollbar(
+        controller: _scrollController,
+        thickness: 5,
+        isAlwaysShown: true,
+        child: SingleChildScrollView(
+          controller: _scrollController,
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  "Location",
+                  style: TextStyle(
+                    fontSize: 32,
+                    color: Colors.blue,
+                  ),
                 ),
-              ),
-              SizedBox(height: 10),
-              PhotoPicker(),
-              SizedBox(height: 20),
-              Text(
-                "Provide the address of your area",
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.w400,
+                const SizedBox(height: 10),
+                const PhotoPicker(),
+                const SizedBox(height: 20),
+                const Text(
+                  "Provide the address of your area",
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w400,
+                  ),
                 ),
-              ),
-              AreaAdress(),
-            ],
+                const AreaAdress(),
+                const SizedBox(height: 10),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    _sharedWidget.button(
+
+                      label: "Continue",
+                      onPressed: () {},
+
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -63,8 +84,15 @@ class _RegisterAreaState extends State<RegisterArea> {
   }
 }
 
-class PhotoPicker extends StatelessWidget {
+class PhotoPicker extends StatefulWidget {
   const PhotoPicker({Key? key}) : super(key: key);
+
+  @override
+  State<PhotoPicker> createState() => _PhotoPickerState();
+}
+
+class _PhotoPickerState extends State<PhotoPicker> {
+  File? image;
 
   @override
   Widget build(BuildContext context) {
@@ -80,36 +108,83 @@ class PhotoPicker extends StatelessWidget {
         ),
         const SizedBox(height: 15),
         Center(
-          child: InkWell(
-            onTap: () {},
-            borderRadius: const BorderRadius.all(Radius.circular(12)),
-            child: DottedBorder(
-              color: Colors.blue,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 80,
-                  vertical: 30,
-                ),
-                child: Column(
-                  children: const [
-                    Icon(
-                      Icons.cloud_upload,
-                      size: 80,
-                      color: Colors.grey,
-                    ),
-                    SizedBox(height: 10),
-                    Text("Browse for an image")
-                  ],
-                ),
-              ),
-              borderType: BorderType.RRect,
-              radius: const Radius.circular(12),
-            ),
+          child: DottedBorder(
+            color: Colors.blue,
+            child: image != null ? displayImage() : placeHolder(),
+            borderType: BorderType.RRect,
+            radius: const Radius.circular(12),
           ),
         )
       ],
     );
   }
+
+  Future chooseImage() async {
+    try {
+      final image = await ImagePicker().pickImage(
+        source: ImageSource.gallery,
+      );
+      if (image == null) return;
+      final imageTemp = File(image.path);
+      setState(() => this.image = imageTemp);
+      print("Loaded");
+    } on Exception catch (e) {
+      // TODO
+    }
+  }
+
+  Widget displayImage() => Stack(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(28.0),
+            child: SizedBox(
+              child: Image.file(
+                image!,
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(4.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                GestureDetector(
+                  child: const Icon(Icons.close),
+                  onTap: () {
+                    setState(() {
+                      image = null;
+                    });
+                  },
+                ),
+              ],
+            ),
+          ),
+        ],
+      );
+
+  Widget placeHolder() => InkWell(
+
+        onTap: () {
+          chooseImage();
+        },
+        borderRadius: const BorderRadius.all(Radius.circular(12)),
+        child: Container(
+          width: 300,
+          height: 200,
+          padding: const EdgeInsets.all(35),
+          child: Column(
+            children: const [
+              Icon(
+                Icons.cloud_upload,
+                size: 80,
+                color: Colors.grey,
+              ),
+              SizedBox(height: 10),
+              Text("Browse for an image")
+            ],
+          ),
+        ),
+      );
 }
 
 class AreaAdress extends StatefulWidget {
@@ -164,22 +239,26 @@ class _AreaAdressState extends State<AreaAdress> {
     'Wawang Pulo',
   ];
   String selectedBarangay = 'Arkong Bato';
-
+  String stepOneSubtitle = "";
   @override
   Widget build(BuildContext context) {
     return Stepper(
       steps: _steps(),
       currentStep: _currentStep,
       onStepTapped: (step) {
-        setState(() {
-          _currentStep = step;
-        });
+        if (_formKey.currentState!.validate()) {
+          setState(() {
+            _currentStep = step;
+          });
+        }
       },
       onStepContinue: () {
         if (_currentStep == 0) {
           if (_formKey.currentState!.validate()) {
             setState(() {
               if (_currentStep < _steps().length - 1) {
+                stepOneSubtitle =
+                    street.text + ", " + selectedBarangay + ", Valenzuela";
                 moveCamera(street.text.trim(), selectedBarangay);
                 _currentStep += 1;
               } else {
@@ -228,6 +307,7 @@ class _AreaAdressState extends State<AreaAdress> {
   List<Step> _steps() {
     List<Step> steps = [
       Step(
+        subtitle: Text(stepOneSubtitle),
         title: const Text("Enter address"),
         content: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -270,7 +350,6 @@ class _AreaAdressState extends State<AreaAdress> {
                     ),
                     child: DropdownButtonHideUnderline(
                       child: DropdownButton<String>(
-                        hint: const Text("Select Barangay"),
                         value: selectedBarangay,
                         icon: const Icon(
                           Icons.arrow_drop_down_rounded,
@@ -301,23 +380,26 @@ class _AreaAdressState extends State<AreaAdress> {
           height: 400,
           child: Stack(
             children: [
-              GoogleMap(
-                initialCameraPosition: const CameraPosition(
-                  zoom: 15,
-                  tilt: 0,
-                  bearing: 0,
-                  target: LatLng(14.7011, 120.9830),
-                ),
-                mapType: mapType,
-                minMaxZoomPreference: const MinMaxZoomPreference(15, 20),
-                gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
-                  Factory<OneSequenceGestureRecognizer>(
-                    () => EagerGestureRecognizer(),
+              Material(
+                elevation: 3,
+                child: GoogleMap(
+                  initialCameraPosition: const CameraPosition(
+                    zoom: 15,
+                    tilt: 0,
+                    bearing: 0,
+                    target: LatLng(14.7011, 120.9830),
                   ),
-                },
-                onMapCreated: (GoogleMapController controller) {
-                  googleMapController = controller;
-                },
+                  mapType: mapType,
+                  minMaxZoomPreference: const MinMaxZoomPreference(15, 20),
+                  gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
+                    Factory<OneSequenceGestureRecognizer>(
+                      () => EagerGestureRecognizer(),
+                    ),
+                  },
+                  onMapCreated: (GoogleMapController controller) {
+                    googleMapController = controller;
+                  },
+                ),
               ),
               Padding(
                 padding: const EdgeInsets.all(8.0),
