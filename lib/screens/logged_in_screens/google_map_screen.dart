@@ -1,3 +1,5 @@
+// ignore_for_file: unused_catch_clause, empty_catches
+
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -65,7 +67,6 @@ class _GoogleMapState extends State<GoogleMapScreen> {
   }
 
   void getLocation(BuildContext context) async {
-    bool serviceEnabled;
 
     Location location = Location();
 
