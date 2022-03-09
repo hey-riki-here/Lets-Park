@@ -3,8 +3,6 @@
 import 'dart:io';
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
-import 'package:geocoding/geocoding.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:lets_park/globals/globals.dart' as globals;
 import 'package:lets_park/shared/shared_widgets.dart';
@@ -13,47 +11,49 @@ class AddressSection extends StatefulWidget {
   const AddressSection({Key? key}) : super(key: key);
 
   @override
-  State<AddressSection> createState() => _AddressSectionState();
+  State<AddressSection> createState() => AddressSectionState();
 }
 
-class _AddressSectionState extends State<AddressSection> {
+class AddressSectionState extends State<AddressSection> {
+  final SharedWidget _sharedWidget = SharedWidget();
+  final GlobalKey<AreaAdressState> _addressState = GlobalKey();
+  final GlobalKey<PhotoPickerState> _photoPickerState = GlobalKey();
   @override
   Widget build(BuildContext context) {
+    
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
-      children: const [
-        Text(
-          "Address",
-          style: TextStyle(
-            fontSize: 32,
-            color: Colors.blue,
-          ),
-        ),
-        SizedBox(height: 10),
-        PhotoPicker(),
-        SizedBox(height: 30),
-        Text(
+      children: [
+        _sharedWidget.stepHeader("Address"),
+        const SizedBox(height: 10),
+        PhotoPicker(key: _photoPickerState),
+        const SizedBox(height: 30),
+        const Text(
           "Provide the address of your area",
           style: TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.w300,
           ),
         ),
-        AreaAdress(),
-        SizedBox(height: 10),
+        AreaAdress(key: _addressState),
+        const SizedBox(height: 10),
       ],
     );
   }
+
+  GlobalKey<FormState> get getFormKey => _addressState.currentState!.getFormKey;
+  File? get getImage => _photoPickerState.currentState!.getImage;
+
 }
 
 class PhotoPicker extends StatefulWidget {
   const PhotoPicker({Key? key}) : super(key: key);
 
   @override
-  State<PhotoPicker> createState() => _PhotoPickerState();
+  State<PhotoPicker> createState() => PhotoPickerState();
 }
 
-class _PhotoPickerState extends State<PhotoPicker> {
+class PhotoPickerState extends State<PhotoPicker> {
   File? image;
 
   @override
@@ -143,21 +143,20 @@ class _PhotoPickerState extends State<PhotoPicker> {
           ),
         ),
       );
+
+    File? get getImage => image;
 }
 
 class AreaAdress extends StatefulWidget {
   const AreaAdress({Key? key}) : super(key: key);
 
   @override
-  State<AreaAdress> createState() => _AreaAdressState();
+  State<AreaAdress> createState() => AreaAdressState();
 }
 
-class _AreaAdressState extends State<AreaAdress> {
+class AreaAdressState extends State<AreaAdress> {
   TextEditingController barangay = TextEditingController();
   TextEditingController street = TextEditingController();
-  late GoogleMapController googleMapController;
-  MapType mapType = MapType.normal;
-  String mapTypeAsset = "assets/icons/map-type-1.png";
   final _formKey = GlobalKey<FormState>();
   final barangays = <String>[
     'Arkong Bato',
@@ -286,4 +285,6 @@ class _AreaAdressState extends State<AreaAdress> {
       value: item,
     );
   }
+
+  GlobalKey<FormState> get getFormKey => _formKey;
 }

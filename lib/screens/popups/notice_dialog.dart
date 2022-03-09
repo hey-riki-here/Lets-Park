@@ -1,14 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:lets_park/globals/globals.dart' as globals;
 
 class NoticeDialog extends StatelessWidget {
   final String message;
   final String imageLink;
   final bool forLoading;
+  final bool forConfirmation;
   const NoticeDialog({
     Key? key,
     required this.imageLink,
     required this.message,
     this.forLoading = false,
+    this.forConfirmation = false,
   }) : super(key: key);
 
   @override
@@ -55,7 +58,39 @@ class NoticeDialog extends StatelessWidget {
     if (forLoading == true) {
       return const Padding(
         padding: EdgeInsets.all(16.0),
-        child: Center(child: CircularProgressIndicator(color: Colors.green,)),
+        child: Center(
+            child: CircularProgressIndicator(
+          color: Colors.green,
+        )),
+      );
+    } else if (forConfirmation == true) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 10),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            TextButton(
+              child: const Text(
+                "Cancel",
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w400),
+              ),
+              onPressed: () {
+                globals.popWindow = false;
+                Navigator.of(context, rootNavigator: true).pop();
+              },
+            ),
+            TextButton(
+              child: const Text(
+                "Confirm",
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w400),
+              ),
+              onPressed: () {
+                globals.popWindow = true;
+                Navigator.of(context, rootNavigator: true).pop();
+              },
+            ),
+          ],
+        ),
       );
     } else {
       return ElevatedButton(

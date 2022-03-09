@@ -8,3 +8,5 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 TextEditingController globalStreet = TextEditingController();
 String globalBarangay = "";
 LatLng latLng = const LatLng(14.7011, 120.9830);
+bool popWindow = false;
+List data = [];

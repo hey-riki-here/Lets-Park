@@ -45,6 +45,14 @@ class SharedWidget {
     );
   }
 
+  Text stepHeader(String label) => Text(
+        label,
+        style: const TextStyle(
+          fontSize: 32,
+          color: Colors.blue,
+        ),
+      );
+
   TextFormField textFormField({
     required TextInputAction action,
     required TextEditingController controller,
