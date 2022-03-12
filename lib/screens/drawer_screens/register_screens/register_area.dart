@@ -1,13 +1,18 @@
 // ignore_for_file: unused_catch_clause, empty_catches
 
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:lets_park/globals/globals.dart' as globals;
+import 'package:lets_park/main.dart';
+import 'package:lets_park/models/parking_space.dart';
 import 'package:lets_park/screens/drawer_screens/register_screens/address_step.dart';
 import 'package:lets_park/screens/drawer_screens/register_screens/info_and_features.dart';
 import 'package:lets_park/screens/drawer_screens/register_screens/location_section.dart';
 import 'package:lets_park/screens/popups/notice_dialog.dart';
+import 'package:lets_park/services/firebase_api.dart';
 import 'package:lets_park/shared/shared_widgets.dart';
 
 class RegisterArea extends StatefulWidget {
@@ -34,6 +39,10 @@ class _RegisterAreaState extends State<RegisterArea> {
           message: "Are you want to cancel renting out your space?",
           forConfirmation: true,
         );
+
+        if (globals.popWindow) {
+          globals.parkingSpace = ParkingSpace();
+        }
         return globals.popWindow;
       },
       child: Scaffold(
@@ -68,21 +77,30 @@ class _RegisterAreaState extends State<RegisterArea> {
                 if (_currentStep == _steps().length - 1) {
                   if (_informationState.currentState!.getFormKey.currentState!
                       .validate()) {
+                    globals.parkingSpace.setCapacity =
+                        _informationState.currentState!.getCapacity;
 
-                        globals.data.add(_informationState.currentState!.getCapacity);
-                        globals.data.add(_informationState.currentState!.getInfo);
-                        globals.data.add(_informationState.currentState!.getVerticalClearance);
-                        globals.data.add(_informationState.currentState!.getType);
-                        globals.data.add(_informationState.currentState!.getSelectedFeatures);
+                    globals.parkingSpace.setInfo =
+                        _informationState.currentState!.getInfo;
 
-                        print(globals.data);
+                    globals.parkingSpace.setVerticalClearance =
+                        _informationState.currentState!.getVerticalClearance;
 
-                      }
+                    globals.parkingSpace.setType =
+                        _informationState.currentState!.getType;
+
+                    globals.parkingSpace.setFeatures =
+                        _informationState.currentState!.getSelectedFeatures;
+
+                    globals.parkingSpace.setOwnerId =
+                        FirebaseAuth.instance.currentUser!.uid;
+
+                    uploadParkingSpace(context);
+                  }
                 }
 
                 if (_currentStep == 1) {
-                  globals.data.add(globals.latLng);
-                  print(globals.data);
+                  globals.parkingSpace.setLatLng = globals.latLng;
                 }
 
                 if (_currentStep < _steps().length - 1) {
@@ -96,12 +114,13 @@ class _RegisterAreaState extends State<RegisterArea> {
                     } else {
                       if (_addressState.currentState!.getFormKey.currentState!
                           .validate()) {
-                        globals.data.add(_addressState.currentState!.getImage);
-                        globals.data.add(globals.globalStreet.text.trim() + ", " + globals.globalBarangay + ", Valenzuela");
+                        globals.parkingSpace.setAddress =
+                            globals.globalStreet.text.trim() +
+                                ", " +
+                                globals.globalBarangay +
+                                ", Valenzuela";
                         getCoordinatesAndRefresh();
                         _currentStep += 1;
-
-                        print(globals.data);
                       }
                     }
                   } else {
@@ -224,5 +243,38 @@ class _RegisterAreaState extends State<RegisterArea> {
         );
       },
     );
+  }
+
+  String generateFilename() {
+    int suffix = globals.parkinSpaceQuantity + 1;
+    String filename = globals.globalStreet.text +
+        "-" +
+        globals.globalBarangay +
+        "-ps-$suffix";
+    print(filename);
+    return filename.toLowerCase();
+  }
+
+  void uploadParkingSpace(BuildContext context) async {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => const NoticeDialog(
+        imageLink: "assets/logo/lets-park-logo.png",
+        message: "We are now uploading your parking space information...",
+        forLoading: true,
+      ),
+    );
+
+    await FirebaseServices.uploadImage(
+      _addressState.currentState!.getImage!,
+      "parking-area-images/" + generateFilename(),
+    ).then((url) {
+      globals.parkingSpace.setImageUrl = url;
+    });
+
+    await FirebaseServices.uploadParkingSpace();
+
+    navigatorKey.currentState!.popUntil((route) => route.isFirst);
   }
 }

@@ -1,5 +1,8 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:lets_park/models/parking_space.dart';
 import 'package:lets_park/screens/logged_in_screens/google_map_screen.dart';
+import 'package:lets_park/screens/popups/parking_area_info.dart';
 import 'package:lets_park/shared/NavigationDrawer.dart';
 import 'package:location/location.dart';
 
@@ -127,20 +130,21 @@ class FilterButtons extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         const SizedBox(width: 50),
-        _buildCategory("Nearest", 100),
-        _buildCategory("Highest Rating", 120),
-        _buildCategory("Secured", 100),
+        _buildCategory("Nearest", 100, context),
+        _buildCategory("Highest Rating", 120, context),
+        _buildCategory("Secured", 100, context),
       ],
     );
   }
 
-  Widget _buildCategory(String label, double width) {
+  Widget _buildCategory(String label, double width, BuildContext context) {
     return Material(
       borderRadius: const BorderRadius.all(Radius.circular(15)),
       elevation: 2,
       child: InkWell(
         borderRadius: BorderRadius.circular(15),
-        onTap: () {},
+        onTap: () {
+        },
         child: Ink(
           height: 30,
           width: width,

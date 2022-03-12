@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:lets_park/globals/globals.dart' as globals;
 import 'package:lets_park/shared/shared_widgets.dart';
+import 'package:path/path.dart';
 
 class AddressSection extends StatefulWidget {
   const AddressSection({Key? key}) : super(key: key);
@@ -20,7 +21,6 @@ class AddressSectionState extends State<AddressSection> {
   final GlobalKey<PhotoPickerState> _photoPickerState = GlobalKey();
   @override
   Widget build(BuildContext context) {
-    
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -43,7 +43,6 @@ class AddressSectionState extends State<AddressSection> {
 
   GlobalKey<FormState> get getFormKey => _addressState.currentState!.getFormKey;
   File? get getImage => _photoPickerState.currentState!.getImage;
-
 }
 
 class PhotoPicker extends StatefulWidget {
@@ -88,6 +87,7 @@ class PhotoPickerState extends State<PhotoPicker> {
       );
       if (image == null) return;
       final imageTemp = File(image.path);
+      print(basename(image.path));
       setState(() => this.image = imageTemp);
     } on Exception catch (e) {}
   }
@@ -144,7 +144,7 @@ class PhotoPickerState extends State<PhotoPicker> {
         ),
       );
 
-    File? get getImage => image;
+  File? get getImage => image;
 }
 
 class AreaAdress extends StatefulWidget {
@@ -225,7 +225,6 @@ class AreaAdressState extends State<AreaAdress> {
                 textInputAction: TextInputAction.done,
                 controller: street,
                 validator: (value) {
-                  
                   if (value == null || value.isEmpty) {
                     return "Please enter street";
                   }

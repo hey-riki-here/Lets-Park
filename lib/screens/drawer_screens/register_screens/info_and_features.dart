@@ -40,7 +40,7 @@ class InfoAndFeaturesState extends State<InfoAndFeatures> {
 
   String get getInfo => _informationState.currentState!.getInfo;
 
-  String get getVerticalClearance =>
+  double get getVerticalClearance =>
       _informationState.currentState!.getVerticalClearance;
 
   String? get getType => _reservabilityState.currentState!.getType;
@@ -253,7 +253,8 @@ class InformationState extends State<Information> {
 
   String get getInfo => _infoController.text.trim();
 
-  String get getVerticalClearance => _vertClearanceController.text.trim();
+  double get getVerticalClearance =>
+      double.parse(_vertClearanceController.text.trim());
 }
 
 class Reservability extends StatefulWidget {

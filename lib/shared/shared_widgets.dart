@@ -103,7 +103,7 @@ class SharedWidget {
   }
 
   AppBar appbarDrawer(
-      {required String title, required VoidCallback onPressed}) {
+      {required String title, VoidCallback? onPressed}) {
     return AppBar(
       backgroundColor: Colors.white,
       leading: IconButton(

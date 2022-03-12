@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:lets_park/screens/drawer_screens/about_us.dart';
+import 'package:lets_park/screens/drawer_screens/manage_space/manage_space.dart';
 import 'package:lets_park/screens/drawer_screens/messages.dart';
 import 'package:lets_park/screens/drawer_screens/my_parkings.dart';
 import 'package:lets_park/screens/drawer_screens/notifications.dart';
@@ -282,7 +283,7 @@ class Item extends StatelessWidget {
         if (currentPage != id) {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => const RegisterArea()),
+            MaterialPageRoute(builder: (context) => const ManageSpace()),
           );
         }
         break;
