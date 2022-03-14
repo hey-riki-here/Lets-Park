@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:lets_park/globals/globals.dart' as globals;
 import 'package:lets_park/shared/shared_widgets.dart';
-import 'package:path/path.dart';
 
 class AddressSection extends StatefulWidget {
   const AddressSection({Key? key}) : super(key: key);
@@ -87,7 +86,7 @@ class PhotoPickerState extends State<PhotoPicker> {
       );
       if (image == null) return;
       final imageTemp = File(image.path);
-      print(basename(image.path));
+
       setState(() => this.image = imageTemp);
     } on Exception catch (e) {}
   }

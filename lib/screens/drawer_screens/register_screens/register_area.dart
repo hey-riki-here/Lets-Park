@@ -1,6 +1,5 @@
 // ignore_for_file: unused_catch_clause, empty_catches
 
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:geocoding/geocoding.dart';
@@ -8,6 +7,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:lets_park/globals/globals.dart' as globals;
 import 'package:lets_park/main.dart';
 import 'package:lets_park/models/parking_space.dart';
+import 'package:lets_park/screens/drawer_screens/manage_space/manage_space.dart';
 import 'package:lets_park/screens/drawer_screens/register_screens/address_step.dart';
 import 'package:lets_park/screens/drawer_screens/register_screens/info_and_features.dart';
 import 'package:lets_park/screens/drawer_screens/register_screens/location_section.dart';
@@ -235,6 +235,7 @@ class _RegisterAreaState extends State<RegisterArea> {
       bool? forConfirmation = false}) {
     return showDialog(
       context: context,
+      barrierDismissible: false,
       builder: (context) {
         return NoticeDialog(
           imageLink: imageLink,
@@ -246,12 +247,18 @@ class _RegisterAreaState extends State<RegisterArea> {
   }
 
   String generateFilename() {
-    int suffix = globals.parkinSpaceQuantity + 1;
+    int id = globals.parkinSpaceQuantity + 1;
+    DateTime date = DateTime.now();
+    String time = date.month.toString() +
+        date.day.toString() +
+        date.year.toString() +
+        date.hour.toString() +
+        date.minute.toString() +
+        date.second.toString();
     String filename = globals.globalStreet.text +
         "-" +
         globals.globalBarangay +
-        "-ps-$suffix";
-    print(filename);
+        "-PS$time$id";
     return filename.toLowerCase();
   }
 
@@ -259,10 +266,13 @@ class _RegisterAreaState extends State<RegisterArea> {
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (context) => const NoticeDialog(
-        imageLink: "assets/logo/lets-park-logo.png",
-        message: "We are now uploading your parking space information...",
-        forLoading: true,
+      builder: (context) => WillPopScope(
+        onWillPop: () async => false,
+        child: const NoticeDialog(
+          imageLink: "assets/logo/lets-park-logo.png",
+          message: "We are now uploading your parking space information...",
+          forLoading: true,
+        ),
       ),
     );
 
@@ -276,5 +286,8 @@ class _RegisterAreaState extends State<RegisterArea> {
     await FirebaseServices.uploadParkingSpace();
 
     navigatorKey.currentState!.popUntil((route) => route.isFirst);
+
+    Navigator.push(context,
+        MaterialPageRoute(builder: ((context) => const ManageSpace())));
   }
 }

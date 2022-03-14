@@ -7,8 +7,16 @@ import 'package:lets_park/globals/globals.dart' as globals;
 class FirebaseServices {
   static Future uploadParkingSpace() async {
     int id = globals.parkinSpaceQuantity + 1;
+    DateTime date = DateTime.now();
+    String time = date.month.toString() +
+        date.day.toString() +
+        date.year.toString() +
+        date.hour.toString() +
+        date.minute.toString() +
+        date.second.toString();
+
     final docUser =
-        FirebaseFirestore.instance.collection('parking-spaces').doc('ps-$id');
+        FirebaseFirestore.instance.collection('parking-spaces').doc('PS$time$id');
 
     await docUser.set(globals.parkingSpace.toJson());
   }

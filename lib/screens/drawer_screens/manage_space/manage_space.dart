@@ -1,6 +1,5 @@
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
+import 'package:lets_park/screens/drawer_screens/manage_space/earnings.dart';
 import 'package:lets_park/screens/drawer_screens/manage_space/your_space.dart';
 import 'package:lets_park/shared/NavigationDrawer.dart';
 import 'package:lets_park/shared/shared_widgets.dart';
@@ -142,12 +141,7 @@ class Menu extends StatelessWidget {
                   ),
                   subLabel: "View all your spaces",
                   onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: ((context) => const YourSpace()),
-                      ),
-                    );
+                    goToRoute(context, YourSpace());
                   },
                 ),
                 Container(
@@ -159,7 +153,9 @@ class Menu extends StatelessWidget {
                   insets: const EdgeInsets.all(10),
                   borderRadius: const BorderRadius.all(Radius.zero),
                   subLabel: "View your daily and monthly earnings",
-                  onTap: () {},
+                  onTap: () {
+                    goToRoute(context, const Earnings());
+                  },
                 ),
                 Container(
                   height: 1,
@@ -234,6 +230,15 @@ class Menu extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  void goToRoute(BuildContext context, Widget page) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: ((context) => page),
       ),
     );
   }

@@ -5,16 +5,18 @@ import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 import 'package:lets_park/main.dart';
+import 'package:lets_park/models/app_user.dart';
+import 'package:lets_park/screens/loading_screens/logging_in_screen.dart';
 import 'package:lets_park/screens/popups/notice_dialog.dart';
 import 'package:lets_park/screens/signin_register/login.dart';
 import 'package:lets_park/screens/signin_register/register.dart';
+import 'package:lets_park/globals/globals.dart' as globals;
 
 class SignInProvider extends ChangeNotifier {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final googleSignIn = GoogleSignIn();
   GoogleSignInAccount? _googleUser;
   GoogleSignInAccount get getGoogleUser => _googleUser!;
-
   Future signinWithEmailAndPass(
     String email,
     String password,
@@ -62,22 +64,20 @@ class SignInProvider extends ChangeNotifier {
   }
 
   Future googleLogin(BuildContext context) async {
-    _showLoading(context);
-
     try {
       final googleUser = await googleSignIn.signIn();
 
       if (googleUser == null) return;
+      showDialog(context: context, builder: (context) => LoggingIn());
       _googleUser = googleUser;
 
       final googleAuth = await googleUser.authentication;
-
       final credential = GoogleAuthProvider.credential(
         accessToken: googleAuth.accessToken,
         idToken: googleAuth.idToken,
       );
-
       await _auth.signInWithCredential(credential);
+      retrieveUserData();
     } on Exception catch (e) {
     } finally {
       notifyListeners();
@@ -109,12 +109,10 @@ class SignInProvider extends ChangeNotifier {
 
     try {
       await FacebookAuth.instance.logOut();
-    } on Exception catch (e) {
-    }
+    } on Exception catch (e) {}
     try {
       await googleSignIn.disconnect();
-    } on Exception catch (e) {
-    }
+    } on Exception catch (e) {}
     _auth.signOut();
 
     navigatorKey.currentState!.popUntil((route) => route.isFirst);
@@ -144,5 +142,9 @@ class SignInProvider extends ChangeNotifier {
         ));
       },
     );
+  }
+
+  void retrieveUserData() async {
+    globals.appUser.setUserId = _auth.currentUser!.uid;
   }
 }

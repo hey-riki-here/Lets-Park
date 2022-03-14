@@ -102,8 +102,7 @@ class SharedWidget {
     );
   }
 
-  AppBar appbarDrawer(
-      {required String title, VoidCallback? onPressed}) {
+  AppBar appbarDrawer({required String title, VoidCallback? onPressed}) {
     return AppBar(
       backgroundColor: Colors.white,
       leading: IconButton(
@@ -111,6 +110,33 @@ class SharedWidget {
         onPressed: onPressed,
       ),
       elevation: 2,
+      bottom: PreferredSize(
+        child: Container(
+          color: Colors.white,
+          height: 40,
+          width: double.infinity,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            child: Text(
+              title,
+              style: const TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ),
+        preferredSize: const Size.fromHeight(40),
+      ),
+    );
+  }
+
+  AppBar manageSpaceAppBar(String title) {
+    return AppBar(
+      backgroundColor: Colors.white,
+      iconTheme: const IconThemeData(
+        color: Colors.black,
+      ),
       bottom: PreferredSize(
         child: Container(
           color: Colors.white,

@@ -1,47 +1,40 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:lets_park/models/parking_space.dart';
+import 'package:lets_park/screens/drawer_screens/register_screens/register_area.dart';
+import 'package:lets_park/shared/shared_widgets.dart';
+import 'package:lets_park/globals/globals.dart' as globals;
 
 class YourSpace extends StatelessWidget {
-  const YourSpace({Key? key}) : super(key: key);
+  final appUser = globals.appUser;
+  YourSpace({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    final _sharedWidgets = SharedWidget();
+    List<ParkingSpace>? parkingSpaces = appUser.getOwnedParkingSpaces;
+
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        iconTheme: const IconThemeData(
-          color: Colors.black,
-        ),
-        bottom: PreferredSize(
-          child: Container(
-            color: Colors.white,
-            height: 40,
-            width: double.infinity,
-            child: const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 16.0),
-              child: Text(
-                "Your Spaces",
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.w600,
-                ),
+      appBar: _sharedWidgets.manageSpaceAppBar("Your spaces"),
+      backgroundColor: Colors.grey.shade300,
+      body: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Column(
+          children: [
+            Expanded(
+              child: ListView.builder(
+                itemCount: parkingSpaces!.length,
+                itemBuilder: (context, index) {
+                  int title = index + 1;
+                  return ParkingCard(
+                    parkingSpace: parkingSpaces[index],
+                    title: "$title",
+                  );
+                },
               ),
             ),
-          ),
-          preferredSize: const Size.fromHeight(40),
-        ),
-      ),
-      backgroundColor: Colors.grey.shade300,
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Column(
-            children: const [
-              ParkingCard(),
-              SizedBox(height: 15),
-              AddMore(),
-            ],
-          ),
+            const AddMore(),
+          ],
         ),
       ),
     );
@@ -49,17 +42,21 @@ class YourSpace extends StatelessWidget {
 }
 
 class ParkingCard extends StatelessWidget {
-  const ParkingCard({Key? key}) : super(key: key);
+  final ParkingSpace parkingSpace;
+  final String title;
+  const ParkingCard({Key? key, required this.parkingSpace, required this.title})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    int capacity = parkingSpace.getCapacity!;
     return Card(
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.all(
           Radius.circular(12),
         ),
       ),
-      elevation: 5,
+      elevation: 3,
       child: Padding(
         padding: const EdgeInsets.all(8.0),
         child: Column(
@@ -68,9 +65,9 @@ class ParkingCard extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text(
-                  "Space 1",
-                  style: TextStyle(
+                Text(
+                  "Space " + title,
+                  style: const TextStyle(
                     fontSize: 21,
                     fontWeight: FontWeight.w600,
                   ),
@@ -79,9 +76,9 @@ class ParkingCard extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 7),
-            const Text(
-              "83 P. Faustino St.",
-              style: TextStyle(
+            Text(
+              parkingSpace.getAddress!,
+              style: const TextStyle(
                 fontSize: 18,
                 color: Colors.grey,
               ),
@@ -118,18 +115,18 @@ class ParkingCard extends StatelessWidget {
             ),
             const SizedBox(height: 10),
             Row(
-              children: const [
-                Text(
+              children: [
+                const Text(
                   "Available slots:",
                   style: TextStyle(
                     fontSize: 21,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
-                SizedBox(width: 5),
+                const SizedBox(width: 5),
                 Text(
-                  "1/1",
-                  style: TextStyle(
+                  "1/$capacity",
+                  style: const TextStyle(
                     fontSize: 21,
                     fontWeight: FontWeight.w600,
                     color: Colors.blue,
@@ -162,13 +159,14 @@ class ParkingCard extends StatelessWidget {
       width: 100,
       height: 30,
       decoration: BoxDecoration(
-          color: color, borderRadius: BorderRadius.all(Radius.circular(20))),
+          color: color,
+          borderRadius: const BorderRadius.all(Radius.circular(20))),
       child: Center(
         child: Text(
           label,
           style: const TextStyle(
             color: Colors.white,
-            fontSize: 18,
+            fontSize: 16,
           ),
         ),
       ),
@@ -181,24 +179,30 @@ class AddMore extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: const [
-          Icon(
-            FontAwesomeIcons.plusCircle,
-            color: Colors.grey,
-          ),
-          SizedBox(width: 10),
-          Text(
-            "Increase your level to add more space.",
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.w600,
+    return InkWell(
+      onTap: () {
+        Navigator.push(context,
+            MaterialPageRoute(builder: ((context) => const RegisterArea())));
+      },
+      child: Center(
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: const [
+            Icon(
+              FontAwesomeIcons.plusCircle,
               color: Colors.grey,
             ),
-          ),
-        ],
+            SizedBox(width: 10),
+            Text(
+              "Increase your level to add more space.",
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+                color: Colors.grey,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

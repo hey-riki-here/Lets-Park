@@ -57,7 +57,6 @@ class Capacity extends StatefulWidget {
 }
 
 class CapacityState extends State<Capacity> {
-  final SharedWidget _sharedWidget = SharedWidget();
   int _capacity = 1;
   @override
   Widget build(BuildContext context) {

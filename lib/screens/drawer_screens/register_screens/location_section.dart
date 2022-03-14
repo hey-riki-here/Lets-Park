@@ -78,7 +78,9 @@ class LocationSectionState extends State<LocationSection> {
                     cameraPosition = position;
                   },
                   onCameraIdle: () {
-                    LatLng currentLatLng = LatLng(cameraPosition.target.latitude, cameraPosition.target.longitude);
+                    LatLng currentLatLng = LatLng(
+                        cameraPosition.target.latitude,
+                        cameraPosition.target.longitude);
                     globals.latLng = currentLatLng;
                   },
                 ),
@@ -142,4 +144,5 @@ class LocationSectionState extends State<LocationSection> {
       ),
     );
   }
+
 }

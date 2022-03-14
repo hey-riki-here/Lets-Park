@@ -1,5 +1,3 @@
-import 'dart:io';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 class ParkingSpace {
@@ -16,6 +14,7 @@ class ParkingSpace {
   ParkingSpace();
 
   ParkingSpace.fromDatabase(
+      String? ownerId,
       String? imageUrl,
       String? address,
       List geoposition,
@@ -24,6 +23,7 @@ class ParkingSpace {
       double? verticalClearance,
       String? type,
       List<String>? features) {
+    _ownerId = ownerId;
     _imageUrl = imageUrl;
     _address = address;
     _latLng = LatLng(geoposition[0], geoposition[1]);
@@ -111,6 +111,7 @@ class ParkingSpace {
     features = fromDatabase.cast<String>();
 
     return ParkingSpace.fromDatabase(
+      json['ownerId'],
       json['imageUrl'],
       json['address'],
       json['geoposition'],

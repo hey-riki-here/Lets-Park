@@ -8,6 +8,7 @@ import 'package:lets_park/screens/drawer_screens/notifications.dart';
 import 'package:lets_park/screens/drawer_screens/profile.dart';
 import 'package:lets_park/screens/drawer_screens/register_screens/register_area.dart';
 import 'package:lets_park/screens/logged_in_screens/home.dart';
+import 'package:lets_park/globals/globals.dart' as globals;
 
 class NavigationDrawer extends StatefulWidget {
   final int currentPage;
@@ -20,8 +21,8 @@ class NavigationDrawer extends StatefulWidget {
 
 class _NavigationDrawerState extends State<NavigationDrawer> {
   final user = FirebaseAuth.instance.currentUser!;
-
-  String photoURL = "https://cdn4.iconfinder.com/data/icons/user-people-2/48/5-512.png";
+  String photoURL =
+      "https://cdn4.iconfinder.com/data/icons/user-people-2/48/5-512.png";
 
   @override
   void initState() {
@@ -88,11 +89,17 @@ class _NavigationDrawerState extends State<NavigationDrawer> {
                     color: Colors.blue,
                   ),
                 ),
-                Item(
-                  title: 'Rent out your own space',
-                  id: 6,
-                  currentPage: widget.currentPage,
-                ),
+                globals.appUser.getOwnedParkingSpaces!.isEmpty
+                    ? Item(
+                        title: 'Rent out your own space',
+                        id: 6,
+                        currentPage: widget.currentPage,
+                      )
+                    : Item(
+                        title: 'Manage your space',
+                        id: 6,
+                        currentPage: widget.currentPage,
+                      ),
                 const SizedBox(height: 20),
                 const Text(
                   "Developers",
@@ -279,7 +286,15 @@ class Item extends StatelessWidget {
           );
         }
         break;
-        case 'Rent out your own space':
+      case 'Rent out your own space':
+        if (currentPage != id) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const RegisterArea()),
+          );
+        }
+        break;
+      case 'Manage your space':
         if (currentPage != id) {
           Navigator.push(
             context,

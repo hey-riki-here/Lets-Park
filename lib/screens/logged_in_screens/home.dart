@@ -1,8 +1,9 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'dart:math';
+
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:lets_park/models/parking_space.dart';
+import 'package:lets_park/models/app_user.dart';
 import 'package:lets_park/screens/logged_in_screens/google_map_screen.dart';
-import 'package:lets_park/screens/popups/parking_area_info.dart';
 import 'package:lets_park/shared/NavigationDrawer.dart';
 import 'package:location/location.dart';
 
@@ -16,7 +17,9 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> {
   final _scaffoldKey = GlobalKey<ScaffoldState>();
-
+  final user = FirebaseAuth.instance.currentUser;
+  final GlobalKey<GoogleMapScreenState> _gMapKey = GlobalKey();
+  final appUser = AppUser();
   @override
   Widget build(BuildContext context) {
     grantPermission();
@@ -26,7 +29,7 @@ class _HomeState extends State<Home> {
       body: SafeArea(
         child: Stack(
           children: [
-            const GoogleMapScreen(),
+            GoogleMapScreen(key: _gMapKey),
             Padding(
               padding: const EdgeInsets.all(16.0),
               child: Column(
@@ -35,7 +38,7 @@ class _HomeState extends State<Home> {
                     children: [
                       DrawerButton(scaffoldKey: _scaffoldKey),
                       const SizedBox(width: 10),
-                      const SearchBox(),
+                      SearchBox(gMapKey: _gMapKey),
                     ],
                   ),
                   const SizedBox(height: 10),
@@ -87,10 +90,12 @@ class DrawerButton extends StatelessWidget {
 }
 
 class SearchBox extends StatelessWidget {
-  const SearchBox({Key? key}) : super(key: key);
+  final GlobalKey<GoogleMapScreenState> gMapKey;
+  const SearchBox({Key? key, required this.gMapKey}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    final _controller = TextEditingController();
     return Expanded(
       child: Material(
         borderRadius: const BorderRadius.all(Radius.circular(15)),
@@ -100,9 +105,23 @@ class SearchBox extends StatelessWidget {
             color: Colors.white,
             borderRadius: BorderRadius.circular(10),
           ),
-          child: TextFormField(
+          child: TextField(
+            controller: _controller,
             textInputAction: TextInputAction.done,
+            onSubmitted: (query) {
+              gMapKey.currentState!.goToLocation(query + ", Valenzuela");
+            },
             decoration: InputDecoration(
+              suffixIcon: IconButton(
+                  onPressed: () {
+                    gMapKey.currentState!
+                        .goToLocation(_controller.text.trim() + ", Valenzuela");
+                  },
+                  icon: const Icon(
+                    Icons.search,
+                    color: Colors.black54,
+                    size: 20,
+                  )),
               isDense: true,
               hintText: 'Enter location here',
               filled: true,
@@ -144,6 +163,10 @@ class FilterButtons extends StatelessWidget {
       child: InkWell(
         borderRadius: BorderRadius.circular(15),
         onTap: () {
+          double totalDistance =
+              calculateDistance(14.7560799, 120.9975581, 14.750741800000002, 121.00106040000001);
+
+          print(totalDistance);
         },
         child: Ink(
           height: 30,
@@ -160,5 +183,14 @@ class FilterButtons extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  double calculateDistance(lat1, lon1, lat2, lon2) {
+    var p = 0.017453292519943295;
+    var c = cos;
+    var a = 0.5 -
+        c((lat2 - lat1) * p) / 2 +
+        c(lat1 * p) * c(lat2 * p) * (1 - c((lon2 - lon1) * p)) / 2;
+    return 12742 * asin(sqrt(a));
   }
 }
