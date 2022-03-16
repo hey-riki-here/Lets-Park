@@ -12,5 +12,6 @@ String globalBarangay = "";
 LatLng latLng = const LatLng(14.7011, 120.9830);
 bool popWindow = false;
 ParkingSpace parkingSpace = ParkingSpace();
+List<ParkingSpace> currentParkingSpaces = [];
 int parkinSpaceQuantity = 0;
 AppUser appUser = AppUser();

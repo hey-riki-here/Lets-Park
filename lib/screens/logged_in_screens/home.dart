@@ -1,11 +1,13 @@
-import 'dart:math';
-
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:lets_park/models/app_user.dart';
+import 'package:lets_park/models/parking_space.dart';
 import 'package:lets_park/screens/logged_in_screens/google_map_screen.dart';
+import 'package:lets_park/services/firebase_api.dart';
 import 'package:lets_park/shared/NavigationDrawer.dart';
 import 'package:location/location.dart';
+import 'package:geolocator/geolocator.dart' as geolocator;
 
 class Home extends StatefulWidget {
   final int _pageId = 2;
@@ -42,7 +44,7 @@ class _HomeState extends State<Home> {
                     ],
                   ),
                   const SizedBox(height: 10),
-                  const FilterButtons(),
+                  FilterButtons(gMapKey: _gMapKey),
                 ],
               ),
             ),
@@ -96,6 +98,7 @@ class SearchBox extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final _controller = TextEditingController();
+
     return Expanded(
       child: Material(
         borderRadius: const BorderRadius.all(Radius.circular(15)),
@@ -140,57 +143,283 @@ class SearchBox extends StatelessWidget {
   }
 }
 
-class FilterButtons extends StatelessWidget {
-  const FilterButtons({Key? key}) : super(key: key);
+class FilterButtons extends StatefulWidget {
+  final GlobalKey<GoogleMapScreenState> gMapKey;
+  const FilterButtons({Key? key, required this.gMapKey}) : super(key: key);
 
   @override
+  State<FilterButtons> createState() => _FilterButtonsState();
+}
+
+class _FilterButtonsState extends State<FilterButtons> {
+  bool canShowModal = true;
+  @override
   Widget build(BuildContext context) {
+    FirebaseServices _firebaseServices = FirebaseServices();
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         const SizedBox(width: 50),
-        _buildCategory("Nearest", 100, context),
-        _buildCategory("Highest Rating", 120, context),
-        _buildCategory("Secured", 100, context),
+        _buildCategory(
+          label: "Nearby",
+          width: 100,
+          context: context,
+          onTap: () async {
+            if (canShowModal == true) {
+              setState(() {
+                canShowModal = false;
+              });
+              var position = await geolocator.Geolocator().getCurrentPosition(
+                  desiredAccuracy: geolocator.LocationAccuracy.high);
+              Map<ParkingSpace, double> nearbySpaces =
+                  _firebaseServices.getNearbyParkingSpaces(
+                LatLng(
+                  position.latitude,
+                  position.longitude,
+                ),
+              );
+              setState(() {
+                canShowModal = true;
+              });
+              await showModalBottomSheet<void>(
+                barrierColor: const Color.fromARGB(0, 0, 0, 0),
+                elevation: 50,
+                context: context,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                builder: (BuildContext context) {
+                  return Container(
+                    height: 350,
+                    padding: const EdgeInsets.all(8),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Center(
+                          child: Icon(
+                            Icons.drag_handle_rounded,
+                            color: Colors.grey,
+                            size: 30,
+                          ),
+                        ),
+                        const Text(
+                          "Top nearby places",
+                          style: TextStyle(
+                            fontSize: 23,
+                          ),
+                        ),
+                        const SizedBox(
+                          height: 20,
+                        ),
+                        const Text(
+                          "Click on the parking space to focus it on the map",
+                          style: TextStyle(
+                            color: Colors.grey,
+                          ),
+                        ),
+                        Expanded(
+                          child: ListView.builder(
+                            scrollDirection: Axis.horizontal,
+                            itemCount: nearbySpaces.keys.length,
+                            itemBuilder: (context, index) {
+                              return NearbyParkingCard(
+                                space: nearbySpaces.keys.elementAt(index),
+                                gMapKey: widget.gMapKey,
+                                distance: getDistance(
+                                  nearbySpaces.values.elementAt(index),
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              );
+            }
+          },
+        ),
+        _buildCategory(
+          label: "Highest Rating",
+          width: 120,
+          context: context,
+          onTap: () {},
+        ),
+        _buildCategory(
+          label: "Secured",
+          width: 100,
+          context: context,
+          onTap: () {},
+        ),
       ],
     );
   }
 
-  Widget _buildCategory(String label, double width, BuildContext context) {
+  Widget _buildCategory({
+    required String label,
+    required double width,
+    required BuildContext context,
+    required VoidCallback onTap,
+  }) {
     return Material(
       borderRadius: const BorderRadius.all(Radius.circular(15)),
       elevation: 2,
       child: InkWell(
         borderRadius: BorderRadius.circular(15),
-        onTap: () {
-          double totalDistance =
-              calculateDistance(14.7560799, 120.9975581, 14.750741800000002, 121.00106040000001);
-
-          print(totalDistance);
-        },
+        onTap: canShowModal == false && label.compareTo("Nearby") == 0
+            ? null
+            : onTap,
         child: Ink(
           height: 30,
           width: width,
-          child: Center(
-            child: Text(
-              label,
-              style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ),
+          child: label.compareTo("Nearby") == 0
+              ? Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Center(
+                      child: Text(
+                        label,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    canShowModal == false
+                        ? const SizedBox(
+                            width: 15,
+                            height: 15,
+                            child: CircularProgressIndicator(
+                              color: Colors.grey,
+                              strokeWidth: 2,
+                            ),
+                          )
+                        : Container(),
+                  ],
+                )
+              : Center(
+                  child: Text(
+                    label,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
         ),
       ),
     );
   }
 
-  double calculateDistance(lat1, lon1, lat2, lon2) {
-    var p = 0.017453292519943295;
-    var c = cos;
-    var a = 0.5 -
-        c((lat2 - lat1) * p) / 2 +
-        c(lat1 * p) * c(lat2 * p) * (1 - c((lon2 - lon1) * p)) / 2;
-    return 12742 * asin(sqrt(a));
+  String getDistance(double distance) {
+    int newDistance = 0;
+    if (distance < 1) {
+      newDistance = (distance * 1000).toInt();
+      return "$newDistance m";
+    } else {
+      newDistance = distance.toInt();
+      return "$newDistance km";
+    }
+  }
+}
+
+class NearbyParkingCard extends StatelessWidget {
+  final ParkingSpace space;
+  final String distance;
+  final GlobalKey<GoogleMapScreenState> gMapKey;
+  const NearbyParkingCard({
+    Key? key,
+    required this.space,
+    required this.gMapKey,
+    required this.distance,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      elevation: 5,
+      child: InkWell(
+        onTap: () {
+          gMapKey.currentState!.focusMapOnLocation(space.getLatLng!);
+        },
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: SizedBox(
+                  width: 150,
+                  height: 100,
+                  child: Image.network(
+                    space.getImageUrl!,
+                    fit: BoxFit.fill,
+                  ),
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.star,
+                    color: Colors.yellow.shade600,
+                    size: 17,
+                  ),
+                  Icon(
+                    Icons.star,
+                    color: Colors.yellow.shade600,
+                    size: 17,
+                  ),
+                  Icon(
+                    Icons.star,
+                    color: Colors.yellow.shade600,
+                    size: 17,
+                  ),
+                  Icon(
+                    Icons.star,
+                    color: Colors.yellow.shade600,
+                    size: 17,
+                  ),
+                  Icon(
+                    Icons.star,
+                    color: Colors.yellow.shade600,
+                    size: 17,
+                  ),
+                ],
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(8),
+              child: getFeatures(space.getFeatures!),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Text(
+                "About " + distance,
+                style: const TextStyle(fontSize: 16, color: Colors.black87),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget getFeatures(List<String> features) {
+    String featuresList = "";
+    for (String feature in features) {
+      featuresList += "-" + feature + "\n";
+    }
+
+    return Text(
+      featuresList,
+      style: const TextStyle(color: Colors.black54),
+    );
   }
 }
