@@ -4,7 +4,7 @@ library lets_park.globals;
 
 import 'package:flutter/cupertino.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:lets_park/models/app_user.dart';
+import 'package:lets_park/models/user_data.dart';
 import 'package:lets_park/models/parking_space.dart';
 
 TextEditingController globalStreet = TextEditingController();
@@ -14,4 +14,4 @@ bool popWindow = false;
 ParkingSpace parkingSpace = ParkingSpace();
 List<ParkingSpace> currentParkingSpaces = [];
 int parkinSpaceQuantity = 0;
-AppUser appUser = AppUser();
+UserData userData = UserData();

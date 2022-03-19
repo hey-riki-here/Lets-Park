@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:lets_park/shared/NavigationDrawer.dart';
+import 'package:lets_park/shared/navigation_drawer.dart';
 import 'package:lets_park/shared/shared_widgets.dart';
 
 class AboutUs extends StatelessWidget {

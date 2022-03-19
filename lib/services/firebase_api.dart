@@ -52,7 +52,7 @@ class FirebaseServices {
       }
     });
 
-    globals.appUser.setOwnedParkingSpaces = ownedSpaces;
+    globals.userData.setOwnedParkingSpaces = ownedSpaces;
   }
 
   Stream<List<ParkingSpace>> getParkingSpacesFromDatabase() {

@@ -1,11 +1,10 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:lets_park/models/app_user.dart';
 import 'package:lets_park/models/parking_space.dart';
 import 'package:lets_park/screens/logged_in_screens/google_map_screen.dart';
 import 'package:lets_park/services/firebase_api.dart';
-import 'package:lets_park/shared/NavigationDrawer.dart';
+import 'package:lets_park/shared/navigation_drawer.dart';
 import 'package:location/location.dart';
 import 'package:geolocator/geolocator.dart' as geolocator;
 
@@ -21,7 +20,6 @@ class _HomeState extends State<Home> {
   final _scaffoldKey = GlobalKey<ScaffoldState>();
   final user = FirebaseAuth.instance.currentUser;
   final GlobalKey<GoogleMapScreenState> _gMapKey = GlobalKey();
-  final appUser = AppUser();
   @override
   Widget build(BuildContext context) {
     grantPermission();

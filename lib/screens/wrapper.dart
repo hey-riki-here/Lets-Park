@@ -15,7 +15,7 @@ class Wrapper extends StatelessWidget {
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(
-              child: const Text("Heeeeey!"),
+              child: Text("Heeeeey!"),
             );
           } else if (snapshot.hasData) {
             return const Home();

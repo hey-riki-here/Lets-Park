@@ -89,7 +89,7 @@ class _NavigationDrawerState extends State<NavigationDrawer> {
                     color: Colors.blue,
                   ),
                 ),
-                globals.appUser.getOwnedParkingSpaces!.isEmpty
+                globals.userData.getOwnedParkingSpaces!.isEmpty
                     ? Item(
                         title: 'Rent out your own space',
                         id: 6,

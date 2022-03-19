@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:lets_park/models/parking_space.dart';
+import 'package:lets_park/screens/popups/checkout.dart';
 
 class ParkingAreaInfo extends StatelessWidget {
   final ParkingSpace parkingSpace;
@@ -300,10 +301,18 @@ class InfoAndReviews extends StatelessWidget {
               bottom: 8,
             ),
             child: ElevatedButton(
-              onPressed: () {},
+              onPressed: () {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      fullscreenDialog: true,
+                      builder: (context) => const Checkout(),
+                    ));
+              },
               child: const Text(
                 "Checkout",
                 style: TextStyle(
+                  fontWeight: FontWeight.w400,
                   fontSize: 18,
                 ),
               ),
@@ -329,12 +338,3 @@ class InfoAndReviews extends StatelessWidget {
     return formattedFeatures;
   }
 }
-
-// class InfoTab extends StatelessWidget {
-//   const InfoTab({Key? key}) : super(key: key);
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return 
-//   }
-// }

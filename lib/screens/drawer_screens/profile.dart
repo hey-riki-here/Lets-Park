@@ -1,7 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:lets_park/services/signin_provider.dart';
-import 'package:lets_park/shared/NavigationDrawer.dart';
+import 'package:lets_park/shared/navigation_drawer.dart';
 import 'package:provider/provider.dart';
 
 class Profile extends StatefulWidget {

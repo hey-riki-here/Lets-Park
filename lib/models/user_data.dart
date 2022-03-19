@@ -1,10 +1,10 @@
 import 'package:lets_park/models/parking_space.dart';
 
-class AppUser {
+class UserData {
   String? _id;
   List<ParkingSpace>? _ownedParkingSpace;
 
-  AppUser();
+  UserData();
 
   String? get getUserId => _id;
 

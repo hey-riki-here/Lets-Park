@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:lets_park/screens/drawer_screens/manage_space/earnings.dart';
 import 'package:lets_park/screens/drawer_screens/manage_space/your_space.dart';
-import 'package:lets_park/shared/NavigationDrawer.dart';
+import 'package:lets_park/shared/navigation_drawer.dart';
 import 'package:lets_park/shared/shared_widgets.dart';
 
 class ManageSpace extends StatelessWidget {

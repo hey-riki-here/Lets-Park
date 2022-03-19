@@ -6,7 +6,7 @@ import 'package:lets_park/shared/shared_widgets.dart';
 import 'package:lets_park/globals/globals.dart' as globals;
 
 class YourSpace extends StatelessWidget {
-  final appUser = globals.appUser;
+  final appUser = globals.userData;
   YourSpace({Key? key}) : super(key: key);
 
   @override

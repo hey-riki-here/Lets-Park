@@ -16,7 +16,6 @@ import 'package:lets_park/services/firebase_api.dart';
 import 'package:lets_park/shared/shared_widgets.dart';
 
 class RegisterArea extends StatefulWidget {
-  final int _pageId = 5;
   const RegisterArea({Key? key}) : super(key: key);
 
   @override
@@ -127,6 +126,7 @@ class _RegisterAreaState extends State<RegisterArea> {
                     _currentStep += 1;
                   }
                 } else {
+                  // ignore: todo
                   //TODO
                 }
               });

@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 import 'package:lets_park/main.dart';
-import 'package:lets_park/models/app_user.dart';
 import 'package:lets_park/screens/loading_screens/logging_in_screen.dart';
 import 'package:lets_park/screens/popups/notice_dialog.dart';
 import 'package:lets_park/screens/signin_register/login.dart';
@@ -68,7 +67,7 @@ class SignInProvider extends ChangeNotifier {
       final googleUser = await googleSignIn.signIn();
 
       if (googleUser == null) return;
-      showDialog(context: context, builder: (context) => LoggingIn());
+      showDialog(context: context, builder: (context) => const LoggingIn());
       _googleUser = googleUser;
 
       final googleAuth = await googleUser.authentication;
@@ -77,7 +76,6 @@ class SignInProvider extends ChangeNotifier {
         idToken: googleAuth.idToken,
       );
       await _auth.signInWithCredential(credential);
-      retrieveUserData();
     } on Exception catch (e) {
     } finally {
       notifyListeners();
@@ -144,7 +142,4 @@ class SignInProvider extends ChangeNotifier {
     );
   }
 
-  void retrieveUserData() async {
-    globals.appUser.setUserId = _auth.currentUser!.uid;
-  }
 }
