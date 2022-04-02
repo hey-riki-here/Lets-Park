@@ -35,9 +35,10 @@ class ParkingAreaInfo extends StatelessWidget {
                   Padding(
                     padding: const EdgeInsets.all(16.0),
                     child: Header(
-                        imageUrl: parkingSpace.getImageUrl!,
-                        address: parkingSpace.getAddress!,
-                        type: parkingSpace.getType!),
+                      imageUrl: parkingSpace.getImageUrl!,
+                      address: parkingSpace.getAddress!,
+                      type: parkingSpace.getType!,
+                    ),
                   ),
                   const PriceAndDistance(),
                   const TabBar(
@@ -74,6 +75,7 @@ class ParkingAreaInfo extends StatelessWidget {
           features: parkingSpace.getFeatures!,
           capacity: parkingSpace.getCapacity!,
           verticalClearance: parkingSpace.getVerticalClearance!,
+          space: parkingSpace,
         ),
       ),
     );
@@ -215,17 +217,19 @@ class PriceAndDistance extends StatelessWidget {
 }
 
 class InfoAndReviews extends StatelessWidget {
+  final ParkingSpace space;
   final String info;
   final List<String> features;
   final int capacity;
   final double verticalClearance;
-  const InfoAndReviews({
-    Key? key,
-    required this.info,
-    required this.features,
-    required this.capacity,
-    required this.verticalClearance,
-  }) : super(key: key);
+  const InfoAndReviews(
+      {Key? key,
+      required this.info,
+      required this.features,
+      required this.capacity,
+      required this.verticalClearance,
+      required this.space})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -303,11 +307,12 @@ class InfoAndReviews extends StatelessWidget {
             child: ElevatedButton(
               onPressed: () {
                 Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      fullscreenDialog: true,
-                      builder: (context) => const Checkout(),
-                    ));
+                  context,
+                  MaterialPageRoute(
+                    fullscreenDialog: true,
+                    builder: (context) => Checkout(parkingSpace: space),
+                  ),
+                );
               },
               child: const Text(
                 "Checkout",

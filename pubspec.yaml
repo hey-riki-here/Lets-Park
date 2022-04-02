@@ -56,6 +56,9 @@ dependencies:
   firebase_storage: ^10.2.9
   flutter_holo_date_picker: ^1.0.3
   flutter_time_picker_spinner: ^2.0.0
+  f_datetimerangepicker: ^0.2.0
+  date_utils: ^0.2.0
+  numberpicker: ^2.1.1
 dev_dependencies:
   flutter_test:
     sdk: flutter

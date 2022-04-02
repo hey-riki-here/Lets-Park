@@ -1,6 +1,8 @@
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:lets_park/models/parking.dart';
 
 class ParkingSpace {
+  String? _id;
   String? _ownerId;
   String? _imageUrl;
   String? _address;
@@ -10,10 +12,13 @@ class ParkingSpace {
   double? _verticalClearance;
   String? _type;
   List<String>? _features = [];
+  bool? _isFull;
+  List<Parking>? _parkingSessions = [];
 
   ParkingSpace();
 
   ParkingSpace.fromDatabase(
+      String? id,
       String? ownerId,
       String? imageUrl,
       String? address,
@@ -23,6 +28,7 @@ class ParkingSpace {
       double? verticalClearance,
       String? type,
       List<String>? features) {
+    _id = id;
     _ownerId = ownerId;
     _imageUrl = imageUrl;
     _address = address;
@@ -32,6 +38,12 @@ class ParkingSpace {
     _verticalClearance = verticalClearance;
     _type = type;
     _features = features;
+  }
+
+  String? get getSpaceId => _id;
+
+  set setSpaceId(String? id) {
+    _id = id;
   }
 
   String? get getOwnerId => _ownerId;
@@ -88,12 +100,25 @@ class ParkingSpace {
     _features = features;
   }
 
+  bool? get isSpaceFull => _isFull;
+
+  set setFull(bool? isFull) {
+    _isFull = isFull;
+  }
+
+  List<Parking>? get getParkingSessions => _parkingSessions;
+
+  set setParkingSessions(List<Parking>? parkingSessions) {
+    _parkingSessions = parkingSessions;
+  }
+
   @override
   String toString() {
-    return "ParkingSpace [ $_ownerId , $_imageUrl , $_address, $_latLng , $_capacity , $_info , $_verticalClearance, $_type , $_features]";
+    return "ParkingSpace [ $_ownerId , $_imageUrl , $_address, $_latLng , $_capacity , $_info , $_verticalClearance, $_type , $_features, $_isFull, $_parkingSessions]";
   }
 
   Map<String, dynamic> toJson() => {
+        'id': _id,
         'ownerId': _ownerId,
         'imageUrl': _imageUrl,
         'address': _address,
@@ -103,6 +128,7 @@ class ParkingSpace {
         'verticalClearance': _verticalClearance,
         'type': _type,
         'features': _features,
+        'parkingSessions': _parkingSessions,
       };
 
   static ParkingSpace fromJson(Map<String, dynamic> json) {
@@ -111,6 +137,7 @@ class ParkingSpace {
     features = fromDatabase.cast<String>();
 
     return ParkingSpace.fromDatabase(
+      json['id'],
       json['ownerId'],
       json['imageUrl'],
       json['address'],

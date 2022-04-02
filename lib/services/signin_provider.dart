@@ -9,13 +9,14 @@ import 'package:lets_park/screens/loading_screens/logging_in_screen.dart';
 import 'package:lets_park/screens/popups/notice_dialog.dart';
 import 'package:lets_park/screens/signin_register/login.dart';
 import 'package:lets_park/screens/signin_register/register.dart';
-import 'package:lets_park/globals/globals.dart' as globals;
+import 'package:lets_park/services/user_services.dart';
 
 class SignInProvider extends ChangeNotifier {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final googleSignIn = GoogleSignIn();
   GoogleSignInAccount? _googleUser;
   GoogleSignInAccount get getGoogleUser => _googleUser!;
+
   Future signinWithEmailAndPass(
     String email,
     String password,
@@ -75,7 +76,17 @@ class SignInProvider extends ChangeNotifier {
         accessToken: googleAuth.accessToken,
         idToken: googleAuth.idToken,
       );
-      await _auth.signInWithCredential(credential);
+      final UserCredential authResult =
+          await _auth.signInWithCredential(credential);
+
+
+      if (authResult.additionalUserInfo!.isNewUser) {
+        if (authResult.user != null) {
+          UserServices.registerNewUserData();
+        }
+      } else {
+        UserServices.getUserData();
+      }
     } on Exception catch (e) {
     } finally {
       notifyListeners();
@@ -141,5 +152,4 @@ class SignInProvider extends ChangeNotifier {
       },
     );
   }
-
 }

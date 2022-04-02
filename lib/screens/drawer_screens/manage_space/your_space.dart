@@ -23,7 +23,7 @@ class YourSpace extends StatelessWidget {
           children: [
             Expanded(
               child: ListView.builder(
-                scrollDirection: Axis.horizontal,
+                scrollDirection: Axis.vertical,
                 itemCount: parkingSpaces!.length,
                 itemBuilder: (context, index) {
                   int title = index + 1;

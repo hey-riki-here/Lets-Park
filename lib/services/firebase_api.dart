@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_function_literals_in_foreach_calls
+
 import 'dart:io';
 import 'dart:math';
 
@@ -24,6 +26,8 @@ class FirebaseServices {
         date.minute.toString() +
         date.second.toString();
 
+    globals.parkingSpace.setSpaceId = "PS$time$id";
+
     final docUser = FirebaseFirestore.instance
         .collection('parking-spaces')
         .doc('PS$time$id');
@@ -43,7 +47,6 @@ class FirebaseServices {
 
   static void getOwnedParkingAreas(AsyncSnapshot<List<ParkingSpace>> snapshot) {
     List<ParkingSpace> ownedSpaces = [];
-    // ignore: avoid_function_literals_in_foreach_calls
     snapshot.data!.forEach((parkingSpace) {
       if (parkingSpace.getOwnerId!
               .compareTo(FirebaseAuth.instance.currentUser!.uid) ==
@@ -65,16 +68,17 @@ class FirebaseServices {
     return _spaces;
   }
 
+  
+
   Set<Marker> getMarkers(BuildContext context) {
     late BitmapDescriptor marker;
-    getIcon().then((BitmapDescriptor value) {
+    _getIcon().then((BitmapDescriptor value) {
       marker = value;
     });
 
     _spaces.first.then((value) {
       globals.parkinSpaceQuantity = value.length;
       globals.currentParkingSpaces = value;
-      // ignore: avoid_function_literals_in_foreach_calls
       value.forEach((parkingSpace) {
         _markers.add(
           Marker(
@@ -99,7 +103,7 @@ class FirebaseServices {
     return _markers;
   }
 
-  Future<BitmapDescriptor> getIcon() async {
+  Future<BitmapDescriptor> _getIcon() async {
     BitmapDescriptor markerbitmap = await BitmapDescriptor.fromAssetImage(
       const ImageConfiguration(),
       "assets/icons/parking-marker.png",
@@ -111,9 +115,8 @@ class FirebaseServices {
     Map<ParkingSpace, double> _nearbyParkings = {};
     Map<ParkingSpace, double> _map = {};
 
-    // ignore: avoid_function_literals_in_foreach_calls
     globals.currentParkingSpaces.forEach((parkingSpace) {
-      _map[parkingSpace] = calculateDistance(
+      _map[parkingSpace] = _calculateDistance(
         userLocation.latitude,
         userLocation.longitude,
         parkingSpace.getLatLng!.latitude,
@@ -124,24 +127,15 @@ class FirebaseServices {
     var sortedMap = Map.fromEntries(
         _map.entries.toList()..sort((p1, p2) => p1.value.compareTo(p2.value)));
 
-    // int counter = 0;
-    // for (var parkingSpace in sortedMap.keys) {
-    //   if (counter < 5) {
-    //     _nearbyParkings.add(parkingSpace);
-    //     counter++;
-    //   } else {
-    //     break;
-    //   }
-    // }
-
-    for (int i = 0; i < 5; i++){
-      _nearbyParkings[sortedMap.keys.elementAt(i)] = sortedMap.values.elementAt(i);
+    for (int i = 0; i < 5; i++) {
+      _nearbyParkings[sortedMap.keys.elementAt(i)] =
+          sortedMap.values.elementAt(i);
     }
 
     return _nearbyParkings;
   }
 
-  double calculateDistance(lat1, lon1, lat2, lon2) {
+  double _calculateDistance(lat1, lon1, lat2, lon2) {
     var p = 0.017453292519943295;
     var c = cos;
     var a = 0.5 -
