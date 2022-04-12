@@ -56,7 +56,7 @@ class _LoginState extends State<Login> {
                     icon: const Icon(Icons.person),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return "Please enter your name";
+                        return "Please enter your email";
                       }
                       return null;
                     },

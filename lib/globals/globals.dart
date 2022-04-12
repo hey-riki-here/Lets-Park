@@ -4,6 +4,7 @@ library lets_park.globals;
 
 import 'package:flutter/cupertino.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:lets_park/models/parking.dart';
 import 'package:lets_park/models/user_data.dart';
 import 'package:lets_park/models/parking_space.dart';
 
@@ -15,3 +16,7 @@ ParkingSpace parkingSpace = ParkingSpace();
 List<ParkingSpace> currentParkingSpaces = [];
 int parkinSpaceQuantity = 0;
 UserData userData = UserData();
+bool subscribeToStream = true;
+List<Parking> inProgressParkings = [];
+Map<String, List<Parking>> parkingSession = {};
+bool updateState = false;

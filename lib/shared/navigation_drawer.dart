@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:lets_park/main.dart';
 import 'package:lets_park/screens/drawer_screens/about_us.dart';
 import 'package:lets_park/screens/drawer_screens/manage_space/manage_space.dart';
 import 'package:lets_park/screens/drawer_screens/messages.dart';
@@ -34,6 +35,7 @@ class _NavigationDrawerState extends State<NavigationDrawer> {
 
   @override
   Widget build(BuildContext context) {
+    print("Drawer built.");
     return SafeArea(
       child: Drawer(
         child: Material(
@@ -208,6 +210,9 @@ class MyAccount extends StatelessWidget {
       onTap: () {
         Navigator.pop(context);
         if (currentPage != id) {
+          if (currentPage != 2) {
+            navigatorKey.currentState!.popUntil((route) => route.isFirst);
+          }
           Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => const Profile()),
@@ -256,6 +261,9 @@ class Item extends StatelessWidget {
         break;
       case 'My Parkings':
         if (currentPage != id) {
+          if (currentPage != 2) {
+            navigatorKey.currentState!.popUntil((route) => route.isFirst);
+          }
           Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => const MyParkings()),
@@ -264,6 +272,9 @@ class Item extends StatelessWidget {
         break;
       case 'Notifications':
         if (currentPage != id) {
+          if (currentPage != 2) {
+            navigatorKey.currentState!.popUntil((route) => route.isFirst);
+          }
           Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => const Notifications()),
@@ -272,6 +283,9 @@ class Item extends StatelessWidget {
         break;
       case 'Messages':
         if (currentPage != id) {
+          if (currentPage != 2) {
+            navigatorKey.currentState!.popUntil((route) => route.isFirst);
+          }
           Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => const Messages()),
@@ -280,6 +294,9 @@ class Item extends StatelessWidget {
         break;
       case 'About us':
         if (currentPage != id) {
+          if (currentPage != 2) {
+            navigatorKey.currentState!.popUntil((route) => route.isFirst);
+          }
           Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => const AboutUs()),
@@ -288,6 +305,9 @@ class Item extends StatelessWidget {
         break;
       case 'Rent out your own space':
         if (currentPage != id) {
+          if (currentPage != 2) {
+            navigatorKey.currentState!.popUntil((route) => route.isFirst);
+          }
           Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => const RegisterArea()),
@@ -296,6 +316,9 @@ class Item extends StatelessWidget {
         break;
       case 'Manage your space':
         if (currentPage != id) {
+          if (currentPage != 2) {
+            navigatorKey.currentState!.popUntil((route) => route.isFirst);
+          }
           Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => const ManageSpace()),

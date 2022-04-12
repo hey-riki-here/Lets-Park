@@ -7,9 +7,9 @@ import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 import 'package:lets_park/main.dart';
 import 'package:lets_park/screens/loading_screens/logging_in_screen.dart';
 import 'package:lets_park/screens/popups/notice_dialog.dart';
-import 'package:lets_park/screens/signin_register/login.dart';
-import 'package:lets_park/screens/signin_register/register.dart';
 import 'package:lets_park/services/user_services.dart';
+
+import '../globals/globals.dart' as globals;
 
 class SignInProvider extends ChangeNotifier {
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -22,20 +22,21 @@ class SignInProvider extends ChangeNotifier {
     String password,
     BuildContext context,
   ) async {
-    _showLoading(context);
-
     try {
-      await _auth.signInWithEmailAndPassword(email: email, password: password);
+      _showLoading(context);
+      await _auth.signInWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
       notifyListeners();
+      navigatorKey.currentState!.popUntil((route) => route.isFirst);
     } on FirebaseAuthException catch (e) {
+      Navigator.pop(context);
       await _showDialog(
         context,
         "assets/logo/lets-park-logo.png",
         "Login failed! Please make sure to enter correct account credentials.",
       );
-      navigatorKey.currentState!.popUntil((route) => route.isFirst);
-      Navigator.push(
-          context, MaterialPageRoute(builder: ((context) => const Login())));
     }
   }
 
@@ -47,19 +48,19 @@ class SignInProvider extends ChangeNotifier {
   }) async {
     _showLoading(context);
     try {
-      await _auth.createUserWithEmailAndPassword(
-          email: email, password: password);
+      final UserCredential authResult = await _auth
+          .createUserWithEmailAndPassword(email: email, password: password);
+      checkIsNewUser(authResult);
       await _auth.currentUser!.updateDisplayName(name);
       notifyListeners();
+      navigatorKey.currentState!.popUntil((route) => route.isFirst);
     } on FirebaseAuthException catch (e) {
+      Navigator.pop(context);
       await _showDialog(
         context,
         "assets/logo/lets-park-logo.png",
         "Looks like the email you entered is already link to another account. Please try different email.",
       );
-      navigatorKey.currentState!.popUntil((route) => route.isFirst);
-      Navigator.push(
-          context, MaterialPageRoute(builder: ((context) => const Register())));
     }
   }
 
@@ -79,14 +80,7 @@ class SignInProvider extends ChangeNotifier {
       final UserCredential authResult =
           await _auth.signInWithCredential(credential);
 
-
-      if (authResult.additionalUserInfo!.isNewUser) {
-        if (authResult.user != null) {
-          UserServices.registerNewUserData();
-        }
-      } else {
-        UserServices.getUserData();
-      }
+      checkIsNewUser(authResult);
     } on Exception catch (e) {
     } finally {
       notifyListeners();
@@ -100,7 +94,10 @@ class SignInProvider extends ChangeNotifier {
       final result = await FacebookAuth.instance.login();
       final fbUserCredentials =
           FacebookAuthProvider.credential(result.accessToken!.token);
-      await _auth.signInWithCredential(fbUserCredentials);
+      final UserCredential authResult =
+          await _auth.signInWithCredential(fbUserCredentials);
+
+      checkIsNewUser(authResult);
     } on Exception catch (e) {
       await _showDialog(
         context,
@@ -123,7 +120,7 @@ class SignInProvider extends ChangeNotifier {
       await googleSignIn.disconnect();
     } on Exception catch (e) {}
     _auth.signOut();
-
+    globals.inProgressParkings = [];
     navigatorKey.currentState!.popUntil((route) => route.isFirst);
   }
 
@@ -151,5 +148,13 @@ class SignInProvider extends ChangeNotifier {
         ));
       },
     );
+  }
+
+  void checkIsNewUser(UserCredential authResult) {
+    if (authResult.additionalUserInfo!.isNewUser) {
+      if (authResult.user != null) {
+        UserServices.registerNewUserData();
+      }
+    }
   }
 }

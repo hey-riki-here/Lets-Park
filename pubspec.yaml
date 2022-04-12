@@ -59,6 +59,8 @@ dependencies:
   f_datetimerangepicker: ^0.2.0
   date_utils: ^0.2.0
   numberpicker: ^2.1.1
+  rxdart: ^0.27.3
+  
 dev_dependencies:
   flutter_test:
     sdk: flutter

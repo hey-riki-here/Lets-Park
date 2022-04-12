@@ -1,9 +1,17 @@
+// ignore_for_file: avoid_function_literals_in_foreach_calls
+
+import 'dart:async';
+
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:lets_park/globals/globals.dart' as globals;
+import 'package:lets_park/models/parking.dart';
 import 'package:lets_park/models/parking_space.dart';
 import 'package:lets_park/screens/logged_in_screens/google_map_screen.dart';
 import 'package:lets_park/services/firebase_api.dart';
+import 'package:lets_park/services/user_services.dart';
 import 'package:lets_park/shared/navigation_drawer.dart';
 import 'package:location/location.dart';
 import 'package:geolocator/geolocator.dart' as geolocator;
@@ -20,35 +28,64 @@ class _HomeState extends State<Home> {
   final _scaffoldKey = GlobalKey<ScaffoldState>();
   final user = FirebaseAuth.instance.currentUser;
   final GlobalKey<GoogleMapScreenState> _gMapKey = GlobalKey();
+  final UserServices _userServices = UserServices();
+  late StreamSubscription _sub;
+
+  @override
+  void initState() {
+    grantPermission();
+    _sub = _userServices.checkSessionsStream.listen((event) {
+      _userServices.distributeParkingSessions(context);
+    });
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    _sub.cancel();
+    print("Disposed");
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
-    grantPermission();
     return Scaffold(
       key: _scaffoldKey,
       drawer: NavigationDrawer(currentPage: widget._pageId),
-      body: SafeArea(
-        child: Stack(
-          children: [
-            GoogleMapScreen(key: _gMapKey),
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
+      body: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+          stream: _userServices.getUserParkingData()!,
+          builder: (context, snapshot) {
+            if (snapshot.hasData) {
+              List<Parking> parkings = [];
+              snapshot.data!.docs.forEach((element) {
+                parkings.add(Parking.fromJson(element.data()));
+              });
+              globals.userData.setParkings = parkings;
+            }
+            return SafeArea(
+              child: Stack(
                 children: [
-                  Row(
-                    children: [
-                      DrawerButton(scaffoldKey: _scaffoldKey),
-                      const SizedBox(width: 10),
-                      SearchBox(gMapKey: _gMapKey),
-                    ],
+                  GoogleMapScreen(key: _gMapKey),
+                  Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      children: [
+                        Row(
+                          children: [
+                            DrawerButton(scaffoldKey: _scaffoldKey),
+                            const SizedBox(width: 10),
+                            SearchBox(gMapKey: _gMapKey),
+                          ],
+                        ),
+                        const SizedBox(height: 10),
+                        FilterButtons(gMapKey: _gMapKey),
+                      ],
+                    ),
                   ),
-                  const SizedBox(height: 10),
-                  FilterButtons(gMapKey: _gMapKey),
                 ],
               ),
-            ),
-          ],
-        ),
-      ),
+            );
+          }),
     );
   }
 
@@ -73,19 +110,28 @@ class DrawerButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      borderRadius: const BorderRadius.all(Radius.circular(10)),
-      elevation: 2,
-      color: Colors.white,
-      child: IconButton(
-        icon: const Icon(Icons.menu),
-        splashRadius: 30,
-        color: Colors.black,
-        onPressed: () {
-          scaffoldKey.currentState!.openDrawer();
-        },
-      ),
-    );
+    final UserServices _userServices = UserServices();
+
+    return StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
+        stream: _userServices.getUserData()!,
+        builder: (context, snapshot) {
+          if (snapshot.hasData) {
+            print(snapshot.data!.data());
+          }
+          return Material(
+            borderRadius: const BorderRadius.all(Radius.circular(10)),
+            elevation: 2,
+            color: Colors.white,
+            child: IconButton(
+              icon: const Icon(Icons.menu),
+              splashRadius: 30,
+              color: Colors.black,
+              onPressed: () {
+                scaffoldKey.currentState!.openDrawer();
+              },
+            ),
+          );
+        });
   }
 }
 
@@ -156,86 +202,97 @@ class _FilterButtonsState extends State<FilterButtons> {
     FirebaseServices _firebaseServices = FirebaseServices();
 
     return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
-        const SizedBox(width: 50),
         _buildCategory(
           label: "Nearby",
           width: 100,
           context: context,
           onTap: () async {
-            if (canShowModal == true) {
-              setState(() {
-                canShowModal = false;
-              });
-              var position = await geolocator.Geolocator().getCurrentPosition(
-                  desiredAccuracy: geolocator.LocationAccuracy.high);
-              Map<ParkingSpace, double> nearbySpaces =
-                  _firebaseServices.getNearbyParkingSpaces(
-                LatLng(
-                  position.latitude,
-                  position.longitude,
-                ),
-              );
-              setState(() {
-                canShowModal = true;
-              });
-              await showModalBottomSheet<void>(
-                barrierColor: const Color.fromARGB(0, 0, 0, 0),
-                elevation: 50,
-                context: context,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                builder: (BuildContext context) {
-                  return Container(
-                    height: 350,
-                    padding: const EdgeInsets.all(8),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Center(
-                          child: Icon(
-                            Icons.drag_handle_rounded,
-                            color: Colors.grey,
-                            size: 30,
+            Location location = Location();
+
+            bool _serviceEnabled;
+
+            _serviceEnabled = await location.serviceEnabled();
+            if (!_serviceEnabled) {
+              _serviceEnabled = await location.requestService();
+              if (!_serviceEnabled) {
+                return;
+              }
+            } else {
+              if (canShowModal == true) {
+                setState(() {
+                  canShowModal = false;
+                });
+                var position = await geolocator.Geolocator().getCurrentPosition(
+                    desiredAccuracy: geolocator.LocationAccuracy.high);
+                Map<ParkingSpace, double> nearbySpaces =
+                    _firebaseServices.getNearbyParkingSpaces(
+                  LatLng(
+                    position.latitude,
+                    position.longitude,
+                  ),
+                );
+                setState(() {
+                  canShowModal = true;
+                });
+                await showModalBottomSheet<void>(
+                  barrierColor: const Color.fromARGB(0, 0, 0, 0),
+                  elevation: 50,
+                  context: context,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  builder: (BuildContext context) {
+                    return Container(
+                      height: 350,
+                      padding: const EdgeInsets.all(8),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Center(
+                            child: Icon(
+                              Icons.drag_handle_rounded,
+                              color: Colors.grey,
+                              size: 30,
+                            ),
                           ),
-                        ),
-                        const Text(
-                          "Top nearby places",
-                          style: TextStyle(
-                            fontSize: 23,
+                          const Text(
+                            "Top nearby places",
+                            style: TextStyle(
+                              fontSize: 23,
+                            ),
                           ),
-                        ),
-                        const SizedBox(
-                          height: 20,
-                        ),
-                        const Text(
-                          "Click on the parking space to focus it on the map",
-                          style: TextStyle(
-                            color: Colors.grey,
+                          const SizedBox(
+                            height: 20,
                           ),
-                        ),
-                        Expanded(
-                          child: ListView.builder(
-                            scrollDirection: Axis.horizontal,
-                            itemCount: nearbySpaces.keys.length,
-                            itemBuilder: (context, index) {
-                              return NearbyParkingCard(
-                                space: nearbySpaces.keys.elementAt(index),
-                                gMapKey: widget.gMapKey,
-                                distance: getDistance(
-                                  nearbySpaces.values.elementAt(index),
-                                ),
-                              );
-                            },
+                          const Text(
+                            "Click on the parking space to focus it on the map",
+                            style: TextStyle(
+                              color: Colors.grey,
+                            ),
                           ),
-                        ),
-                      ],
-                    ),
-                  );
-                },
-              );
+                          Expanded(
+                            child: ListView.builder(
+                              scrollDirection: Axis.horizontal,
+                              itemCount: nearbySpaces.keys.length,
+                              itemBuilder: (context, index) {
+                                return NearbyParkingCard(
+                                  space: nearbySpaces.keys.elementAt(index),
+                                  gMapKey: widget.gMapKey,
+                                  distance: getDistance(
+                                    nearbySpaces.values.elementAt(index),
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                );
+              }
             }
           },
         ),
@@ -243,7 +300,11 @@ class _FilterButtonsState extends State<FilterButtons> {
           label: "Highest Rating",
           width: 120,
           context: context,
-          onTap: () {},
+          onTap: () {
+            // .then((value) => value.data()!.forEach((key, value) {
+            //       print("$key: $value");
+            //     }));
+          },
         ),
         _buildCategory(
           label: "Secured",
@@ -270,7 +331,7 @@ class _FilterButtonsState extends State<FilterButtons> {
             ? null
             : onTap,
         child: Ink(
-          height: 30,
+          height: 25,
           width: width,
           child: label.compareTo("Nearby") == 0
               ? Row(
@@ -280,7 +341,6 @@ class _FilterButtonsState extends State<FilterButtons> {
                       child: Text(
                         label,
                         style: const TextStyle(
-                          fontSize: 16,
                           fontWeight: FontWeight.w500,
                         ),
                       ),
@@ -302,7 +362,6 @@ class _FilterButtonsState extends State<FilterButtons> {
                   child: Text(
                     label,
                     style: const TextStyle(
-                      fontSize: 16,
                       fontWeight: FontWeight.w500,
                     ),
                   ),

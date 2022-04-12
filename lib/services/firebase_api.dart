@@ -68,8 +68,6 @@ class FirebaseServices {
     return _spaces;
   }
 
-  
-
   Set<Marker> getMarkers(BuildContext context) {
     late BitmapDescriptor marker;
     _getIcon().then((BitmapDescriptor value) {
@@ -127,7 +125,9 @@ class FirebaseServices {
     var sortedMap = Map.fromEntries(
         _map.entries.toList()..sort((p1, p2) => p1.value.compareTo(p2.value)));
 
-    for (int i = 0; i < 5; i++) {
+    int limiter = sortedMap.length < 5 ? sortedMap.length : 5;
+
+    for (int i = 0; i < limiter; i++) {
       _nearbyParkings[sortedMap.keys.elementAt(i)] =
           sortedMap.values.elementAt(i);
     }

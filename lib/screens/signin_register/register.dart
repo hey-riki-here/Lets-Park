@@ -28,35 +28,36 @@ class _RegisterState extends State<Register> {
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: SingleChildScrollView(
-          child: SizedBox(
-            height: MediaQuery.of(context).size.height - 120,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Column(
-                  children: [
-                    _sharedWidgets.headerWithLogo(),
-                    const SizedBox(height: 10),
-                    _sharedWidgets.note("Please complete the form"),
-                  ],
-                ),
-                _createForm(),
-                _sharedWidgets.button(
-                  label: 'Register',
-                  onPressed: () {
-                    if (_formKey.currentState!.validate()) {
-                      provider.signUpWithEmailandPassword(
-                        name: nameController.text.trim(),
-                        email: emailController.text.trim(),
-                        password: passwordController.text.trim(),
-                        context: context,
-                      );
-                    }
-                  },
-                ),
-              ],
-            ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Column(
+                children: [
+                  _sharedWidgets.headerWithLogo(),
+                  const SizedBox(height: 20),
+                  _sharedWidgets.note("Please complete the form"),
+                  const SizedBox(height: 20),
+                ],
+              ),
+              _createForm(),
+            ],
           ),
+        ),
+      ),
+      bottomNavigationBar: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 8),
+        child: _sharedWidgets.button(
+          label: 'Register',
+          onPressed: () {
+            if (_formKey.currentState!.validate()) {
+              provider.signUpWithEmailandPassword(
+                name: nameController.text.trim(),
+                email: emailController.text.trim(),
+                password: passwordController.text.trim(),
+                context: context,
+              );
+            }
+          },
         ),
       ),
     );
@@ -79,7 +80,7 @@ class _RegisterState extends State<Register> {
               return null;
             },
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 20),
           _sharedWidgets.textFormField(
             action: TextInputAction.next,
             controller: surnameController,
@@ -91,7 +92,7 @@ class _RegisterState extends State<Register> {
               return null;
             },
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 20),
           _sharedWidgets.textFormField(
             action: TextInputAction.next,
             controller: emailController,
@@ -104,7 +105,7 @@ class _RegisterState extends State<Register> {
               return null;
             },
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 20),
           _sharedWidgets.textFormField(
             action: TextInputAction.next,
             controller: passwordController,
@@ -119,7 +120,7 @@ class _RegisterState extends State<Register> {
               return null;
             },
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 20),
           _sharedWidgets.textFormField(
             action: TextInputAction.done,
             controller: confirmPasswordController,

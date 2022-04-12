@@ -26,7 +26,7 @@ class ParkingAreaInfo extends StatelessWidget {
           bottom: PreferredSize(
             child: Container(
               color: Colors.white,
-              height: 395,
+              height: 350,
               width: double.infinity,
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -67,7 +67,7 @@ class ParkingAreaInfo extends StatelessWidget {
                 ],
               ),
             ),
-            preferredSize: const Size.fromHeight(395),
+            preferredSize: const Size.fromHeight(350),
           ),
         ),
         body: InfoAndReviews(
@@ -75,7 +75,36 @@ class ParkingAreaInfo extends StatelessWidget {
           features: parkingSpace.getFeatures!,
           capacity: parkingSpace.getCapacity!,
           verticalClearance: parkingSpace.getVerticalClearance!,
-          space: parkingSpace,
+        ),
+        bottomNavigationBar: Padding(
+          padding: const EdgeInsets.symmetric(
+            vertical: 8,
+            horizontal: 80,
+          ),
+          child: ElevatedButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  fullscreenDialog: true,
+                  builder: (context) => Checkout(parkingSpace: parkingSpace),
+                ),
+              );
+            },
+            child: const Text(
+              "Checkout",
+              style: TextStyle(
+                fontWeight: FontWeight.w400,
+                fontSize: 18,
+              ),
+            ),
+            style: ElevatedButton.styleFrom(
+              primary: Colors.lightBlue,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(50.0),
+              ),
+            ),
+          ),
         ),
       ),
     );
@@ -98,10 +127,53 @@ class Header extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        Text(
+          address,
+          style: const TextStyle(
+            color: Colors.black54,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        Row(
+          children: [
+            Icon(
+              Icons.star,
+              color: Colors.yellow.shade600,
+              size: 15,
+            ),
+            Icon(
+              Icons.star,
+              color: Colors.yellow.shade600,
+              size: 15,
+            ),
+            Icon(
+              Icons.star,
+              color: Colors.yellow.shade600,
+              size: 15,
+            ),
+            Icon(
+              Icons.star,
+              color: Colors.yellow.shade600,
+              size: 15,
+            ),
+            Icon(
+              Icons.star,
+              color: Colors.yellow.shade600,
+              size: 15,
+            ),
+          ],
+        ),
+        Text(
+          type,
+          style: const TextStyle(
+            color: Colors.blue,
+          ),
+        ),
+        const SizedBox(height: 10),
         Center(
           child: Container(
-            width: 280,
-            height: 180,
+            width: 250,
+            height: 150,
             decoration: BoxDecoration(
               border: Border.all(width: 1),
               borderRadius: const BorderRadius.all(Radius.circular(12)),
@@ -113,49 +185,6 @@ class Header extends StatelessWidget {
                 fit: BoxFit.fill,
               ),
             ),
-          ),
-        ),
-        const SizedBox(height: 15),
-        Text(
-          address,
-          style: const TextStyle(
-            fontSize: 20,
-          ),
-        ),
-        Row(
-          children: [
-            Icon(
-              Icons.star,
-              color: Colors.yellow.shade600,
-              size: 30,
-            ),
-            Icon(
-              Icons.star,
-              color: Colors.yellow.shade600,
-              size: 30,
-            ),
-            Icon(
-              Icons.star,
-              color: Colors.yellow.shade600,
-              size: 30,
-            ),
-            Icon(
-              Icons.star,
-              color: Colors.yellow.shade600,
-              size: 30,
-            ),
-            Icon(
-              Icons.star,
-              color: Colors.yellow.shade600,
-              size: 30,
-            ),
-          ],
-        ),
-        Text(
-          type,
-          style: const TextStyle(
-            fontSize: 20,
-            color: Colors.blue,
           ),
         ),
       ],
@@ -184,7 +213,7 @@ class PriceAndDistance extends StatelessWidget {
                   Text(
                     "50.00",
                     style: TextStyle(
-                      fontSize: 21,
+                      fontSize: 18,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -201,7 +230,7 @@ class PriceAndDistance extends StatelessWidget {
                   Text(
                     "1 km",
                     style: TextStyle(
-                      fontSize: 21,
+                      fontSize: 18,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -217,19 +246,17 @@ class PriceAndDistance extends StatelessWidget {
 }
 
 class InfoAndReviews extends StatelessWidget {
-  final ParkingSpace space;
   final String info;
   final List<String> features;
   final int capacity;
   final double verticalClearance;
-  const InfoAndReviews(
-      {Key? key,
-      required this.info,
-      required this.features,
-      required this.capacity,
-      required this.verticalClearance,
-      required this.space})
-      : super(key: key);
+  const InfoAndReviews({
+    Key? key,
+    required this.info,
+    required this.features,
+    required this.capacity,
+    required this.verticalClearance,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -243,94 +270,61 @@ class InfoAndReviews extends StatelessWidget {
     );
 
     return SingleChildScrollView(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          SingleChildScrollView(
-            child: SizedBox(
-              height: 330,
-              child: TabBarView(
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 12, vertical: 30),
-                    child: SingleChildScrollView(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            info,
-                            style: valueStyle,
-                          ),
-                          const SizedBox(height: 20),
-                          const Text(
-                            "Features",
-                            style: labelStyle,
-                          ),
-                          const SizedBox(height: 12),
-                          Text(
-                            formatFeatures(),
-                            style: valueStyle,
-                          ),
-                          const SizedBox(height: 20),
-                          const Text(
-                            "Capacity",
-                            style: labelStyle,
-                          ),
-                          const SizedBox(height: 12),
-                          Text(
-                            "$capacity",
-                            style: valueStyle,
-                          ),
-                          const SizedBox(height: 20),
-                          const Text("Vertical Clearance", style: labelStyle),
-                          const SizedBox(height: 12),
-                          Text(
-                            "$verticalClearance m.",
-                            style: valueStyle,
-                          ),
-                        ],
+      child: SizedBox(
+        height: 400,
+        child: TabBarView(
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 12,
+                vertical: 30,
+              ),
+              child: SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      info,
+                      style: const TextStyle(
+                        fontSize: 16,
                       ),
                     ),
-                  ),
-                  const Center(
-                    child: Text("Tab 2"),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.only(
-              bottom: 8,
-            ),
-            child: ElevatedButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    fullscreenDialog: true,
-                    builder: (context) => Checkout(parkingSpace: space),
-                  ),
-                );
-              },
-              child: const Text(
-                "Checkout",
-                style: TextStyle(
-                  fontWeight: FontWeight.w400,
-                  fontSize: 18,
-                ),
-              ),
-              style: ElevatedButton.styleFrom(
-                primary: Colors.lightBlue,
-                fixedSize: const Size(180, 40),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(50.0),
+                    const SizedBox(height: 20),
+                    const Text(
+                      "Features",
+                      style: labelStyle,
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      formatFeatures(),
+                      style: valueStyle,
+                    ),
+                    const SizedBox(height: 20),
+                    const Text(
+                      "Capacity",
+                      style: labelStyle,
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      "$capacity",
+                      style: valueStyle,
+                    ),
+                    const SizedBox(height: 20),
+                    const Text("Vertical Clearance", style: labelStyle),
+                    const SizedBox(height: 12),
+                    Text(
+                      "$verticalClearance m.",
+                      style: valueStyle,
+                    ),
+                  ],
                 ),
               ),
             ),
-          ),
-        ],
+            const Center(
+              child: Text("Tab 2"),
+            ),
+          ],
+        ),
       ),
     );
   }

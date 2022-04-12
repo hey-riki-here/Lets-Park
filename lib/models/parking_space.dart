@@ -128,7 +128,6 @@ class ParkingSpace {
         'verticalClearance': _verticalClearance,
         'type': _type,
         'features': _features,
-        'parkingSessions': _parkingSessions,
       };
 
   static ParkingSpace fromJson(Map<String, dynamic> json) {

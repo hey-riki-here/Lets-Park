@@ -58,7 +58,10 @@ class _CheckoutState extends State<Checkout> {
         ),
       ),
       bottomNavigationBar: Padding(
-        padding: const EdgeInsets.all(8),
+        padding: const EdgeInsets.symmetric(
+          vertical: 8,
+          horizontal: 80,
+        ),
         child: ElevatedButton(
           onPressed: () async {
             if (!(_setupTimeState.currentState!.isTimeValid())) {
@@ -69,7 +72,14 @@ class _CheckoutState extends State<Checkout> {
               showAlertDialog("Please provide car's plate number.");
               return;
             }
+
+            int qty = globals.userData.getUserParkings!.length + 1;
+            String parkingId = "PARKSESS" +
+                DateTime.now().millisecondsSinceEpoch.toString().toString() +
+                "$qty";
             Parking newParking = Parking(
+              parkingId,
+              widget.parkingSpace.getImageUrl,
               FirebaseAuth.instance.currentUser!.displayName,
               globals.userData.getStars,
               widget.parkingSpace.getAddress,
@@ -79,6 +89,9 @@ class _CheckoutState extends State<Checkout> {
                   .currentState!.getDeparture!.millisecondsSinceEpoch,
               _setupTimeState.currentState!.getDuration,
               _setupTimeState.currentState!.getParkingPrice,
+              false,
+              true,
+              false,
             );
 
             showDialog(
