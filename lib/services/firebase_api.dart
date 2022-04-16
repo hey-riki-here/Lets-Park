@@ -54,7 +54,6 @@ class FirebaseServices {
         ownedSpaces.add(parkingSpace);
       }
     });
-
     globals.userData.setOwnedParkingSpaces = ownedSpaces;
   }
 

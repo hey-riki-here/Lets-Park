@@ -1,5 +1,6 @@
 // ignore_for_file: prefer_final_fields, avoid_function_literals_in_foreach_calls
 
+import 'package:lets_park/models/notification.dart';
 import 'package:lets_park/models/parking.dart';
 import 'package:lets_park/models/parking_space.dart';
 
@@ -8,6 +9,7 @@ class UserData {
   List<ParkingSpace>? _ownedParkingSpace;
   int? _stars = 0;
   List<Parking>? _userParkings = [];
+  List<UserNotification>? _notifications = [];
 
   UserData();
 
@@ -28,15 +30,21 @@ class UserData {
   set setOwnedParkingSpaces(List<ParkingSpace>? ownedParkingSpace) =>
       _ownedParkingSpace = ownedParkingSpace;
 
+  int? get getStars => _stars;
+
+  set setStars(int? stars) => _stars = stars;
+
   List<Parking>? get getUserParkings => _userParkings;
 
   set setParkings(List<Parking>? parkings) {
     _userParkings = parkings;
   }
 
-  int? get getStars => _stars;
+  List<UserNotification>? get getUserNotifications => _notifications;
 
-  set setStars(int? stars) => _stars = stars;
+  set setUserNotifications(List<UserNotification>? notifications) {
+    _notifications = notifications;
+  }
 
   @override
   String toString() {
@@ -49,7 +57,6 @@ class UserData {
       };
 
   static UserData fromJson(Map<String, dynamic> json) {
-
     return UserData.fromDatabase(
       json['id'],
       json['stars'],

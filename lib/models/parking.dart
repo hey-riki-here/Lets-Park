@@ -1,7 +1,10 @@
 class Parking {
+  String? _parkingSpaceId;
   String? _parkingId;
   String? _imageUrl;
+  String? _ownerId;
   String? _driver;
+  String? _driverImage;
   int? _stars;
   String? _address;
   String? _plateNumber;
@@ -14,9 +17,12 @@ class Parking {
   bool? _inHistory;
 
   Parking(
+    String? parkingSpaceId,
     String? parkingId,
     String? imageUrl,
+    String? ownerId,
     String? driver,
+    String? driverImage,
     int? stars,
     String? address,
     String? plateNumber,
@@ -28,9 +34,12 @@ class Parking {
     bool? upcoming,
     bool? inHistory,
   ) {
+    _parkingSpaceId = parkingSpaceId;
     _parkingId = parkingId;
     _imageUrl = imageUrl;
+    _ownerId = ownerId;
     _driver = driver;
+    _driverImage = driverImage;
     _stars = stars;
     _address = address;
     _plateNumber = plateNumber;
@@ -43,11 +52,17 @@ class Parking {
     _inHistory = inHistory;
   }
 
+  String? get getParkingSpaceId => _parkingSpaceId;
+
   String? get getParkingId => _parkingId;
 
   String? get getImageUrl => _imageUrl;
 
+  String? get getParkingOwner => _ownerId;
+
   String? get getDriver => _driver;
+
+  String? get getDriverImage => _driverImage;
 
   int? get getStars => _stars;
 
@@ -115,9 +130,12 @@ class Parking {
   }
 
   Map<String, dynamic> toJson() => {
+        'parkingSpaceId': _parkingSpaceId,
         'parkingId': _parkingId,
         'imageUrl': _imageUrl,
+        'ownerId': _ownerId,
         'driver': _driver,
+        'driverImage': _driverImage,
         'stars': _stars,
         'address': _address,
         'plateNumber': _plateNumber,
@@ -132,9 +150,12 @@ class Parking {
 
   static Parking fromJson(Map<String, dynamic> json) {
     return Parking(
+      json['parkingSpaceId'],
       json['parkingId'],
       json['imageUrl'],
+      json['ownerId'],
       json['driver'],
+      json['driverImage'],
       json['stars'],
       json['address'],
       json['plateNumber'],

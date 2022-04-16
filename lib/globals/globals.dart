@@ -2,6 +2,8 @@
 
 library lets_park.globals;
 
+import 'dart:async';
+
 import 'package:flutter/cupertino.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:lets_park/models/parking.dart';
@@ -20,3 +22,4 @@ bool subscribeToStream = true;
 List<Parking> inProgressParkings = [];
 Map<String, List<Parking>> parkingSession = {};
 bool updateState = false;
+late StreamSubscription sub;

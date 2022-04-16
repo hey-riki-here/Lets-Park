@@ -6,13 +6,15 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:lets_park/models/notification.dart' as notif;
+import 'package:lets_park/models/notification.dart';
 import 'package:lets_park/models/parking.dart';
 import 'package:lets_park/globals/globals.dart' as globals;
 import 'package:lets_park/services/world_time_api.dart';
 
 class UserServices {
   final Stream checkSessionsStream =
-      Stream.periodic(const Duration(milliseconds: 500), (int count) {
+      Stream.periodic(const Duration(milliseconds: 1000), (int count) {
     return count;
   });
 
@@ -52,11 +54,22 @@ class UserServices {
         .snapshots();
   }
 
+  Stream<QuerySnapshot<Map<String, dynamic>>>? getUserNotifications() {
+    return FirebaseFirestore.instance
+        .collection('user-data')
+        .doc(FirebaseAuth.instance.currentUser!.uid)
+        .collection('notifications')
+        .snapshots();
+  }
+
   void distributeParkingSessions(BuildContext context) async {
-    var collection = FirebaseFirestore.instance
+    var userParkings = FirebaseFirestore.instance
         .collection('user-data')
         .doc(FirebaseAuth.instance.currentUser!.uid)
         .collection("user-parkings");
+
+    var parkingSessions =
+        FirebaseFirestore.instance.collection('parking-spaces');
 
     List<Parking> parkings = globals.userData.getUserParkings!;
 
@@ -72,10 +85,10 @@ class UserServices {
         );
       });
       for (var parking in parkings) {
-        //String parkingId = parking.getParkingId!;
         String address = parking.getAddress!;
         String time = _getFormattedTime(
             _getDateTimeFromMillisecondEpoch(parking.getArrival!));
+
         if ((_getDateTimeFromMillisecondEpoch(parking.getArrival!)
                         .compareTo(now) ==
                     0 ||
@@ -83,49 +96,112 @@ class UserServices {
                         .compareTo(now) ==
                     -1) &&
             (_getDateTimeFromMillisecondEpoch(parking.getDeparture!)
-                        .compareTo(now) ==
-                    0 ||
-                _getDateTimeFromMillisecondEpoch(parking.getDeparture!)
-                        .compareTo(now) ==
-                    1) &&
+                    .compareTo(now) ==
+                1) &&
             parking.isInProgress == false) {
-          collection.doc(parking.getParkingId).update({
+          await userParkings.doc(parking.getParkingId).update({
             'inProgress': true,
             'upcoming': false,
             'inHistory': false,
-          }).then((_) {
-            showNotice(
-              context,
-              "Your parking in $address at $time has started.",
-            );
+          }).then((_) => showNotice(
+                context,
+                "Your parking in $address at $time has started.",
+              ));
+
+          await parkingSessions
+              .doc(parking.getParkingSpaceId)
+              .collection("parking-sessions")
+              .doc(parking.getParkingId)
+              .update({
+            'inProgress': true,
+            'upcoming': false,
+            'inHistory': false,
           });
         } else if (_getDateTimeFromMillisecondEpoch(parking.getArrival!)
                     .compareTo(now) ==
                 1 &&
             parking.isUpcoming == false) {
-          collection.doc(parking.getParkingId).update({
+          await userParkings.doc(parking.getParkingId).update({
             'inProgress': false,
             'upcoming': true,
             'inHistory': false,
           }).then((_) => print('Success (Upcoming)'));
+
+          await parkingSessions
+              .doc(parking.getParkingSpaceId)
+              .collection("parking-sessions")
+              .doc(parking.getParkingId)
+              .update({
+            'inProgress': false,
+            'upcoming': true,
+            'inHistory': false,
+          });
         } else if ((_getDateTimeFromMillisecondEpoch(parking.getArrival!)
                         .compareTo(now) ==
                     -1 &&
-                _getDateTimeFromMillisecondEpoch(parking.getDeparture!)
-                        .compareTo(now) ==
-                    -1) &&
+                (_getDateTimeFromMillisecondEpoch(parking.getDeparture!)
+                            .compareTo(now) ==
+                        0 ||
+                    _getDateTimeFromMillisecondEpoch(parking.getDeparture!)
+                            .compareTo(now) ==
+                        -1)) &&
             parking.isInHistory == false) {
-          collection.doc(parking.getParkingId).update({
+          await userParkings.doc(parking.getParkingId).update({
             'inProgress': false,
             'upcoming': false,
             'inHistory': true,
-          }).then((_) => showNotice(
-                context,
-                "Your parking in $address at $time has ended.",
-              ));
+          }).then((_) {
+            showNotice(
+              context,
+              "Your parking in $address at $time has ended.",
+            );
+            UserServices.notifyUser(
+              parking.getParkingOwner!,
+              UserNotification(
+                FirebaseAuth.instance.currentUser!.photoURL!,
+                FirebaseAuth.instance.currentUser!.displayName!,
+                "finished parking in your parking space. Give him a rate now.",
+                false,
+                true,
+                now.millisecondsSinceEpoch,
+              ),
+            );
+
+            UserServices.notifyUser(
+              FirebaseAuth.instance.currentUser!.uid,
+              UserNotification(
+                FirebaseAuth.instance.currentUser!.photoURL!,
+                FirebaseAuth.instance.currentUser!.displayName!,
+                "How did the parking went? Share your thoughts now.",
+                false,
+                false,
+                now.millisecondsSinceEpoch,
+              ),
+            );
+          });
+
+          await parkingSessions
+              .doc(parking.getParkingSpaceId)
+              .collection("parking-sessions")
+              .doc(parking.getParkingId)
+              .update({
+            'inProgress': false,
+            'upcoming': false,
+            'inHistory': true,
+          });
         }
       }
     } on Exception catch (e) {}
+  }
+
+  static void notifyUser(String userId, UserNotification notif) async {
+    final docUser = FirebaseFirestore.instance
+        .collection('user-data')
+        .doc(userId)
+        .collection("notifications")
+        .doc();
+
+    await docUser.set(notif.toJson());
   }
 
   DateTime _getDateTimeFromMillisecondEpoch(int time) {
@@ -167,22 +243,3 @@ class UserServices {
     return formattedTime;
   }
 }
-
-
-
-
-//secondStream!,
-            //_userServices.getUserParkingData()!,
-            //     FirebaseFirestore.instance
-            // .collection('user-data')
-            // .doc(FirebaseAuth.instance.currentUser!.uid)
-            // .collection("user-parkings")
-            // .get()
-            // .then((value) => value.docs.forEach((element) {
-            //       stream = FirebaseFirestore.instance
-            //           .collection('user-data')
-            //           .doc(FirebaseAuth.instance.currentUser!.uid)
-            //           .collection('user-parkings')
-            //           .doc(element.data()["parkingId"])
-            //           .snapshots();
-            //     }));

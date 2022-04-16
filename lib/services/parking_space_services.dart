@@ -1,6 +1,9 @@
 // ignore_for_file: empty_catches, avoid_function_literals_in_foreach_calls
 
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:lets_park/globals/globals.dart' as globals;
 import 'package:lets_park/models/parking.dart';
 import 'package:lets_park/models/parking_space.dart';
 
@@ -74,6 +77,15 @@ class ParkingSpaceServices {
       isAvailable = true;
     }
     return isAvailable;
+  }
+
+  static Stream<QuerySnapshot<Map<String, dynamic>>> getParkingSessionsDocs(
+      String spaceId) {
+    return FirebaseFirestore.instance
+        .collection('parking-spaces')
+        .doc(spaceId)
+        .collection('parking-sessions')
+        .snapshots();
   }
 
   static DateTime _getDateTimeFromMillisecondsFromEpoch(int time) {

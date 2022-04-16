@@ -2,6 +2,7 @@
 
 import 'dart:io';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dotted_border/dotted_border.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -11,12 +12,15 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:lets_park/main.dart';
+import 'package:lets_park/models/notification.dart' as notif;
+import 'package:lets_park/models/notification.dart';
 import 'package:lets_park/models/parking.dart';
 import 'package:lets_park/models/parking_space.dart';
 import 'package:lets_park/screens/popups/notice_dialog.dart';
 import 'package:lets_park/screens/popups/successful_booking.dart';
 import 'package:lets_park/services/parking_space_services.dart';
 import 'package:lets_park/services/user_services.dart';
+import 'package:lets_park/services/world_time_api.dart';
 import 'package:numberpicker/numberpicker.dart';
 import 'package:lets_park/globals/globals.dart' as globals;
 
@@ -34,29 +38,46 @@ class _CheckoutState extends State<Checkout> {
 
   @override
   Widget build(BuildContext context) {
+    final capacity = widget.parkingSpace.getCapacity!;
+    int availableSlot = 0;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text("Checkout"),
       ),
       backgroundColor: Colors.grey.shade100,
-      body: Padding(
-        padding: const EdgeInsets.all(12),
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Column(
-                children: [
-                  SetUpTime(key: _setupTimeState),
-                  Vehicle(key: _vehicleState),
-                  const PhotoPicker(),
-                  const Payment(),
-                ],
+      body: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+          stream: ParkingSpaceServices.getParkingSessionsDocs(
+              widget.parkingSpace.getSpaceId!),
+          builder: (context, snapshot) {
+            if (snapshot.hasData) {
+              int occupied = 0;
+              snapshot.data!.docs.forEach((parking) {
+                if (parking.data()["inProgress"] == true || parking.data()["upcoming"] == true) {
+                  occupied++;
+                }
+              });
+              availableSlot = capacity - occupied;
+            }
+            return Padding(
+              padding: const EdgeInsets.all(12),
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Column(
+                      children: [
+                        SetUpTime(key: _setupTimeState),
+                        Vehicle(key: _vehicleState),
+                        const PhotoPicker(),
+                        const Payment(),
+                      ],
+                    ),
+                  ],
+                ),
               ),
-            ],
-          ),
-        ),
-      ),
+            );
+          }),
       bottomNavigationBar: Padding(
         padding: const EdgeInsets.symmetric(
           vertical: 8,
@@ -78,9 +99,12 @@ class _CheckoutState extends State<Checkout> {
                 DateTime.now().millisecondsSinceEpoch.toString().toString() +
                 "$qty";
             Parking newParking = Parking(
+              widget.parkingSpace.getSpaceId,
               parkingId,
               widget.parkingSpace.getImageUrl,
+              widget.parkingSpace.getOwnerId,
               FirebaseAuth.instance.currentUser!.displayName,
+              FirebaseAuth.instance.currentUser!.photoURL,
               globals.userData.getStars,
               widget.parkingSpace.getAddress,
               _vehicleState.currentState!.getPlateNumber,
@@ -108,27 +132,55 @@ class _CheckoutState extends State<Checkout> {
             );
 
             await Future.delayed(const Duration(seconds: 2));
-
-            bool isAvailable =
-                await ParkingSpaceServices.isParkingSpaceAvailableAtTimeRange(
-              widget.parkingSpace.getSpaceId,
-              _setupTimeState.currentState!.getArrival!.millisecondsSinceEpoch,
-              _setupTimeState
-                  .currentState!.getDeparture!.millisecondsSinceEpoch,
-            ).then((isAvailable) {
-              if (isAvailable) {
-                ParkingSpaceServices.updateParkingSpaceData(
-                  widget.parkingSpace,
-                  newParking,
-                );
-                UserServices.updateUserParkingData(newParking);
-              }
-              return isAvailable;
-            });
+            bool isAvailable = true;
+            if (availableSlot > 0) {
+              isAvailable = true;
+            } else {
+              isAvailable =
+                  await ParkingSpaceServices.isParkingSpaceAvailableAtTimeRange(
+                widget.parkingSpace.getSpaceId,
+                _setupTimeState
+                    .currentState!.getArrival!.millisecondsSinceEpoch,
+                _setupTimeState
+                    .currentState!.getDeparture!.millisecondsSinceEpoch,
+              ).then((isAvailable) async {
+                return isAvailable;
+              });
+            }
 
             Navigator.pop(context);
 
             if (isAvailable) {
+              ParkingSpaceServices.updateParkingSpaceData(
+                widget.parkingSpace,
+                newParking,
+              );
+
+              DateTime now = DateTime(0, 0, 0, 0, 0);
+              await WorldTimeServices.getDateTimeNow().then((time) {
+                now = DateTime(
+                  time.year,
+                  time.month,
+                  time.day,
+                  time.hour,
+                  time.minute,
+                );
+              });
+
+              UserServices.updateUserParkingData(newParking);
+
+              UserServices.notifyUser(
+                widget.parkingSpace.getOwnerId!,
+                UserNotification(
+                  FirebaseAuth.instance.currentUser!.photoURL!,
+                  FirebaseAuth.instance.currentUser!.displayName!,
+                  "just booked on your parking space. Tap to view details.",
+                  true,
+                  false,
+                  now.millisecondsSinceEpoch,
+                ),
+              );
+
               navigatorKey.currentState!.popUntil((route) => route.isFirst);
               Navigator.push(
                 context,

@@ -1,7 +1,10 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:lets_park/models/parking_space.dart';
+import 'package:lets_park/screens/drawer_screens/manage_space/space.dart';
 import 'package:lets_park/screens/drawer_screens/register_screens/register_area.dart';
+import 'package:lets_park/services/parking_space_services.dart';
 import 'package:lets_park/shared/shared_widgets.dart';
 import 'package:lets_park/globals/globals.dart' as globals;
 
@@ -16,7 +19,7 @@ class YourSpace extends StatelessWidget {
 
     return Scaffold(
       appBar: _sharedWidgets.manageSpaceAppBar("Your spaces"),
-      backgroundColor: Colors.grey.shade300,
+      backgroundColor: Colors.grey.shade100,
       body: Padding(
         padding: const EdgeInsets.all(8.0),
         child: Column(
@@ -50,109 +53,147 @@ class ParkingCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    int capacity = parkingSpace.getCapacity!;
-    return Card(
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.all(
-          Radius.circular(12),
-        ),
-      ),
-      elevation: 3,
-      child: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  "Space " + title,
-                  style: const TextStyle(
-                    fontSize: 21,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                buildTag("Active", Colors.green),
-              ],
-            ),
-            const SizedBox(height: 7),
-            Text(
-              parkingSpace.getAddress!,
-              style: const TextStyle(
-                fontSize: 18,
-                color: Colors.grey,
+    final capacity = parkingSpace.getCapacity!;
+    int availableSlot = 0;
+
+    return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+        stream: ParkingSpaceServices.getParkingSessionsDocs(parkingSpace.getSpaceId!),
+        builder: (context, snapshot) {
+          if (snapshot.hasData) {
+            if (snapshot.hasData) {
+              int occupied = 0;
+              snapshot.data!.docs.forEach((parking) {
+                if (parking.data()["inProgress"] == true) {
+                  occupied++;
+                }
+              });
+              availableSlot = capacity - occupied;
+            }
+          }
+
+          return Card(
+            shape: const RoundedRectangleBorder(
+              borderRadius: BorderRadius.all(
+                Radius.circular(12),
               ),
             ),
-            const SizedBox(height: 7),
-            Row(
-              children: [
-                Icon(
-                  Icons.star,
-                  color: Colors.yellow.shade600,
-                  size: 17,
-                ),
-                Icon(
-                  Icons.star,
-                  color: Colors.yellow.shade600,
-                  size: 17,
-                ),
-                Icon(
-                  Icons.star,
-                  color: Colors.yellow.shade600,
-                  size: 17,
-                ),
-                Icon(
-                  Icons.star,
-                  color: Colors.yellow.shade600,
-                  size: 17,
-                ),
-                Icon(
-                  Icons.star,
-                  color: Colors.yellow.shade600,
-                  size: 17,
-                ),
-              ],
-            ),
-            const SizedBox(height: 10),
-            Row(
-              children: [
-                const Text(
-                  "Available slots:",
-                  style: TextStyle(
-                    fontSize: 21,
-                    fontWeight: FontWeight.w600,
+            elevation: 3,
+            child: InkWell(
+              borderRadius: BorderRadius.circular(12),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => Space(
+                      space: parkingSpace,
+                      title: title,
+                    ),
                   ),
+                );
+              },
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          "Space " + title,
+                          style: const TextStyle(
+                            fontSize: 21,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        buildTag("Active", Colors.green),
+                      ],
+                    ),
+                    const SizedBox(height: 7),
+                    Text(
+                      parkingSpace.getAddress!,
+                      style: const TextStyle(
+                        fontSize: 18,
+                        color: Colors.grey,
+                      ),
+                    ),
+                    const SizedBox(height: 7),
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.star,
+                          color: Colors.yellow.shade600,
+                          size: 17,
+                        ),
+                        Icon(
+                          Icons.star,
+                          color: Colors.yellow.shade600,
+                          size: 17,
+                        ),
+                        Icon(
+                          Icons.star,
+                          color: Colors.yellow.shade600,
+                          size: 17,
+                        ),
+                        Icon(
+                          Icons.star,
+                          color: Colors.yellow.shade600,
+                          size: 17,
+                        ),
+                        Icon(
+                          Icons.star,
+                          color: Colors.yellow.shade600,
+                          size: 17,
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 10),
+                    Row(
+                      children: [
+                        const Text(
+                          "Available slots:",
+                          style: TextStyle(
+                            fontSize: 21,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        const SizedBox(width: 5),
+                        Text(
+                          "$availableSlot/$capacity",
+                          style: const TextStyle(
+                            fontSize: 21,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.blue,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 10),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        buildTag(
+                            availableSlot == 0
+                                ? "Full"
+                                : availableSlot > 0 && availableSlot != capacity
+                                    ? "Occupied"
+                                    : "Empty",
+                            Colors.blue),
+                        IconButton(
+                          onPressed: () {},
+                          icon: const Icon(
+                            FontAwesomeIcons.pencilAlt,
+                            color: Colors.blue,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
-                const SizedBox(width: 5),
-                Text(
-                  "1/$capacity",
-                  style: const TextStyle(
-                    fontSize: 21,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.blue,
-                  ),
-                ),
-              ],
+              ),
             ),
-            const SizedBox(height: 10),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                buildTag("Empty", Colors.blue),
-                IconButton(
-                  onPressed: () {},
-                  icon: const Icon(
-                    FontAwesomeIcons.pencilAlt,
-                    color: Colors.blue,
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
+          );
+        });
   }
 
   Widget buildTag(String label, Color color) {

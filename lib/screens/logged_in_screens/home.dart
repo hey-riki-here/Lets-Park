@@ -7,6 +7,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:lets_park/globals/globals.dart' as globals;
+import 'package:lets_park/models/notification.dart' as notif;
+import 'package:lets_park/models/notification.dart';
 import 'package:lets_park/models/parking.dart';
 import 'package:lets_park/models/parking_space.dart';
 import 'package:lets_park/screens/logged_in_screens/google_map_screen.dart';
@@ -35,15 +37,17 @@ class _HomeState extends State<Home> {
   void initState() {
     grantPermission();
     _sub = _userServices.checkSessionsStream.listen((event) {
-      _userServices.distributeParkingSessions(context);
+      if (mounted) {
+        _userServices.distributeParkingSessions(context);
+      }
     });
+
     super.initState();
   }
 
   @override
   void dispose() {
     _sub.cancel();
-    print("Disposed");
     super.dispose();
   }
 
@@ -141,49 +145,61 @@ class SearchBox extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final UserServices _userServices = UserServices();
     final _controller = TextEditingController();
 
-    return Expanded(
-      child: Material(
-        borderRadius: const BorderRadius.all(Radius.circular(15)),
-        elevation: 2,
-        child: Container(
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(10),
-          ),
-          child: TextField(
-            controller: _controller,
-            textInputAction: TextInputAction.done,
-            onSubmitted: (query) {
-              gMapKey.currentState!.goToLocation(query + ", Valenzuela");
-            },
-            decoration: InputDecoration(
-              suffixIcon: IconButton(
-                  onPressed: () {
-                    gMapKey.currentState!
-                        .goToLocation(_controller.text.trim() + ", Valenzuela");
+    return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+        stream: _userServices.getUserNotifications()!,
+        builder: (context, snapshot) {
+          if (snapshot.hasData) {
+            List<UserNotification> notifications = [];
+            snapshot.data!.docs.forEach((element) {
+              notifications.add(UserNotification.fromJson(element.data())); //
+            });
+            globals.userData.setUserNotifications = notifications;
+          }
+          return Expanded(
+            child: Material(
+              borderRadius: const BorderRadius.all(Radius.circular(15)),
+              elevation: 2,
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: TextField(
+                  controller: _controller,
+                  textInputAction: TextInputAction.done,
+                  onSubmitted: (query) {
+                    gMapKey.currentState!.goToLocation(query + ", Valenzuela");
                   },
-                  icon: const Icon(
-                    Icons.search,
-                    color: Colors.black54,
-                    size: 20,
-                  )),
-              isDense: true,
-              hintText: 'Enter location here',
-              filled: true,
-              fillColor: Colors.white,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(10.0),
-                borderSide: BorderSide.none,
+                  decoration: InputDecoration(
+                    suffixIcon: IconButton(
+                        onPressed: () {
+                          gMapKey.currentState!.goToLocation(
+                              _controller.text.trim() + ", Valenzuela");
+                        },
+                        icon: const Icon(
+                          Icons.search,
+                          color: Colors.black54,
+                          size: 20,
+                        )),
+                    isDense: true,
+                    hintText: 'Enter location here',
+                    filled: true,
+                    fillColor: Colors.white,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10.0),
+                      borderSide: BorderSide.none,
+                    ),
+                  ),
+                  textAlign: TextAlign.start,
+                  maxLines: 1,
+                ),
               ),
             ),
-            textAlign: TextAlign.start,
-            maxLines: 1,
-          ),
-        ),
-      ),
-    );
+          );
+        });
   }
 }
 
@@ -300,11 +316,7 @@ class _FilterButtonsState extends State<FilterButtons> {
           label: "Highest Rating",
           width: 120,
           context: context,
-          onTap: () {
-            // .then((value) => value.data()!.forEach((key, value) {
-            //       print("$key: $value");
-            //     }));
-          },
+          onTap: () {},
         ),
         _buildCategory(
           label: "Secured",

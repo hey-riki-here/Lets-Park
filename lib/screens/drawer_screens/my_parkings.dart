@@ -41,10 +41,7 @@ class _MyParkingsState extends State<MyParkings> {
         appBar: AppBar(
           actions: [
             IconButton(
-              onPressed: () {
-                showNotice(
-                    "A Parking session just ended. Check parking history for details.");
-              },
+              onPressed: () {},
               icon: const Icon(
                 Icons.stop,
                 color: Colors.black,
@@ -129,9 +126,9 @@ class _MyParkingsState extends State<MyParkings> {
                 });
 
                 for (var parking in parkings) {
-                  if (parking.isInProgress == true){
+                  if (parking.isInProgress == true) {
                     inProgress.add(parking);
-                  } else if (parking.isUpcoming == true){
+                  } else if (parking.isUpcoming == true) {
                     upcoming.add(parking);
                   } else {
                     history.add(parking);

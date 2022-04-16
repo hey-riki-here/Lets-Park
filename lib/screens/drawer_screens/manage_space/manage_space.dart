@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:lets_park/screens/drawer_screens/manage_space/earnings.dart';
+import 'package:lets_park/screens/drawer_screens/manage_space/upcoming_parkings_menu.dart';
 import 'package:lets_park/screens/drawer_screens/manage_space/your_space.dart';
 import 'package:lets_park/shared/navigation_drawer.dart';
 import 'package:lets_park/shared/shared_widgets.dart';
@@ -153,9 +154,7 @@ class Menu extends StatelessWidget {
                   insets: const EdgeInsets.all(10),
                   borderRadius: const BorderRadius.all(Radius.zero),
                   subLabel: "View your daily and monthly earnings",
-                  onTap: () {
-                    goToRoute(context, const Earnings());
-                  },
+                  onTap: () => goToRoute(context, const Earnings()),
                 ),
                 Container(
                   height: 1,
@@ -166,7 +165,7 @@ class Menu extends StatelessWidget {
                   insets: const EdgeInsets.all(10),
                   borderRadius: const BorderRadius.all(Radius.zero),
                   subLabel: "View upcoming parkings",
-                  onTap: () {},
+                  onTap: () => goToRoute(context, const UpcomingParkingsMenu()),
                 ),
                 Container(
                   height: 1,
