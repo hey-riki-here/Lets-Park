@@ -31,14 +31,14 @@ class _HomeState extends State<Home> {
   final user = FirebaseAuth.instance.currentUser;
   final GlobalKey<GoogleMapScreenState> _gMapKey = GlobalKey();
   final UserServices _userServices = UserServices();
-  late StreamSubscription _sub;
 
   @override
   void initState() {
     grantPermission();
-    _sub = _userServices.checkSessionsStream.listen((event) {
+
+    WidgetsBinding.instance!.addPostFrameCallback((_) {
       if (mounted) {
-        _userServices.distributeParkingSessions(context);
+        _userServices.startSessionsStream(context);
       }
     });
 
@@ -47,7 +47,8 @@ class _HomeState extends State<Home> {
 
   @override
   void dispose() {
-    _sub.cancel();
+    _userServices.getParkingSessionsStream.cancel();
+     _userServices.getOwnedParkingSessionsStream.cancel();
     super.dispose();
   }
 
@@ -316,7 +317,11 @@ class _FilterButtonsState extends State<FilterButtons> {
           label: "Highest Rating",
           width: 120,
           context: context,
-          onTap: () {},
+          onTap: () {
+            //print(DateTime.fromMillisecondsSinceEpoch(1648742400000));
+
+            print(DateTime(2022, 4, 2).millisecondsSinceEpoch);
+          },
         ),
         _buildCategory(
           label: "Secured",

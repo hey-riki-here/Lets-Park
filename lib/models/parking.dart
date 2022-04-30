@@ -4,6 +4,7 @@ class Parking {
   String? _imageUrl;
   String? _ownerId;
   String? _driver;
+  String? _driverId;
   String? _driverImage;
   int? _stars;
   String? _address;
@@ -22,6 +23,7 @@ class Parking {
     String? imageUrl,
     String? ownerId,
     String? driver,
+    String? driverId,
     String? driverImage,
     int? stars,
     String? address,
@@ -39,6 +41,7 @@ class Parking {
     _imageUrl = imageUrl;
     _ownerId = ownerId;
     _driver = driver;
+    _driverId = driverId;
     _driverImage = driverImage;
     _stars = stars;
     _address = address;
@@ -61,6 +64,8 @@ class Parking {
   String? get getParkingOwner => _ownerId;
 
   String? get getDriver => _driver;
+  
+  String? get getDriverId => _driverId;
 
   String? get getDriverImage => _driverImage;
 
@@ -135,6 +140,7 @@ class Parking {
         'imageUrl': _imageUrl,
         'ownerId': _ownerId,
         'driver': _driver,
+        'driverId': _driverId,
         'driverImage': _driverImage,
         'stars': _stars,
         'address': _address,
@@ -155,6 +161,7 @@ class Parking {
       json['imageUrl'],
       json['ownerId'],
       json['driver'],
+      json['driverId'],
       json['driverImage'],
       json['stars'],
       json['address'],

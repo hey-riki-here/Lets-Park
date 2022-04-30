@@ -14,6 +14,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "416164685068-s50rch5p980jddmsv12j2216ihgk02rg.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.u7thdevs.lets_park",
+            "certificate_hash": "8dc30563d93e74c76675a16691e408df0d248896"
+          }
+        },
+        {
           "client_id": "416164685068-g8tq6bs34bijfcmd50e36j2229b43ao7.apps.googleusercontent.com",
           "client_type": 3
         }

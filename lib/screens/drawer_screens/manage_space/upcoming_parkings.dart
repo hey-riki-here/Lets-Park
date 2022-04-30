@@ -232,7 +232,7 @@ class _UpcomingParkingsState extends State<UpcomingParkings> {
                         ),
                         SizedBox(width: 10),
                         Text(
-                          "No cars parked today.",
+                          "No upcoming parking for this space.",
                           style: TextStyle(
                             color: Colors.grey,
                             fontSize: 16,

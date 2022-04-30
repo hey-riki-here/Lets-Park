@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:lets_park/screens/drawer_screens/manage_space/earnings.dart';
+import 'package:lets_park/screens/drawer_screens/manage_space/earnings_menu.dart';
+import 'package:lets_park/screens/drawer_screens/manage_space/parking_history_menu.dart';
 import 'package:lets_park/screens/drawer_screens/manage_space/upcoming_parkings_menu.dart';
 import 'package:lets_park/screens/drawer_screens/manage_space/your_space.dart';
 import 'package:lets_park/shared/navigation_drawer.dart';
@@ -179,7 +180,14 @@ class Menu extends StatelessWidget {
                     bottomLeft: Radius.circular(12),
                   ),
                   subLabel: "Keep track of your space's parking session",
-                  onTap: () {},
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const ParkingHistoryMenu(),
+                      ),
+                    );
+                  },
                 ),
               ],
             ),

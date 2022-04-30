@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:lets_park/globals/globals.dart' as globals;
 import 'package:lets_park/models/notification.dart';
 import 'package:lets_park/services/user_services.dart';
@@ -36,7 +37,6 @@ class _NotificationsState extends State<Notifications> {
           stream: _userServices.getUserNotifications(),
           builder: (context, snapshot) {
             if (snapshot.hasData) {
-              print("Some updates...");
               List<UserNotification> newNotifications = [];
               snapshot.data!.docs.forEach((element) {
                 newNotifications.add(UserNotification.fromJson(element.data()));
@@ -102,26 +102,39 @@ class _NotificationsState extends State<Notifications> {
                           ),
                           const SizedBox(width: 10),
                           Expanded(
-                            child: RichText(
-                              text: TextSpan(
-                                children: <TextSpan>[
-                                  TextSpan(
-                                    text: notifications[index].getUsername!,
-                                    style: const TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      height: 2,
-                                      color: Colors.black,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                RichText(
+                                  text: TextSpan(
+                                    children: <TextSpan>[
+                                      TextSpan(
+                                        text: notifications[index].getUsername!,
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          height: 2,
+                                          color: Colors.black,
+                                        ),
+                                      ),
+                                      TextSpan(
+                                        text: " " +
+                                            notifications[index].getMessage!,
+                                        style: const TextStyle(
+                                          color: Colors.black,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                const SizedBox(height: 5),
+                                Text(
+                                  _getFormattedTime(
+                                    DateTime.fromMillisecondsSinceEpoch(
+                                      notifications[index].getNotificationDate!,
                                     ),
                                   ),
-                                  TextSpan(
-                                    text:
-                                        " " + notifications[index].getMessage!,
-                                    style: const TextStyle(
-                                      color: Colors.black,
-                                    ),
-                                  ),
-                                ],
-                              ),
+                                ),
+                              ],
                             ),
                           ),
                         ],
@@ -132,6 +145,29 @@ class _NotificationsState extends State<Notifications> {
               },
             );
           }),
+    );
+  }
+
+  String _getFormattedTime(DateTime time) {
+    String formattedTime = "";
+    DateTime arrival = DateTime(
+      time.year,
+      time.month,
+      time.day,
+    );
+
+    arrival.compareTo(_getDateTimeNow()) == 0
+        ? formattedTime += "Today at "
+        : formattedTime += DateFormat('MMM. dd, yyyy ').format(arrival) + "at ";
+    formattedTime += DateFormat("h:mm a").format(time);
+    return formattedTime;
+  }
+
+  DateTime _getDateTimeNow() {
+    return DateTime(
+      DateTime.now().year,
+      DateTime.now().month,
+      DateTime.now().day,
     );
   }
 }

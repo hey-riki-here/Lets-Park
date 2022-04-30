@@ -104,6 +104,7 @@ class _CheckoutState extends State<Checkout> {
               widget.parkingSpace.getImageUrl,
               widget.parkingSpace.getOwnerId,
               FirebaseAuth.instance.currentUser!.displayName,
+              FirebaseAuth.instance.currentUser!.uid,
               FirebaseAuth.instance.currentUser!.photoURL,
               globals.userData.getStars,
               widget.parkingSpace.getAddress,
@@ -147,8 +148,6 @@ class _CheckoutState extends State<Checkout> {
                 return isAvailable;
               });
             }
-
-            Navigator.pop(context);
 
             if (isAvailable) {
               ParkingSpaceServices.updateParkingSpaceData(
