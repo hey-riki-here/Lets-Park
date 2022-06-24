@@ -1,4 +1,4 @@
-// ignore_for_file: unused_catch_clause, empty_catches
+// ignore_for_file: unused_catch_clause, empty_catches, avoid_function_literals_in_foreach_calls
 
 import 'dart:io';
 
@@ -12,7 +12,6 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:lets_park/main.dart';
-import 'package:lets_park/models/notification.dart' as notif;
 import 'package:lets_park/models/notification.dart';
 import 'package:lets_park/models/parking.dart';
 import 'package:lets_park/models/parking_space.dart';
@@ -43,7 +42,7 @@ class _CheckoutState extends State<Checkout> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Checkout"),
+        title: const Text("Rent details"),
       ),
       backgroundColor: Colors.grey.shade100,
       body: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
@@ -53,7 +52,8 @@ class _CheckoutState extends State<Checkout> {
             if (snapshot.hasData) {
               int occupied = 0;
               snapshot.data!.docs.forEach((parking) {
-                if (parking.data()["inProgress"] == true || parking.data()["upcoming"] == true) {
+                if (parking.data()["inProgress"] == true ||
+                    parking.data()["upcoming"] == true) {
                   occupied++;
                 }
               });
@@ -69,8 +69,8 @@ class _CheckoutState extends State<Checkout> {
                       children: [
                         SetUpTime(key: _setupTimeState),
                         Vehicle(key: _vehicleState),
-                        const PhotoPicker(),
-                        const Payment(),
+                        //const PhotoPicker(),
+                        //const Payment(),
                       ],
                     ),
                   ],
@@ -131,7 +131,7 @@ class _CheckoutState extends State<Checkout> {
                 ),
               ),
             );
-
+            globals.goCheck = false;
             await Future.delayed(const Duration(seconds: 2));
             bool isAvailable = true;
             if (availableSlot > 0) {
@@ -169,17 +169,24 @@ class _CheckoutState extends State<Checkout> {
               UserServices.updateUserParkingData(newParking);
 
               UserServices.notifyUser(
+                "NOTIF" +
+                    globals.userData.getUserNotifications!.length.toString(),
                 widget.parkingSpace.getOwnerId!,
                 UserNotification(
+                  "NOTIF" +
+                      globals.userData.getUserNotifications!.length.toString(),
+                  widget.parkingSpace.getSpaceId!,
                   FirebaseAuth.instance.currentUser!.photoURL!,
                   FirebaseAuth.instance.currentUser!.displayName!,
                   "just booked on your parking space. Tap to view details.",
                   true,
                   false,
                   now.millisecondsSinceEpoch,
+                  false,
+                  false,
                 ),
               );
-
+              globals.goCheck = true;
               navigatorKey.currentState!.popUntil((route) => route.isFirst);
               Navigator.push(
                 context,

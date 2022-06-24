@@ -199,7 +199,7 @@ class _UpcomingParkingsState extends State<UpcomingParkings> {
                                               MainAxisAlignment.spaceBetween,
                                           children: [
                                             Text(
-                                              "Time Remaining:",
+                                              "Duratiom:",
                                               style: textStyle,
                                             ),
                                             Text(

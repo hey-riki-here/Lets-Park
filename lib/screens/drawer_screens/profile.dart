@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:lets_park/services/signin_provider.dart';
 import 'package:lets_park/shared/navigation_drawer.dart';
 import 'package:provider/provider.dart';
@@ -16,7 +17,8 @@ class _ProfileState extends State<Profile> {
   final user = FirebaseAuth.instance.currentUser!;
 
   String phoneNumber = "None";
-  String photoUrl = "https://cdn4.iconfinder.com/data/icons/user-people-2/48/5-512.png";
+  String photoUrl =
+      "https://cdn4.iconfinder.com/data/icons/user-people-2/48/5-512.png";
 
   @override
   void initState() {
@@ -42,59 +44,260 @@ class _ProfileState extends State<Profile> {
             _scaffoldKey.currentState!.openDrawer();
           },
         ),
-        actions: <Widget>[
-          IconButton(
-            icon: const Icon(Icons.logout),
-            onPressed: () {
-              Provider.of<SignInProvider>(
-                context,
-                listen: false,
-              ).logout(context);
-            },
-          )
-        ],
         centerTitle: true,
         title: const Text("Profile"),
         elevation: 0,
         bottom: PreferredSize(
           child: Container(
               color: Colors.blue[400],
-              height: 120.0,
+              height: 140,
               width: double.infinity,
-              child: Column(
-                children: <Widget>[
-                  CircleAvatar(
-                    backgroundImage: NetworkImage(photoUrl),
-                    radius: 40,
-                  ),
-                  const SizedBox(height: 10),
-                ],
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        Text(
+                          user.displayName!,
+                          style: const TextStyle(
+                            fontSize: 21,
+                            color: Colors.white,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.email_outlined,
+                              color: Colors.red[700],
+                            ),
+                            const SizedBox(width: 10),
+                            Text(
+                              user.email!,
+                              style: const TextStyle(
+                                color: Colors.white,
+                              ),
+                            ),
+                          ],
+                        ),
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.phone_rounded,
+                              color: Colors.green[400],
+                            ),
+                            const SizedBox(width: 10),
+                            const Text(
+                              "09123456789",
+                              style: TextStyle(
+                                color: Colors.white,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                    CircleAvatar(
+                      backgroundImage: NetworkImage(photoUrl),
+                      radius: 40,
+                    ),
+                  ],
+                ),
               )),
-          preferredSize: const Size.fromHeight(120.0),
+          preferredSize: const Size.fromHeight(140),
         ),
       ),
       drawer: NavigationDrawer(currentPage: widget._pageId),
-      body: Padding(
-        padding: const EdgeInsets.all(20.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              "Personal Information",
-              style: TextStyle(
-                color: Colors.grey,
-                fontSize: 21,
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(20.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                "ACCOUNT SETTINGS",
+                style: TextStyle(
+                  color: Colors.grey,
+                  fontSize: 14,
+                ),
               ),
+              const SizedBox(height: 10),
+              const Menu(),
+              const SizedBox(height: 15),
+              const Text(
+                "RECENT PARKINGS (Pending)",
+                style: TextStyle(
+                  color: Colors.grey,
+                  fontSize: 14,
+                ),
+              ),
+              const SizedBox(height: 15),
+              RecentParkingSample(photoURL: photoUrl),
+              const SizedBox(height: 15),
+              RecentParkingSample(photoURL: photoUrl),
+              const SizedBox(height: 15),
+              RecentParkingSample(photoURL: photoUrl),
+              const SizedBox(height: 15),
+              RecentParkingSample(photoURL: photoUrl),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class Menu extends StatelessWidget {
+  const Menu({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Card(
+          shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.all(
+              Radius.circular(12),
             ),
-            const SizedBox(height: 20),
-            FieldWidget(label: "Name", text: user.displayName!),
-            const Divider(color: Colors.black, height: 30),
-            FieldWidget(label: "Email", text: user.email!),
-            const Divider(color: Colors.black, height: 30),
-            FieldWidget(label: "Phone Number", text: phoneNumber),
-            const Divider(color: Colors.black, height: 30),
-            // FieldWidget(label: "Password", text: user.p),
-            //const Divider(color: Colors.black, height: 30),
+          ),
+          elevation: 5,
+          child: Column(
+            children: [
+              buildMenuItem(
+                icon: Icons.edit_note_rounded,
+                iconSize: 20,
+                iconColor: Colors.blue[400]!,
+                label: "Update Profile info",
+                insets: const EdgeInsets.all(15),
+                borderRadius: const BorderRadius.only(
+                  topRight: Radius.circular(12),
+                  topLeft: Radius.circular(12),
+                ),
+                onTap: () {},
+              ),
+              buildMenuItem(
+                icon: Icons.star_rounded,
+                iconSize: 22,
+                iconColor: Colors.yellow[600]!,
+                label: "My Favorites (Pending)",
+                insets: const EdgeInsets.all(15),
+                borderRadius: const BorderRadius.only(
+                  topRight: Radius.circular(12),
+                  topLeft: Radius.circular(12),
+                ),
+                onTap: () {},
+              ),
+              buildMenuItem(
+                icon: FontAwesomeIcons.car,
+                iconSize: 20,
+                iconColor: Colors.green[400]!,
+                label: "Registered Cars",
+                insets: const EdgeInsets.all(15),
+                borderRadius: const BorderRadius.all(Radius.zero),
+                onTap: () {},
+              ),
+              buildMenuItem(
+                icon: Icons.credit_card_rounded,
+                iconSize: 20,
+                iconColor: Colors.tealAccent[700]!,
+                label: "Linked Cards",
+                insets: const EdgeInsets.all(15),
+                borderRadius: const BorderRadius.all(Radius.zero),
+                onTap: () {},
+              ),
+              buildMenuItem(
+                icon: FontAwesomeIcons.key,
+                iconSize: 17,
+                iconColor: Colors.yellow[700]!,
+                label: "Reset password",
+                insets: const EdgeInsets.all(15),
+                borderRadius: const BorderRadius.all(Radius.zero),
+                onTap: () {},
+              ),
+              buildMenuItem(
+                icon: FontAwesomeIcons.info,
+                iconSize: 17,
+                iconColor: Colors.grey[600]!,
+                label: "Terms of services (Pending)",
+                insets: const EdgeInsets.all(15),
+                borderRadius: const BorderRadius.all(Radius.zero),
+                onTap: () {},
+              ),
+              buildMenuItem(
+                icon: Icons.policy,
+                iconSize: 20,
+                iconColor: Colors.blue[700]!,
+                label: "Data policy (Pending)",
+                insets: const EdgeInsets.all(15),
+                borderRadius: const BorderRadius.all(Radius.zero),
+                onTap: () {},
+              ),
+              buildMenuItem(
+                icon: Icons.logout_rounded,
+                iconSize: 20,
+                iconColor: Colors.red[400]!,
+                label: "Logout",
+                insets: const EdgeInsets.all(15),
+                borderRadius: const BorderRadius.only(
+                  bottomRight: Radius.circular(12),
+                  bottomLeft: Radius.circular(12),
+                ),
+                onTap: () {
+                  Provider.of<SignInProvider>(
+                    context,
+                    listen: false,
+                  ).logout(context);
+                },
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget buildMenuItem({
+    required IconData icon,
+    required double iconSize,
+    required Color iconColor,
+    required String label,
+    required EdgeInsets insets,
+    required BorderRadius borderRadius,
+    required VoidCallback onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: borderRadius,
+      child: Padding(
+        padding: insets,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Row(
+              children: [
+                Icon(
+                  icon,
+                  color: iconColor,
+                  size: iconSize,
+                ),
+                const SizedBox(width: 10),
+                Text(
+                  label,
+                  style: const TextStyle(
+                    fontSize: 15,
+                  ),
+                ),
+              ],
+            ),
+            Icon(
+              Icons.arrow_forward_ios_rounded,
+              size: 14,
+              color: Colors.grey.shade700,
+            ),
           ],
         ),
       ),
@@ -102,45 +305,166 @@ class _ProfileState extends State<Profile> {
   }
 }
 
-class FieldWidget extends StatelessWidget {
-  final String label, text;
-  const FieldWidget({Key? key, required this.label, required this.text})
+class RecentParkingSample extends StatelessWidget {
+  final String photoURL;
+  const RecentParkingSample({Key? key, required this.photoURL})
       : super(key: key);
+
+  final textStyle = const TextStyle(
+    fontSize: 16,
+  );
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Column(
+    return Card(
+      elevation: 2,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.all(
+          Radius.circular(12),
+        ),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 8,
+        ),
+        child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              label,
-              style: const TextStyle(
-                color: Colors.grey,
-                fontSize: 18,
-              ),
+            Row(
+              children: [
+                CircleAvatar(
+                  backgroundColor: Colors.white,
+                  backgroundImage: NetworkImage(
+                    photoURL,
+                  ),
+                  radius: 25,
+                ),
+                const SizedBox(width: 15),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      "Ricky Eredillas Jr.",
+                      style: textStyle,
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.star,
+                          color: Colors.yellow.shade600,
+                          size: 15,
+                        ),
+                        Icon(
+                          Icons.star,
+                          color: Colors.yellow.shade600,
+                          size: 15,
+                        ),
+                        Icon(
+                          Icons.star,
+                          color: Colors.yellow.shade600,
+                          size: 15,
+                        ),
+                        Icon(
+                          Icons.star,
+                          color: Colors.yellow.shade600,
+                          size: 15,
+                        ),
+                        Icon(
+                          Icons.star,
+                          color: Colors.yellow.shade600,
+                          size: 15,
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ],
             ),
             const SizedBox(height: 10),
-            Text(
-              text,
-              style: const TextStyle(
-                fontWeight: FontWeight.w600,
-                fontSize: 20,
-              ),
+            Row(
+              children: [
+                const Icon(
+                  FontAwesomeIcons.carAlt,
+                  color: Colors.blue,
+                  size: 30,
+                ),
+                const SizedBox(width: 15),
+                Text(
+                  "TWAT 124",
+                  style: textStyle,
+                ),
+              ],
+            ),
+            const SizedBox(height: 10),
+            Row(
+              children: [
+                const Icon(
+                  Icons.access_time,
+                  color: Colors.blue,
+                  size: 30,
+                ),
+                const SizedBox(width: 15),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            "Arrived:",
+                            style: textStyle,
+                          ),
+                          Text(
+                            "June 2, 2022 at 12:00 PM",
+                            style: textStyle.copyWith(
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 5),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            "Departed:",
+                            style: textStyle,
+                          ),
+                          Text(
+                            "June 2, 2022 at 12:15 PM",
+                            style: textStyle.copyWith(
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 5),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            "Duration:",
+                            style: textStyle,
+                          ),
+                          Text(
+                            "15 Minutes",
+                            style: textStyle.copyWith(
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
           ],
         ),
-        ElevatedButton.icon(
-          style: ElevatedButton.styleFrom(
-            primary: Colors.blue[400],
-          ),
-          icon: const Icon(Icons.edit, size: 18),
-          label: const Text('Edit'),
-          onPressed: () {},
-        ),
-      ],
+      ),
     );
   }
 }

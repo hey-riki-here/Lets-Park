@@ -23,3 +23,5 @@ List<Parking> inProgressParkings = [];
 Map<String, List<Parking>> parkingSession = {};
 bool updateState = false;
 late StreamSubscription sub;
+bool goCheck = true;
+bool goCheckOwnedSpaces = false;

@@ -4,11 +4,11 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
-import 'package:lets_park/globals/globals.dart';
 import 'package:lets_park/models/parking.dart';
 import 'package:lets_park/models/parking_space.dart';
 import 'package:lets_park/services/parking_space_services.dart';
 import 'package:lets_park/shared/shared_widgets.dart';
+import 'package:lets_park/models/review.dart';
 
 class Space extends StatefulWidget {
   final ParkingSpace space;
@@ -33,6 +33,7 @@ class _SpaceState extends State<Space> {
     final capacity = space.getCapacity;
     int availableSlot = 0;
     List<Parking> inProgressParkings = [];
+    final List<Review> reviews = [];
 
     return Scaffold(
       appBar: _sharedWidgets.manageSpaceAppBar("Space $title"),
@@ -323,7 +324,7 @@ class _SpaceState extends State<Space> {
                                                           .spaceBetween,
                                                   children: [
                                                     Text(
-                                                      "Time Remaining:",
+                                                      "Duration:",
                                                       style: textStyle,
                                                     ),
                                                     Text(
@@ -373,92 +374,106 @@ class _SpaceState extends State<Space> {
                   ),
                 ),
                 const SizedBox(height: 10),
-                Container(
-                  height: 150,
-                  child: ListView.builder(
-                    scrollDirection: Axis.horizontal,
-                    itemCount: 3,
-                    itemBuilder: ((context, index) {
-                      return SizedBox(
-                        width: MediaQuery.of(context).size.width - 20,
-                        child: Card(
-                          elevation: 2,
-                          shape: const RoundedRectangleBorder(
-                            borderRadius: BorderRadius.all(
-                              Radius.circular(12),
-                            ),
-                          ),
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 16,
-                              vertical: 8,
-                            ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(
-                                  children: [
-                                    const CircleAvatar(
-                                      backgroundColor: Colors.white,
-                                      backgroundImage: NetworkImage(
-                                          "https://www.bentbusinessmarketing.com/wp-content/uploads/2013/02/35844588650_3ebd4096b1_b-1024x683.jpg"),
-                                      radius: 25,
-                                    ),
-                                    const SizedBox(width: 15),
-                                    Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          "Roberto Ginintuan",
-                                          style: textStyle,
+                StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+                    stream: ParkingSpaceServices.getParkingSpaceReviews(
+                        space.getSpaceId!),
+                    builder: (context, snapshot) {
+                      if (snapshot.hasData) {
+                        reviews.clear();
+                        snapshot.data!.docs.forEach((review) {
+                          reviews.add(Review.fromJson(review.data()));
+                        });
+                      }
+                      return reviews.isEmpty
+                          ? const Card(
+                              elevation: 2,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.all(
+                                  Radius.circular(12),
+                                ),
+                              ),
+                              child: Padding(
+                                padding: EdgeInsets.all(16),
+                                child: Center(
+                                    child: Text(
+                                  "No reviews yet.",
+                                  style: TextStyle(
+                                    color: Colors.grey,
+                                  ),
+                                )),
+                              ),
+                            )
+                          : SizedBox(
+                              height: 180,
+                              child: ListView.builder(
+                                scrollDirection: Axis.horizontal,
+                                itemCount: reviews.length,
+                                itemBuilder: ((context, index) {
+                                  return SizedBox(
+                                    width:
+                                        MediaQuery.of(context).size.width - 20,
+                                    child: Card(
+                                      elevation: 2,
+                                      shape: const RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.all(
+                                          Radius.circular(12),
                                         ),
-                                        Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.center,
+                                      ),
+                                      child: Padding(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 16,
+                                          vertical: 8,
+                                        ),
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
                                           children: [
-                                            Icon(
-                                              Icons.star,
-                                              color: Colors.yellow.shade600,
-                                              size: 15,
+                                            Row(
+                                              children: [
+                                                CircleAvatar(
+                                                  backgroundColor: Colors.white,
+                                                  backgroundImage: NetworkImage(
+                                                      reviews[index]
+                                                          .getDisplayPhoto!),
+                                                  radius: 15,
+                                                ),
+                                                const SizedBox(width: 10),
+                                                Text(
+                                                  reviews[index].getReviewer!,
+                                                  style: const TextStyle(
+                                                    fontWeight: FontWeight.w500,
+                                                  ),
+                                                ),
+                                                Expanded(
+                                                  child: Row(
+                                                    mainAxisAlignment:
+                                                        MainAxisAlignment.end,
+                                                    children: const [
+                                                      Icon(
+                                                        Icons.more_vert_rounded,
+                                                        color: Colors.black54,
+                                                        size: 18,
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                              ],
                                             ),
-                                            Icon(
-                                              Icons.star,
-                                              color: Colors.yellow.shade600,
-                                              size: 15,
-                                            ),
-                                            Icon(
-                                              Icons.star,
-                                              color: Colors.yellow.shade600,
-                                              size: 15,
-                                            ),
-                                            Icon(
-                                              Icons.star,
-                                              color: Colors.yellow.shade600,
-                                              size: 15,
-                                            ),
-                                            Icon(
-                                              Icons.star,
-                                              color: Colors.yellow.shade600,
-                                              size: 15,
-                                            ),
+                                            const SizedBox(height: 15),
+                                            getStars(reviews[index]
+                                                .getRating!
+                                                .toInt()),
+                                            const SizedBox(height: 10),
+                                            Text(reviews[index].getReview!),
                                           ],
                                         ),
-                                      ],
+                                      ),
                                     ),
-                                  ],
-                                ),
-                                const SizedBox(height: 10),
-                                const Text(
-                                    "Some reviews about the parking area."),
-                              ],
-                            ),
-                          ),
-                        ),
-                      );
+                                  );
+                                }),
+                              ),
+                            );
                     }),
-                  ),
-                ),
                 const SizedBox(height: 10),
                 const Text(
                   "Settings",
@@ -530,5 +545,20 @@ class _SpaceState extends State<Space> {
       DateTime.now().month,
       DateTime.now().day,
     );
+  }
+
+  Row getStars(int stars) {
+    List<Widget> newChildren = [];
+
+    for (int i = 0; i < stars; i++) {
+      newChildren.add(
+        const Icon(
+          Icons.star,
+          color: Colors.amber,
+          size: 16,
+        ),
+      );
+    }
+    return Row(children: newChildren);
   }
 }

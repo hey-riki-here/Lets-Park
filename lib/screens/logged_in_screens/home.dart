@@ -1,13 +1,10 @@
 // ignore_for_file: avoid_function_literals_in_foreach_calls
 
-import 'dart:async';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:lets_park/globals/globals.dart' as globals;
-import 'package:lets_park/models/notification.dart' as notif;
 import 'package:lets_park/models/notification.dart';
 import 'package:lets_park/models/parking.dart';
 import 'package:lets_park/models/parking_space.dart';
@@ -120,9 +117,6 @@ class DrawerButton extends StatelessWidget {
     return StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
         stream: _userServices.getUserData()!,
         builder: (context, snapshot) {
-          if (snapshot.hasData) {
-            print(snapshot.data!.data());
-          }
           return Material(
             borderRadius: const BorderRadius.all(Radius.circular(10)),
             elevation: 2,
@@ -223,7 +217,7 @@ class _FilterButtonsState extends State<FilterButtons> {
       children: [
         _buildCategory(
           label: "Nearby",
-          width: 100,
+          width: 80,
           context: context,
           onTap: () async {
             Location location = Location();
@@ -315,17 +309,19 @@ class _FilterButtonsState extends State<FilterButtons> {
         ),
         _buildCategory(
           label: "Highest Rating",
-          width: 120,
+          width: 100,
           context: context,
-          onTap: () {
-            //print(DateTime.fromMillisecondsSinceEpoch(1648742400000));
-
-            print(DateTime(2022, 4, 2).millisecondsSinceEpoch);
-          },
+          onTap: () {},
         ),
         _buildCategory(
           label: "Secured",
-          width: 100,
+          width: 80,
+          context: context,
+          onTap: () {},
+        ),
+        _buildCategory(
+          label: "Monthly",
+          width: 80,
           context: context,
           onTap: () {},
         ),

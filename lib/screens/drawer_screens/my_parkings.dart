@@ -508,7 +508,7 @@ class InProgressState extends State<InProgress> {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Text(
-                                "Time Remaining:",
+                                "Duration:",
                                 style: textStyle,
                               ),
                               Text(

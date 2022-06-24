@@ -35,7 +35,6 @@ class _NavigationDrawerState extends State<NavigationDrawer> {
 
   @override
   Widget build(BuildContext context) {
-    print("Drawer built.");
     return SafeArea(
       child: Drawer(
         child: Material(

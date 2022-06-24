@@ -5,8 +5,6 @@ import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
-import 'package:lets_park/models/notification.dart' as notif;
 import 'package:lets_park/models/notification.dart';
 import 'package:lets_park/models/parking.dart';
 import 'package:lets_park/globals/globals.dart' as globals;
@@ -14,6 +12,19 @@ import 'package:lets_park/models/parking_space.dart';
 import 'package:lets_park/services/world_time_api.dart';
 
 class UserServices {
+  var userParkings = FirebaseFirestore.instance
+      .collection('user-data')
+      .doc(FirebaseAuth.instance.currentUser!.uid)
+      .collection("user-parkings");
+
+  var parkingSpacesDb = FirebaseFirestore.instance.collection('parking-spaces');
+
+  List<Parking> parkings = [];
+
+  DateTime now = DateTime(0, 0, 0, 0, 0);
+
+  List<ParkingSpace> spaces = [];
+
   final Stream checkParkingSessionsStream =
       Stream.periodic(const Duration(milliseconds: 1000), (int count) {
     return count;
@@ -29,11 +40,16 @@ class UserServices {
 
   void startSessionsStream(BuildContext context) {
     _parkingSessionsStreams = checkParkingSessionsStream.listen((event) {
-      distributeParkingSessions(context);
+      if (globals.goCheck) {
+        distributeParkingSessions(context);
+      }
     });
 
-    _ownedParkingSessionsStreams = checkOwnedParkingSessionsStream.listen((event) {
-      checkParkingSessionsOnOwnedSpaces(context);
+    _ownedParkingSessionsStreams =
+        checkOwnedParkingSessionsStream.listen((event) {
+      if (globals.goCheck) {
+        checkParkingSessionsOnOwnedSpaces(context);
+      }
     });
   }
 
@@ -82,18 +98,9 @@ class UserServices {
   }
 
   void distributeParkingSessions(BuildContext context) async {
-    var userParkings = FirebaseFirestore.instance
-        .collection('user-data')
-        .doc(FirebaseAuth.instance.currentUser!.uid)
-        .collection("user-parkings");
-
-    var parkingSessions =
-        FirebaseFirestore.instance.collection('parking-spaces');
-
-    List<Parking> parkings = globals.userData.getUserParkings!;
+    parkings = globals.userData.getUserParkings!;
 
     try {
-      DateTime now = DateTime(0, 0, 0, 0, 0);
       await WorldTimeServices.getDateTimeNow().then((time) {
         now = DateTime(
           time.year,
@@ -104,10 +111,6 @@ class UserServices {
         );
       });
       for (var parking in parkings) {
-        String address = parking.getAddress!;
-        String time = _getFormattedTime(
-            _getDateTimeFromMillisecondEpoch(parking.getArrival!));
-
         if ((_getDateTimeFromMillisecondEpoch(parking.getArrival!)
                         .compareTo(now) ==
                     0 ||
@@ -123,12 +126,9 @@ class UserServices {
             'inProgress': true,
             'upcoming': false,
             'inHistory': false,
-          }).then((_) => showNotice(
-                context,
-                "Your parking in $address at $time has started.",
-              ));
+          });
 
-          await parkingSessions
+          await parkingSpacesDb
               .doc(parking.getParkingSpaceId)
               .collection("parking-sessions")
               .doc(parking.getParkingId)
@@ -147,9 +147,9 @@ class UserServices {
             'inProgress': false,
             'upcoming': true,
             'inHistory': false,
-          }).then((_) => print('Success (Upcoming)'));
+          });
 
-          await parkingSessions
+          await parkingSpacesDb
               .doc(parking.getParkingSpaceId)
               .collection("parking-sessions")
               .doc(parking.getParkingId)
@@ -175,36 +175,46 @@ class UserServices {
             'upcoming': false,
             'inHistory': true,
           }).then((_) {
-            showNotice(
-              context,
-              "Your parking in $address at $time has ended.",
-            );
             UserServices.notifyUser(
+              "NOTIF" +
+                  globals.userData.getUserNotifications!.length.toString(),
               parking.getParkingOwner!,
               UserNotification(
+                "NOTIF" +
+                    globals.userData.getUserNotifications!.length.toString(),
+                parking.getParkingSpaceId!,
                 FirebaseAuth.instance.currentUser!.photoURL!,
                 FirebaseAuth.instance.currentUser!.displayName!,
                 "finished parking in your parking space. Give him a rate now.",
                 false,
                 true,
                 now.millisecondsSinceEpoch,
+                false,
+                false,
               ),
             );
 
             UserServices.notifyUser(
+              "NOTIF" +
+                  globals.userData.getUserNotifications!.length.toString(),
               FirebaseAuth.instance.currentUser!.uid,
               UserNotification(
+                "NOTIF" +
+                    globals.userData.getUserNotifications!.length.toString(),
+                parking.getParkingSpaceId!,
                 FirebaseAuth.instance.currentUser!.photoURL!,
                 FirebaseAuth.instance.currentUser!.displayName!,
                 "How did the parking went? Share your thoughts now.",
                 false,
                 false,
                 now.millisecondsSinceEpoch,
+                false,
+                false,
               ),
             );
           });
 
-          await parkingSessions
+          await parkingSpacesDb
               .doc(parking.getParkingSpaceId)
               .collection("parking-sessions")
               .doc(parking.getParkingId)
@@ -220,157 +230,133 @@ class UserServices {
   }
 
   void checkParkingSessionsOnOwnedSpaces(BuildContext context) async {
-    List<ParkingSpace> spaces = globals.userData.getOwnedParkingSpaces!;
-    //List<Parking> parkingSessions = [];
-    var parkingSpacesDb =
-        FirebaseFirestore.instance.collection('parking-spaces');
+    if (globals.goCheckOwnedSpaces) {
+      spaces = globals.userData.getOwnedParkingSpaces!;
 
-    var userDataDb = FirebaseFirestore.instance.collection('user-data');
+      spaces.forEach((space) async {
+        await parkingSpacesDb
+            .doc(space.getSpaceId)
+            .collection('parking-sessions')
+            .snapshots()
+            .forEach((sessions) {
+          sessions.docs.forEach((session) async {
+            Parking parking = Parking.fromJson(session.data());
 
-    spaces.forEach((space) async {
-      await parkingSpacesDb
-          .doc(space.getSpaceId)
-          .collection('parking-sessions')
-          .snapshots()
-          .forEach((sessions) {
-        sessions.docs.forEach((session) async {
-          Parking parking = Parking.fromJson(session.data());
+            DateTime now = DateTime(0, 0, 0, 0, 0);
+            await WorldTimeServices.getDateTimeNow().then((time) {
+              now = DateTime(
+                time.year,
+                time.month,
+                time.day,
+                time.hour,
+                time.minute,
+              );
+            });
 
-          DateTime now = DateTime(0, 0, 0, 0, 0);
-          await WorldTimeServices.getDateTimeNow().then((time) {
-            now = DateTime(
-              time.year,
-              time.month,
-              time.day,
-              time.hour,
-              time.minute,
-            );
+            if ((_getDateTimeFromMillisecondEpoch(parking.getArrival!)
+                            .compareTo(now) ==
+                        0 ||
+                    _getDateTimeFromMillisecondEpoch(parking.getArrival!)
+                            .compareTo(now) ==
+                        -1) &&
+                (_getDateTimeFromMillisecondEpoch(parking.getDeparture!)
+                        .compareTo(now) ==
+                    1) &&
+                parking.isInProgress == false) {
+              _ownedParkingSessionsStreams.pause();
+              await parkingSpacesDb
+                  .doc(parking.getParkingSpaceId)
+                  .collection("parking-sessions")
+                  .doc(parking.getParkingId)
+                  .update({
+                'inProgress': true,
+                'upcoming': false,
+                'inHistory': false,
+              });
+              _ownedParkingSessionsStreams.resume();
+            } else if ((_getDateTimeFromMillisecondEpoch(parking.getArrival!)
+                            .compareTo(now) ==
+                        -1 &&
+                    (_getDateTimeFromMillisecondEpoch(parking.getDeparture!)
+                                .compareTo(now) ==
+                            0 ||
+                        _getDateTimeFromMillisecondEpoch(parking.getDeparture!)
+                                .compareTo(now) ==
+                            -1)) &&
+                parking.isInHistory == false) {
+              _ownedParkingSessionsStreams.pause();
+              await parkingSpacesDb
+                  .doc(parking.getParkingSpaceId)
+                  .collection("parking-sessions")
+                  .doc(parking.getParkingId)
+                  .update({
+                'inProgress': false,
+                'upcoming': false,
+                'inHistory': true,
+              });
+              _ownedParkingSessionsStreams.resume();
+              UserServices.notifyUser(
+                "NOTIF" +
+                    globals.userData.getUserNotifications!.length.toString(),
+                parking.getParkingOwner!,
+                UserNotification(
+                  "NOTIF" +
+                      globals.userData.getUserNotifications!.length.toString(),
+                  parking.getParkingSpaceId!,
+                  parking.getDriverImage!,
+                  parking.getDriver!,
+                  "finished parking in your parking space. Give him a rate now.",
+                  false,
+                  true,
+                  now.millisecondsSinceEpoch,
+                  false,
+                  false,
+                ),
+              );
+            }
           });
-
-          if ((_getDateTimeFromMillisecondEpoch(parking.getArrival!)
-                          .compareTo(now) ==
-                      0 ||
-                  _getDateTimeFromMillisecondEpoch(parking.getArrival!)
-                          .compareTo(now) ==
-                      -1) &&
-              (_getDateTimeFromMillisecondEpoch(parking.getDeparture!)
-                      .compareTo(now) ==
-                  1) &&
-              parking.isInProgress == false) {
-            _ownedParkingSessionsStreams.pause();
-            await parkingSpacesDb
-                .doc(parking.getParkingSpaceId)
-                .collection("parking-sessions")
-                .doc(parking.getParkingId)
-                .update({
-              'inProgress': true,
-              'upcoming': false,
-              'inHistory': false,
-            });
-            _ownedParkingSessionsStreams.resume();
-            // await userDataDb
-            //     .doc(parking.getDriverId)
-            //     .collection('user-parkings')
-            //     .doc(parking.getParkingId)
-            //     .update({
-            //   'inProgress': true,
-            //   'upcoming': false,
-            //   'inHistory': false,
-            // });
-          } else if ((_getDateTimeFromMillisecondEpoch(parking.getArrival!)
-                          .compareTo(now) ==
-                      -1 &&
-                  (_getDateTimeFromMillisecondEpoch(parking.getDeparture!)
-                              .compareTo(now) ==
-                          0 ||
-                      _getDateTimeFromMillisecondEpoch(parking.getDeparture!)
-                              .compareTo(now) ==
-                          -1)) &&
-              parking.isInHistory == false) {
-            _ownedParkingSessionsStreams.pause();
-            await parkingSpacesDb
-                .doc(parking.getParkingSpaceId)
-                .collection("parking-sessions")
-                .doc(parking.getParkingId)
-                .update({
-              'inProgress': false,
-              'upcoming': false,
-              'inHistory': true,
-            });
-            _ownedParkingSessionsStreams.resume();
-            UserServices.notifyUser(
-              parking.getParkingOwner!,
-              UserNotification(
-                parking.getDriverImage!,
-                parking.getDriver!,
-                "finished parking in your parking space. Give him a rate now.",
-                false,
-                true,
-                now.millisecondsSinceEpoch,
-              ),
-            );
-          }
         });
       });
-    });
-
-    // for (var parking in parkingSessions) {
-    //   // DateTime now = DateTime(0, 0, 0, 0, 0);
-    //   // await WorldTimeServices.getDateTimeNow().then((time) {
-    //   //   now = DateTime(
-    //   //     time.year,
-    //   //     time.month,
-    //   //     time.day,
-    //   //     time.hour,
-    //   //     time.minute,
-    //   //   );
-    //   // });
-
-    //   // if ((_getDateTimeFromMillisecondEpoch(parking.getArrival!)
-    //   //                 .compareTo(now) ==
-    //   //             0 ||
-    //   //         _getDateTimeFromMillisecondEpoch(parking.getArrival!)
-    //   //                 .compareTo(now) ==
-    //   //             -1) &&
-    //   //     (_getDateTimeFromMillisecondEpoch(parking.getDeparture!)
-    //   //             .compareTo(now) ==
-    //   //         1) &&
-    //   //     parking.isInProgress == false) {
-    //   //       print(true);
-    //   //   await parkingSpacesDb
-    //   //       .doc(parking.getParkingSpaceId)
-    //   //       .collection("parking-sessions")
-    //   //       .doc(parking.getParkingId)
-    //   //       .update({
-    //   //     'inProgress': true,
-    //   //     'upcoming': false,
-    //   //     'inHistory': false,
-    //   //   });
-
-    //   //   await userDataDb
-    //   //       .doc(parking.getDriverId)
-    //   //       .collection('user-parkings')
-    //   //       .doc(parking.getParkingId)
-    //   //       .update({
-    //   //     'inProgress': true,
-    //   //     'upcoming': false,
-    //   //     'inHistory': false,
-    //   //   });
-    //   // } else {
-    //   //   print(false);
-    //   // }
-
-    // }
+    }
   }
 
-  static void notifyUser(String userId, UserNotification notif) async {
+  static void notifyUser(
+      String notifId, String userId, UserNotification notif) async {
     final docUser = FirebaseFirestore.instance
         .collection('user-data')
         .doc(userId)
         .collection("notifications")
-        .doc();
+        .doc(notifId);
 
     await docUser.set(notif.toJson());
+  }
+
+  static void updateNotificationStatus(
+    String userId,
+    String notificationId,
+  ) async {
+    await FirebaseFirestore.instance
+        .collection('user-data')
+        .doc(userId)
+        .collection('notifications')
+        .doc(notificationId)
+        .update({
+      'hasRead': true,
+    });
+  }
+
+  static void updateReviewNotificationStatus(
+    String userId,
+    String notificationId,
+  ) async {
+    await FirebaseFirestore.instance
+        .collection('user-data')
+        .doc(userId)
+        .collection('notifications')
+        .doc(notificationId)
+        .update({
+      'hasFinishedReview': true,
+    });
   }
 
   DateTime _getDateTimeFromMillisecondEpoch(int time) {
@@ -385,32 +371,19 @@ class UserServices {
     );
   }
 
-  void showNotice(BuildContext context, String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
-        backgroundColor: Colors.blue,
-        duration: const Duration(seconds: 5),
-      ),
-    );
-  }
-
-  String _getFormattedTime(DateTime time) {
-    String formattedTime = "";
-    DateTime arrival = DateTime(
-      time.year,
-      time.month,
-      time.day,
-    );
-
-    formattedTime += DateFormat('MMM. dd, yyyy ').format(arrival) + "at ";
-    formattedTime += DateFormat("h:mm a").format(time);
-    return formattedTime;
-  }
+  // void showNotice(BuildContext context, String message) {
+  //   ScaffoldMessenger.of(context).showSnackBar(
+  //     SnackBar(
+  //       content: Text(message),
+  //       behavior: SnackBarBehavior.floating,
+  //       shape: RoundedRectangleBorder(
+  //         borderRadius: BorderRadius.circular(12),
+  //       ),
+  //       backgroundColor: Colors.blue,
+  //       duration: const Duration(seconds: 5),
+  //     ),
+  //   );
+  // }
 
   StreamSubscription get getParkingSessionsStream => _parkingSessionsStreams;
 

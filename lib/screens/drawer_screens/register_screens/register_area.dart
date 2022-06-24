@@ -35,7 +35,7 @@ class _RegisterAreaState extends State<RegisterArea> {
       onWillPop: () async {
         await _showDialog(
           imageLink: "assets/icons/marker.png",
-          message: "Are you want to cancel renting out your space?",
+          message: "Do you want to cancel renting out your space?",
           forConfirmation: true,
         );
 
@@ -78,6 +78,8 @@ class _RegisterAreaState extends State<RegisterArea> {
                       .validate()) {
                     globals.parkingSpace.setCapacity =
                         _informationState.currentState!.getCapacity;
+
+                    globals.parkingSpace.setRating = 0;
 
                     globals.parkingSpace.setInfo =
                         _informationState.currentState!.getInfo;

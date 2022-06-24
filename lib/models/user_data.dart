@@ -6,7 +6,7 @@ import 'package:lets_park/models/parking_space.dart';
 
 class UserData {
   String? _id;
-  List<ParkingSpace>? _ownedParkingSpace;
+  List<ParkingSpace>? _ownedParkingSpace = [];
   int? _stars = 0;
   List<Parking>? _userParkings = [];
   List<UserNotification>? _notifications = [];

@@ -53,6 +53,9 @@ dependencies:
   cached_network_image: ^3.2.0
   dotted_border: ^2.0.0+2
   image_picker: ^0.8.4+10
+  flutter_rating_bar: ^4.0.1
+  community_material_icon: ^5.9.55
+  iconsax: ^0.0.8
   firebase_storage: ^10.2.9
   flutter_holo_date_picker: ^1.0.3
   flutter_time_picker_spinner: ^2.0.0
@@ -60,6 +63,7 @@ dependencies:
   date_utils: ^0.2.0
   numberpicker: ^2.1.1
   rxdart: ^0.27.3
+  schedulers: ^0.3.1
   
 dev_dependencies:
   flutter_test:

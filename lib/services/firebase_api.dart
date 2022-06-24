@@ -114,7 +114,7 @@ class FirebaseServices {
     Map<ParkingSpace, double> _map = {};
 
     globals.currentParkingSpaces.forEach((parkingSpace) {
-      _map[parkingSpace] = _calculateDistance(
+      _map[parkingSpace] = calculateDistance(
         userLocation.latitude,
         userLocation.longitude,
         parkingSpace.getLatLng!.latitude,
@@ -135,7 +135,7 @@ class FirebaseServices {
     return _nearbyParkings;
   }
 
-  double _calculateDistance(lat1, lon1, lat2, lon2) {
+  static double calculateDistance(lat1, lon1, lat2, lon2) {
     var p = 0.017453292519943295;
     var c = cos;
     var a = 0.5 -

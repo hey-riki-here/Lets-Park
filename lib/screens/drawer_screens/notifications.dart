@@ -1,8 +1,13 @@
+// ignore_for_file: avoid_function_literals_in_foreach_calls
+
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:lets_park/globals/globals.dart' as globals;
 import 'package:lets_park/models/notification.dart';
+import 'package:lets_park/screens/popups/notice_dialog.dart';
+import 'package:lets_park/screens/popups/review_parking_area.dart';
 import 'package:lets_park/services/user_services.dart';
 import 'package:lets_park/shared/navigation_drawer.dart';
 import 'package:lets_park/shared/shared_widgets.dart';
@@ -33,11 +38,13 @@ class _NotificationsState extends State<Notifications> {
         },
       ),
       drawer: NavigationDrawer(currentPage: widget._pageId),
+      backgroundColor: Colors.grey.shade100,
       body: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
           stream: _userServices.getUserNotifications(),
           builder: (context, snapshot) {
             if (snapshot.hasData) {
               List<UserNotification> newNotifications = [];
+
               snapshot.data!.docs.forEach((element) {
                 newNotifications.add(UserNotification.fromJson(element.data()));
               });
@@ -57,9 +64,41 @@ class _NotificationsState extends State<Notifications> {
                 return InkWell(
                   splashColor: Colors.blue.shade100,
                   highlightColor: Colors.blue.shade100,
-                  onTap: () {},
+                  onTap: () async {
+                    if (notifications[index].isFinishedReviewing!) {
+                      showDialog(
+                        context: context,
+                        barrierDismissible: false,
+                        builder: (context) => WillPopScope(
+                          onWillPop: () async => false,
+                          child: const NoticeDialog(
+                            imageLink: "assets/logo/lets-park-logo.png",
+                            message: "You have already responded.",
+                            forLoading: false,
+                          ),
+                        ),
+                      );
+                    } else {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          fullscreenDialog: true,
+                          builder: (context) => ReviewParkingArea(
+                            spaceId: notifications[index].getParkingSpaceId!,
+                            notificationId: notifications[index].getNotificationId!,
+                          ),
+                        ),
+                      );
+                      UserServices.updateNotificationStatus(
+                        FirebaseAuth.instance.currentUser!.uid,
+                        notifications[index].getNotificationId!,
+                      );
+                    }
+                  },
                   child: Ink(
-                    color: Colors.blue.shade50,
+                    color: notifications[index].isNotifRead!
+                        ? Colors.grey.shade100
+                        : Colors.blue.shade50,
                     child: Padding(
                       padding: const EdgeInsets.all(8.0),
                       child: Row(
@@ -170,4 +209,21 @@ class _NotificationsState extends State<Notifications> {
       DateTime.now().day,
     );
   }
+}
+
+class NotificationWithId {
+  String? _id;
+  UserNotification? _userNotif;
+
+  NotificationWithId(
+    String? id,
+    UserNotification? userNotif,
+  ) {
+    _id = id;
+    _userNotif = userNotif;
+  }
+
+  String? get getNotificationId => _id;
+
+  UserNotification? get getUserNotification => _userNotif;
 }

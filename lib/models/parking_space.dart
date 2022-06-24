@@ -1,5 +1,4 @@
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:lets_park/models/parking.dart';
 
 class ParkingSpace {
   String? _id;
@@ -8,32 +7,35 @@ class ParkingSpace {
   String? _address;
   LatLng? _latLng;
   int? _capacity;
+  double? _rating;
   String? _info;
   double? _verticalClearance;
   String? _type;
   List<String>? _features = [];
   bool? _isFull;
-  List<Parking>? _parkingSessions = [];
 
   ParkingSpace();
 
   ParkingSpace.fromDatabase(
-      String? id,
-      String? ownerId,
-      String? imageUrl,
-      String? address,
-      List geoposition,
-      int? capacity,
-      String? info,
-      double? verticalClearance,
-      String? type,
-      List<String>? features) {
+    String? id,
+    String? ownerId,
+    String? imageUrl,
+    String? address,
+    List geoposition,
+    int? capacity,
+    double? rating,
+    String? info,
+    double? verticalClearance,
+    String? type,
+    List<String>? features,
+  ) {
     _id = id;
     _ownerId = ownerId;
     _imageUrl = imageUrl;
     _address = address;
     _latLng = LatLng(geoposition[0], geoposition[1]);
     _capacity = capacity;
+    _rating = rating;
     _info = info;
     _verticalClearance = verticalClearance;
     _type = type;
@@ -76,6 +78,12 @@ class ParkingSpace {
     _capacity = capacity;
   }
 
+  double? get getRating => _rating;
+
+  set setRating(double? rating) {
+    _rating = rating;
+  }
+
   String? get getInfo => _info;
 
   set setInfo(String? info) {
@@ -106,15 +114,9 @@ class ParkingSpace {
     _isFull = isFull;
   }
 
-  List<Parking>? get getParkingSessions => _parkingSessions;
-
-  set setParkingSessions(List<Parking>? parkingSessions) {
-    _parkingSessions = parkingSessions;
-  }
-
   @override
   String toString() {
-    return "ParkingSpace [ $_ownerId , $_imageUrl , $_address, $_latLng , $_capacity , $_info , $_verticalClearance, $_type , $_features, $_isFull, $_parkingSessions]";
+    return "ParkingSpace [ $_ownerId , $_imageUrl , $_address, $_latLng , $_capacity , $_rating , $_info , $_verticalClearance, $_type , $_features, $_isFull]";
   }
 
   Map<String, dynamic> toJson() => {
@@ -124,6 +126,7 @@ class ParkingSpace {
         'address': _address,
         'geoposition': [_latLng!.latitude, _latLng!.longitude],
         'capacity': _capacity,
+        'rating': _rating,
         'info': _info,
         'verticalClearance': _verticalClearance,
         'type': _type,
@@ -142,6 +145,7 @@ class ParkingSpace {
       json['address'],
       json['geoposition'],
       json['capacity'],
+      json['rating'],
       json['info'],
       json['verticalClearance'],
       json['type'],

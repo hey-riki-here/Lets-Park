@@ -3,9 +3,12 @@
 import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:lets_park/globals/globals.dart' as globals;
+import 'package:flutter/material.dart';
+import 'package:lets_park/main.dart';
 import 'package:lets_park/models/parking.dart';
 import 'package:lets_park/models/parking_space.dart';
+import 'package:lets_park/models/review.dart';
+import 'package:lets_park/screens/popups/notice_dialog.dart';
 
 class ParkingSpaceServices {
   static void updateParkingSpaceData(
@@ -99,5 +102,97 @@ class ParkingSpaceServices {
     );
 
     return dateTime;
+  }
+
+  static void updateParkingReviews(
+    String spaceId,
+    Review review,
+  ) async {
+    final docUser = FirebaseFirestore.instance
+        .collection('parking-spaces')
+        .doc(spaceId)
+        .collection("parking-reviews")
+        .doc();
+
+    await docUser.set(review.toJson());
+  }
+
+  static Stream<QuerySnapshot<Map<String, dynamic>>> getParkingSpaceReviews(
+      String spaceId) {
+    return FirebaseFirestore.instance
+        .collection('parking-spaces')
+        .doc(spaceId)
+        .collection('parking-reviews')
+        .snapshots();
+  }
+
+  static void updateParkingSpaceRating(
+    String spaceId,
+    double newRating,
+    BuildContext context,
+  ) async {
+    int reviewsLength = 0;
+    final Map<double, double> rates = {
+      1: 0,
+      2: 0,
+      3: 0,
+      4: 0,
+      5: 0,
+    };
+    double value = 0;
+    var reviews = FirebaseFirestore.instance
+        .collection('parking-spaces')
+        .doc(spaceId)
+        .collection('parking-reviews')
+        .snapshots();
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => WillPopScope(
+        onWillPop: () async => false,
+        child: const NoticeDialog(
+          imageLink: "assets/logo/lets-park-logo.png",
+          message: "Saving review...",
+          forLoading: true,
+        ),
+      ),
+    );
+    await reviews.forEach((documents) async {
+      reviewsLength = documents.size;
+      documents.docs.forEach((element) {
+        value = rates[element.data()["rating"]]!;
+        rates[element.data()["rating"]] = value + 1;
+      });
+      value = rates[newRating]!;
+      rates[newRating] = value + 1;
+      double newSpaceRating = ((1 * rates[1]!) +
+              (2 * rates[2]!) +
+              (3 * rates[3]!) +
+              (4 * rates[4]!) +
+              (5 * rates[5]!)) /
+          (reviewsLength + 1);
+
+      await FirebaseFirestore.instance
+          .collection('parking-spaces')
+          .doc(spaceId)
+          .update({
+        'rating': newSpaceRating,
+      });
+      navigatorKey.currentState!.popUntil((route) => route.isFirst);
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => WillPopScope(
+          onWillPop: () async => false,
+          child: const NoticeDialog(
+            imageLink: "assets/logo/lets-park-logo.png",
+            message:
+                "Thanks for reviewing!\nYour review will help others to choose a better parking.",
+            forLoading: false,
+          ),
+        ),
+      );
+    });
   }
 }
