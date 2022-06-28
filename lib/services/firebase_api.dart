@@ -135,6 +135,30 @@ class FirebaseServices {
     return _nearbyParkings;
   }
 
+  static List<ParkingSpace> getHighestRatedParkings() {
+    List<ParkingSpace> firstFiveHighestRating = globals.currentParkingSpaces;
+
+    firstFiveHighestRating.sort((spaceA, spaceB) {
+      double timeA = spaceA.getRating!;
+      double timeB = spaceB.getRating!;
+      return timeB.compareTo(timeA);
+    });
+
+    return firstFiveHighestRating;
+  }
+
+  static List<ParkingSpace> getSecuredParkingSpaces() {
+    List<ParkingSpace> securedParkingSpaces = [];
+
+    globals.currentParkingSpaces.forEach((space) {
+      if (space.getFeatures!.contains("CCTV")) {
+        securedParkingSpaces.add(space);
+      }
+    });
+
+    return securedParkingSpaces;
+  }
+
   static double calculateDistance(lat1, lon1, lat2, lon2) {
     var p = 0.017453292519943295;
     var c = cos;

@@ -1,6 +1,7 @@
 // ignore_for_file: avoid_function_literals_in_foreach_calls
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:community_material_icon/community_material_icon.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -11,6 +12,7 @@ import 'package:lets_park/models/parking_space.dart';
 import 'package:lets_park/screens/logged_in_screens/google_map_screen.dart';
 import 'package:lets_park/services/firebase_api.dart';
 import 'package:lets_park/services/user_services.dart';
+import 'package:lets_park/services/parking_space_services.dart';
 import 'package:lets_park/shared/navigation_drawer.dart';
 import 'package:location/location.dart';
 import 'package:geolocator/geolocator.dart' as geolocator;
@@ -45,7 +47,7 @@ class _HomeState extends State<Home> {
   @override
   void dispose() {
     _userServices.getParkingSessionsStream.cancel();
-     _userServices.getOwnedParkingSessionsStream.cancel();
+    _userServices.getOwnedParkingSessionsStream.cancel();
     super.dispose();
   }
 
@@ -207,7 +209,10 @@ class FilterButtons extends StatefulWidget {
 }
 
 class _FilterButtonsState extends State<FilterButtons> {
-  bool canShowModal = true;
+  bool nearbyCanShowModal = true;
+  bool highestRatingCanShowModal = true;
+  bool securedCanShowModal = true;
+  bool monthlyCanShowModal = true;
   @override
   Widget build(BuildContext context) {
     FirebaseServices _firebaseServices = FirebaseServices();
@@ -217,8 +222,9 @@ class _FilterButtonsState extends State<FilterButtons> {
       children: [
         _buildCategory(
           label: "Nearby",
-          width: 80,
+          width: 75,
           context: context,
+          canShowModal: nearbyCanShowModal,
           onTap: () async {
             Location location = Location();
 
@@ -231,9 +237,9 @@ class _FilterButtonsState extends State<FilterButtons> {
                 return;
               }
             } else {
-              if (canShowModal == true) {
+              if (nearbyCanShowModal == true) {
                 setState(() {
-                  canShowModal = false;
+                  nearbyCanShowModal = false;
                 });
                 var position = await geolocator.Geolocator().getCurrentPosition(
                     desiredAccuracy: geolocator.LocationAccuracy.high);
@@ -245,7 +251,7 @@ class _FilterButtonsState extends State<FilterButtons> {
                   ),
                 );
                 setState(() {
-                  canShowModal = true;
+                  nearbyCanShowModal = true;
                 });
                 await showModalBottomSheet<void>(
                   barrierColor: const Color.fromARGB(0, 0, 0, 0),
@@ -256,7 +262,7 @@ class _FilterButtonsState extends State<FilterButtons> {
                   ),
                   builder: (BuildContext context) {
                     return Container(
-                      height: 350,
+                      height: 370,
                       padding: const EdgeInsets.all(8),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -294,6 +300,7 @@ class _FilterButtonsState extends State<FilterButtons> {
                                   distance: getDistance(
                                     nearbySpaces.values.elementAt(index),
                                   ),
+                                  forNearby: true,
                                 );
                               },
                             ),
@@ -309,20 +316,53 @@ class _FilterButtonsState extends State<FilterButtons> {
         ),
         _buildCategory(
           label: "Highest Rating",
-          width: 100,
+          width: 115,
           context: context,
-          onTap: () {},
+          canShowModal: highestRatingCanShowModal,
+          onTap: () async {
+            if (highestRatingCanShowModal == true) {
+              setState(() {
+                highestRatingCanShowModal = false;
+              });
+              List<ParkingSpace> topFive =
+                  FirebaseServices.getHighestRatedParkings();
+              setState(() {
+                highestRatingCanShowModal = true;
+              });
+              _showContentOnFilterTap(
+                title: "Top highest rated parkings",
+                spaces: topFive,
+              );
+            }
+          },
         ),
         _buildCategory(
           label: "Secured",
           width: 80,
           context: context,
-          onTap: () {},
+          canShowModal: securedCanShowModal,
+          onTap: () {
+            if (securedCanShowModal == true) {
+              setState(() {
+                securedCanShowModal = false;
+              });
+
+              _showContentOnFilterTap(
+                title: "Secure parking spaces",
+                spaces: FirebaseServices.getSecuredParkingSpaces(),
+              );
+
+              setState(() {
+                securedCanShowModal = true;
+              });
+            }
+          },
         ),
         _buildCategory(
           label: "Monthly",
           width: 80,
           context: context,
+          canShowModal: monthlyCanShowModal,
           onTap: () {},
         ),
       ],
@@ -334,53 +374,114 @@ class _FilterButtonsState extends State<FilterButtons> {
     required double width,
     required BuildContext context,
     required VoidCallback onTap,
+    required bool canShowModal,
   }) {
     return Material(
       borderRadius: const BorderRadius.all(Radius.circular(15)),
       elevation: 2,
       child: InkWell(
         borderRadius: BorderRadius.circular(15),
-        onTap: canShowModal == false && label.compareTo("Nearby") == 0
-            ? null
-            : onTap,
+        onTap: canShowModal == false ? null : onTap,
         child: Ink(
           height: 25,
           width: width,
-          child: label.compareTo("Nearby") == 0
+          child: canShowModal == true
               ? Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Center(
-                      child: Text(
-                        label,
-                        style: const TextStyle(
-                          fontWeight: FontWeight.w500,
-                        ),
+                    Text(
+                      label,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                )
+              : Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      label,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w500,
                       ),
                     ),
                     const SizedBox(width: 10),
-                    canShowModal == false
-                        ? const SizedBox(
-                            width: 15,
-                            height: 15,
-                            child: CircularProgressIndicator(
-                              color: Colors.grey,
-                              strokeWidth: 2,
-                            ),
-                          )
-                        : Container(),
-                  ],
-                )
-              : Center(
-                  child: Text(
-                    label,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.w500,
+                    const SizedBox(
+                      width: 15,
+                      height: 15,
+                      child: CircularProgressIndicator(
+                        color: Colors.grey,
+                        strokeWidth: 2,
+                      ),
                     ),
-                  ),
+                  ],
                 ),
         ),
       ),
+    );
+  }
+
+  void _showContentOnFilterTap({
+    required String title,
+    required List<ParkingSpace> spaces,
+  }) async {
+    await showModalBottomSheet<void>(
+      barrierColor: const Color.fromARGB(0, 0, 0, 0),
+      elevation: 50,
+      context: context,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+      ),
+      builder: (BuildContext context) {
+        return Container(
+          height: 350,
+          padding: const EdgeInsets.all(8),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Center(
+                child: Icon(
+                  Icons.drag_handle_rounded,
+                  color: Colors.grey,
+                  size: 30,
+                ),
+              ),
+              Text(
+                title,
+                style: const TextStyle(
+                  fontSize: 23,
+                ),
+              ),
+              const SizedBox(
+                height: 20,
+              ),
+              const Text(
+                "Click on the parking space to focus it on the map",
+                style: TextStyle(
+                  color: Colors.grey,
+                ),
+              ),
+              Expanded(
+                child: ListView.builder(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: spaces.length,
+                  itemBuilder: (context, index) {
+                    return NearbyParkingCard(
+                      space: spaces[index],
+                      gMapKey: widget.gMapKey,
+                      distance: getDistance(
+                        0.0,
+                      ),
+                      forNearby: false,
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 
@@ -399,97 +500,149 @@ class _FilterButtonsState extends State<FilterButtons> {
 class NearbyParkingCard extends StatelessWidget {
   final ParkingSpace space;
   final String distance;
+  final bool forNearby;
   final GlobalKey<GoogleMapScreenState> gMapKey;
   const NearbyParkingCard({
     Key? key,
     required this.space,
     required this.gMapKey,
     required this.distance,
+    required this.forNearby,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      elevation: 5,
-      child: InkWell(
-        onTap: () {
-          gMapKey.currentState!.focusMapOnLocation(space.getLatLng!);
-        },
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(8),
-                child: SizedBox(
-                  width: 150,
-                  height: 100,
-                  child: Image.network(
-                    space.getImageUrl!,
-                    fit: BoxFit.fill,
+    return SizedBox(
+      width: 165,
+      child: Card(
+        elevation: 5,
+        child: InkWell(
+          onTap: () {
+            gMapKey.currentState!.focusMapOnLocation(space.getLatLng!);
+          },
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: SizedBox(
+                    width: 150,
+                    height: 100,
+                    child: Image.network(
+                      space.getImageUrl!,
+                      fit: BoxFit.fill,
+                    ),
                   ),
                 ),
               ),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8),
-              child: Row(
-                children: [
-                  Icon(
-                    Icons.star,
-                    color: Colors.yellow.shade600,
-                    size: 17,
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                child: Text(
+                  space.getAddress!,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    color: Colors.black45,
                   ),
-                  Icon(
-                    Icons.star,
-                    color: Colors.yellow.shade600,
-                    size: 17,
-                  ),
-                  Icon(
-                    Icons.star,
-                    color: Colors.yellow.shade600,
-                    size: 17,
-                  ),
-                  Icon(
-                    Icons.star,
-                    color: Colors.yellow.shade600,
-                    size: 17,
-                  ),
-                  Icon(
-                    Icons.star,
-                    color: Colors.yellow.shade600,
-                    size: 17,
-                  ),
-                ],
+                ),
               ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(8),
-              child: getFeatures(space.getFeatures!),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Text(
-                "About " + distance,
-                style: const TextStyle(fontSize: 16, color: Colors.black87),
+              Center(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 0),
+                  child: ParkingSpaceServices.getStars(space.getRating!),
+                ),
               ),
-            ),
-          ],
+              Padding(
+                padding: const EdgeInsets.all(8),
+                child: getFeatures(space.getFeatures!),
+              ),
+              forNearby
+                  ? Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Text(
+                        "About " + distance,
+                        style: const TextStyle(
+                            fontSize: 16, color: Colors.black87),
+                      ),
+                    )
+                  : const SizedBox(),
+            ],
+          ),
         ),
       ),
     );
   }
 
-  Widget getFeatures(List<String> features) {
-    String featuresList = "";
-    for (String feature in features) {
-      featuresList += "-" + feature + "\n";
-    }
+  Column getFeatures(List<String> features) {
+    List<Widget> newChildren = [];
 
-    return Text(
-      featuresList,
-      style: const TextStyle(color: Colors.black54),
+    for (String feature in features) {
+      if (feature.compareTo("With gate") == 0) {
+        newChildren.add(
+          Row(
+            children: [
+              const Icon(
+                CommunityMaterialIcons.gate,
+                color: Colors.blue,
+                size: 15,
+              ),
+              const SizedBox(width: 12),
+              Text(
+                feature,
+                style: const TextStyle(
+                  fontSize: 14,
+                ),
+              ),
+              const SizedBox(width: 15),
+            ],
+          ),
+        );
+      } else if (feature.compareTo("CCTV") == 0) {
+        newChildren.add(
+          Row(
+            children: [
+              const Icon(
+                CommunityMaterialIcons.cctv,
+                color: Colors.blue,
+                size: 15,
+              ),
+              const SizedBox(width: 12),
+              Text(
+                feature,
+                style: const TextStyle(
+                  fontSize: 14,
+                ),
+              ),
+              const SizedBox(width: 15),
+            ],
+          ),
+        );
+      } else {
+        newChildren.add(
+          Row(
+            children: [
+              const Icon(
+                CommunityMaterialIcons.bus_stop_covered,
+                color: Colors.blue,
+                size: 15,
+              ),
+              const SizedBox(width: 12),
+              Text(
+                feature,
+                style: const TextStyle(
+                  fontSize: 14,
+                ),
+              ),
+            ],
+          ),
+        );
+      }
+    }
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: newChildren,
     );
   }
 }

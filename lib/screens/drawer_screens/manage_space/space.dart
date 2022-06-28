@@ -115,7 +115,7 @@ class _SpaceState extends State<Space> {
                                       ),
                                     ),
                                     const TextSpan(
-                                      text: " available slot/s out of ",
+                                      text: " available slot(s) out of ",
                                       style: TextStyle(
                                         height: 2,
                                         color: Colors.black,
@@ -130,7 +130,7 @@ class _SpaceState extends State<Space> {
                                       ),
                                     ),
                                     const TextSpan(
-                                      text: " slot/s",
+                                      text: " slot(s)",
                                       style: TextStyle(
                                         height: 2,
                                         color: Colors.black,

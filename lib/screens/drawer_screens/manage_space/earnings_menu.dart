@@ -56,92 +56,93 @@ class _SpaceCardState extends State<SpaceCard> {
     double earnings = 0;
 
     return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-        stream: ParkingSpaceServices.getParkingSessionsDocs(
-          space.getSpaceId!,
-        ),
-        builder: (context, snapshot) {
+      stream: ParkingSpaceServices.getParkingSessionsDocs(
+        space.getSpaceId!,
+      ),
+      builder: (context, snapshot) {
+        if (snapshot.hasData) {
           if (snapshot.hasData) {
-            if (snapshot.hasData) {
-              earnings = 0;
-              snapshot.data!.docs.forEach((parking) {
-                earnings += parking.data()["price"];
-              });
-            }
+            earnings = 0;
+            snapshot.data!.docs.forEach((parking) {
+              earnings += parking.data()["price"];
+            });
           }
+        }
 
-          return Card(
-            shape: const RoundedRectangleBorder(
-              borderRadius: BorderRadius.all(
-                Radius.circular(12),
-              ),
+        return Card(
+          shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.all(
+              Radius.circular(12),
             ),
-            elevation: 3,
-            child: InkWell(
-              borderRadius: BorderRadius.circular(12),
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => SpaceEarnings(
-                      space: space,
-                      index: index,
-                    ),
+          ),
+          elevation: 3,
+          child: InkWell(
+            borderRadius: BorderRadius.circular(12),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => SpaceEarnings(
+                    space: space,
+                    index: index,
                   ),
-                );
-              },
-              child: Padding(
-                padding: const EdgeInsets.all(12.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Image.asset(
-                          "assets/icons/parking-marker.png",
-                          scale: 2.7,
-                        ),
-                        const SizedBox(width: 5),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              "Space $index",
-                              style: const TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                            const SizedBox(height: 5),
-                            RichText(
-                              text: TextSpan(
-                                children: <TextSpan>[
-                                  const TextSpan(
-                                    text: "Total Earnings: ",
-                                    style: TextStyle(
-                                      fontSize: 11,
-                                      color: Colors.black,
-                                    ),
-                                  ),
-                                  TextSpan(
-                                    text: "P $earnings",
-                                    style: const TextStyle(
-                                      color: Colors.black,
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ],
                 ),
+              );
+            },
+            child: Padding(
+              padding: const EdgeInsets.all(12.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Image.asset(
+                        "assets/icons/parking-marker.png",
+                        scale: 2.7,
+                      ),
+                      const SizedBox(width: 5),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            "Space $index",
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          const SizedBox(height: 5),
+                          RichText(
+                            text: TextSpan(
+                              children: <TextSpan>[
+                                const TextSpan(
+                                  text: "Total Earnings: ",
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    color: Colors.black,
+                                  ),
+                                ),
+                                TextSpan(
+                                  text: "P $earnings",
+                                  style: const TextStyle(
+                                    color: Colors.black,
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ],
               ),
             ),
-          );
-        });
+          ),
+        );
+      },
+    );
   }
 }

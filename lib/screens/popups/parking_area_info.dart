@@ -9,6 +9,7 @@ import 'package:lets_park/screens/popups/checkout.dart';
 import 'package:lets_park/services/firebase_api.dart';
 import 'package:lets_park/services/parking_space_services.dart';
 import 'package:geolocator/geolocator.dart' as geolocator;
+import 'package:location/location.dart';
 
 class ParkingAreaInfo extends StatefulWidget {
   final ParkingSpace parkingSpace;
@@ -21,7 +22,7 @@ class ParkingAreaInfo extends StatefulWidget {
 
 class _ParkingAreaInfoState extends State<ParkingAreaInfo> {
   String destinationDistance = "";
-
+  bool isLocationEnabled = false;
   @override
   void initState() {
     toDestination();
@@ -47,7 +48,7 @@ class _ParkingAreaInfoState extends State<ParkingAreaInfo> {
           bottom: PreferredSize(
             child: Container(
               color: Colors.white,
-              height: 350,
+              height: 365,
               width: double.infinity,
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -60,9 +61,13 @@ class _ParkingAreaInfoState extends State<ParkingAreaInfo> {
                       address: widget.parkingSpace.getAddress!,
                       type: widget.parkingSpace.getType!,
                       stars: widget.parkingSpace.getRating!,
+                      isLocationEnabled: isLocationEnabled,
                     ),
                   ),
-                  PriceAndDistance(distance: destinationDistance),
+                  PriceAndDistance(
+                    distance: destinationDistance,
+                    isLocationEnabled: isLocationEnabled,
+                  ),
                   const TabBar(
                     labelColor: Colors.black,
                     indicatorColor: Colors.black,
@@ -89,7 +94,7 @@ class _ParkingAreaInfoState extends State<ParkingAreaInfo> {
                 ],
               ),
             ),
-            preferredSize: const Size.fromHeight(350),
+            preferredSize: const Size.fromHeight(365),
           ),
         ),
         body: InfoAndReviews(
@@ -135,18 +140,30 @@ class _ParkingAreaInfoState extends State<ParkingAreaInfo> {
   }
 
   void toDestination() async {
-    var position = await geolocator.Geolocator()
-        .getCurrentPosition(desiredAccuracy: geolocator.LocationAccuracy.high);
+    if (mounted) {
+      Location location = Location();
 
-    double distance = FirebaseServices.calculateDistance(
-      position.latitude,
-      position.longitude,
-      widget.parkingSpace.getLatLng!.latitude,
-      widget.parkingSpace.getLatLng!.longitude,
-    );
-    setState(() {
-      destinationDistance = getDistance(distance);
-    });
+      bool _serviceEnabled;
+      _serviceEnabled = await location.serviceEnabled();
+      if (_serviceEnabled) {
+        setState(() {
+          isLocationEnabled = true;
+        });
+      }
+      var position = await geolocator.Geolocator().getCurrentPosition(
+          desiredAccuracy: geolocator.LocationAccuracy.high);
+
+      double distance = FirebaseServices.calculateDistance(
+        position.latitude,
+        position.longitude,
+        widget.parkingSpace.getLatLng!.latitude,
+        widget.parkingSpace.getLatLng!.longitude,
+      );
+      setState(() {
+        destinationDistance = getDistance(distance);
+        isLocationEnabled = true;
+      });
+    }
   }
 
   String getDistance(double distance) {
@@ -166,12 +183,14 @@ class Header extends StatelessWidget {
   final String address;
   final String type;
   final double stars;
+  final bool isLocationEnabled;
   const Header({
     Key? key,
     required this.imageUrl,
     required this.address,
     required this.type,
     required this.stars,
+    required this.isLocationEnabled,
   }) : super(key: key);
 
   @override
@@ -186,7 +205,7 @@ class Header extends StatelessWidget {
             fontWeight: FontWeight.w400,
           ),
         ),
-        getStars(stars),
+        ParkingSpaceServices.getStars(stars),
         Text(
           type,
           style: const TextStyle(
@@ -211,37 +230,38 @@ class Header extends StatelessWidget {
             ),
           ),
         ),
+        const SizedBox(height: 10),
+        !isLocationEnabled
+            ? Row(
+                children: [
+                  Icon(
+                    Icons.warning_rounded,
+                    size: 20,
+                    color: Colors.amber[700],
+                  ),
+                  const SizedBox(width: 10),
+                  const Text(
+                    "Please turn on location service to calculate estimated distance",
+                    style: TextStyle(
+                      color: Colors.black54,
+                    ),
+                  ),
+                ],
+              )
+            : const Text(""),
       ],
     );
-  }
-
-  Row getStars(double stars) {
-
-    List<Widget> newChildren = [];
-    double length = stars;
-    Color? color = Colors.amber;
-
-    if (stars == 0) {
-      length = 5;
-      color = Colors.grey[400];
-    }
-
-    for (int i = 0; i < length.toInt(); i++) {
-      newChildren.add(
-        Icon(
-          Icons.star_rounded,
-          color: color,
-          size: 16,
-        ),
-      );
-    }
-    return Row(children: newChildren);
   }
 }
 
 class PriceAndDistance extends StatelessWidget {
   final String distance;
-  const PriceAndDistance({Key? key, required this.distance}) : super(key: key);
+  final bool isLocationEnabled;
+  const PriceAndDistance({
+    Key? key,
+    required this.distance,
+    required this.isLocationEnabled,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -273,27 +293,42 @@ class PriceAndDistance extends StatelessWidget {
                 width: 1,
                 height: 30,
               ),
-              distance.isEmpty
-                  ? SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(
-                        color: Colors.grey.shade500,
-                        strokeWidth: 3,
-                      ),
-                    )
-                  : Column(
+              !isLocationEnabled
+                  ? Column(
                       children: [
-                        Text(
-                          "About $distance",
-                          style: const TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
+                        Icon(
+                          Icons.location_off_rounded,
+                          color: Colors.red[300],
                         ),
-                        const Text("To Destination"),
+                        const Text("Location service disabled."),
                       ],
-                    ),
+                    )
+                  : distance.isNotEmpty
+                      ? Column(
+                          children: [
+                            Text(
+                              "About $distance",
+                              style: const TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            const Text("To Destination"),
+                          ],
+                        )
+                      : Column(
+                          children: [
+                            SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(
+                                color: Colors.grey.shade500,
+                                strokeWidth: 3,
+                              ),
+                            ),
+                            const Text("Calculating distance"),
+                          ],
+                        ),
             ],
           ),
         ],
@@ -465,7 +500,9 @@ class InfoAndReviews extends StatelessWidget {
                                 ],
                               ),
                               const SizedBox(height: 15),
-                              getStars(reviews[index].getRating!.toInt()),
+                              ParkingSpaceServices.getStars(
+                                reviews[index].getRating!,
+                              ),
                               const SizedBox(height: 10),
                               Text(reviews[index].getReview!),
                               const Center(
@@ -551,21 +588,6 @@ class InfoAndReviews extends StatelessWidget {
           ),
         );
       }
-    }
-    return Row(children: newChildren);
-  }
-
-  Row getStars(int stars) {
-    List<Widget> newChildren = [];
-
-    for (int i = 0; i < stars; i++) {
-      newChildren.add(
-        const Icon(
-          Icons.star,
-          color: Colors.amber,
-          size: 16,
-        ),
-      );
     }
     return Row(children: newChildren);
   }

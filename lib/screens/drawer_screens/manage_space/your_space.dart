@@ -59,149 +59,148 @@ class ParkingCard extends StatelessWidget {
     int availableSlot = 0;
 
     return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-        stream: ParkingSpaceServices.getParkingSessionsDocs(parkingSpace.getSpaceId!),
-        builder: (context, snapshot) {
+      stream:
+          ParkingSpaceServices.getParkingSessionsDocs(parkingSpace.getSpaceId!),
+      builder: (context, snapshot) {
+        if (snapshot.hasData) {
           if (snapshot.hasData) {
-            if (snapshot.hasData) {
-              int occupied = 0;
-              snapshot.data!.docs.forEach((parking) {
-                if (parking.data()["inProgress"] == true) {
-                  occupied++;
-                }
-              });
-              availableSlot = capacity - occupied;
-            }
+            int occupied = 0;
+            snapshot.data!.docs.forEach((parking) {
+              if (parking.data()["inProgress"] == true) {
+                occupied++;
+              }
+            });
+            availableSlot = capacity - occupied;
           }
+        }
 
-          return Card(
-            shape: const RoundedRectangleBorder(
-              borderRadius: BorderRadius.all(
-                Radius.circular(12),
-              ),
+        return Card(
+          shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.all(
+              Radius.circular(12),
             ),
-            elevation: 3,
-            child: InkWell(
-              borderRadius: BorderRadius.circular(12),
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => Space(
-                      space: parkingSpace,
-                      title: title,
-                    ),
+          ),
+          elevation: 3,
+          child: InkWell(
+            borderRadius: BorderRadius.circular(12),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => Space(
+                    space: parkingSpace,
+                    title: title,
                   ),
-                );
-              },
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          "Space " + title,
-                          style: const TextStyle(
-                            fontSize: 21,
-                            fontWeight: FontWeight.w600,
+                ),
+              );
+            },
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            "Space " + title,
+                            style: const TextStyle(
+                              fontSize: 17,
+                              fontWeight: FontWeight.w600,
+                            ),
                           ),
-                        ),
-                        buildTag("Active", Colors.green),
-                      ],
-                    ),
-                    const SizedBox(height: 7),
-                    Text(
-                      parkingSpace.getAddress!,
-                      style: const TextStyle(
-                        fontSize: 18,
-                        color: Colors.grey,
+                        ],
                       ),
-                    ),
-                    const SizedBox(height: 7),
-                    Row(
-                      children: [
-                        Icon(
-                          Icons.star,
-                          color: Colors.yellow.shade600,
-                          size: 17,
-                        ),
-                        Icon(
-                          Icons.star,
-                          color: Colors.yellow.shade600,
-                          size: 17,
-                        ),
-                        Icon(
-                          Icons.star,
-                          color: Colors.yellow.shade600,
-                          size: 17,
-                        ),
-                        Icon(
-                          Icons.star,
-                          color: Colors.yellow.shade600,
-                          size: 17,
-                        ),
-                        Icon(
-                          Icons.star,
-                          color: Colors.yellow.shade600,
-                          size: 17,
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 10),
-                    Row(
-                      children: [
-                        const Text(
-                          "Available slots:",
-                          style: TextStyle(
-                            fontSize: 21,
-                            fontWeight: FontWeight.w600,
+                      const SizedBox(height: 7),
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.location_on,
+                            color: Colors.red[400],
+                            size: 17,
+                          ),
+                          Text(
+                            parkingSpace.getAddress!,
+                            style: const TextStyle(
+                              fontSize: 16,
+                              color: Colors.grey,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 7),
+                      ParkingSpaceServices.getStars(parkingSpace.getRating!),
+                      const SizedBox(height: 10),
+                      Row(
+                        children: [
+                          const Text(
+                            "Available slots:",
+                            style: TextStyle(
+                              fontSize: 17,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          const SizedBox(width: 5),
+                          Text(
+                            "$availableSlot/$capacity",
+                            style: const TextStyle(
+                              fontSize: 17,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.blue,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                  Column(
+                    children: [
+                      SizedBox(
+                        width: 120,
+                        height: 80,
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(12),
+                          child: Image.network(
+                            parkingSpace.getImageUrl!,
+                            fit: BoxFit.fill,
                           ),
                         ),
-                        const SizedBox(width: 5),
-                        Text(
-                          "$availableSlot/$capacity",
-                          style: const TextStyle(
-                            fontSize: 21,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.blue,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 10),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        buildTag(
+                      ),
+                      const SizedBox(height: 5),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          buildTag(
                             availableSlot == 0
                                 ? "Full"
                                 : availableSlot > 0 && availableSlot != capacity
                                     ? "Occupied"
                                     : "Empty",
-                            Colors.blue),
-                        IconButton(
-                          onPressed: () {},
-                          icon: const Icon(
-                            FontAwesomeIcons.pencilAlt,
-                            color: Colors.blue,
+                            Colors.blue,
                           ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
+                          const SizedBox(width: 5),
+                          buildTag("Active", Colors.green),
+                        ],
+                      ),
+                    ],
+                  ),
+                ],
               ),
             ),
-          );
-        });
+          ),
+        );
+      },
+    );
   }
 
   Widget buildTag(String label, Color color) {
     return Container(
-      width: 100,
-      height: 30,
+      width: 60,
+      height: 20,
       decoration: BoxDecoration(
           color: color,
           borderRadius: const BorderRadius.all(Radius.circular(20))),
@@ -210,7 +209,7 @@ class ParkingCard extends StatelessWidget {
           label,
           style: const TextStyle(
             color: Colors.white,
-            fontSize: 16,
+            fontSize: 12,
           ),
         ),
       ),

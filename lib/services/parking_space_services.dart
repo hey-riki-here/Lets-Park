@@ -3,6 +3,7 @@
 import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:community_material_icon/community_material_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:lets_park/main.dart';
 import 'package:lets_park/models/parking.dart';
@@ -194,5 +195,31 @@ class ParkingSpaceServices {
         ),
       );
     });
+  }
+
+  static Row getStars(double stars) {
+    List<Widget> newChildren = [];
+    double length = stars;
+    Color? color = Colors.amber;
+
+    if (stars == 0) {
+      length = 5;
+      color = Colors.grey[400];
+    }
+
+    for (int i = 0; i < length.toInt(); i++) {
+      newChildren.add(
+        Icon(
+          Icons.star_rounded,
+          color: color,
+          size: 16,
+        ),
+      );
+    }
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      mainAxisSize: MainAxisSize.min,
+      children: newChildren,
+    );
   }
 }

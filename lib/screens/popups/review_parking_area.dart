@@ -96,7 +96,7 @@ class _ReviewParkingAreaState extends State<ReviewParkingArea> {
                               ),
                             ),
                       const SizedBox(height: 5),
-                      getStars(spaceRating),
+                      ParkingSpaceServices.getStars(spaceRating),
                       const Text(
                         "Reservable",
                         style: TextStyle(
@@ -238,27 +238,5 @@ class _ReviewParkingAreaState extends State<ReviewParkingArea> {
         );
       },
     );
-  }
-
-  Row getStars(double stars) {
-    List<Widget> newChildren = [];
-    double length = stars;
-    Color? color = Colors.amber;
-
-    if (stars == 0) {
-      length = 5;
-      color = Colors.grey[400];
-    }
-
-    for (int i = 0; i < length.toInt(); i++) {
-      newChildren.add(
-        Icon(
-          Icons.star_rounded,
-          color: color,
-          size: 16,
-        ),
-      );
-    }
-    return Row(children: newChildren);
   }
 }

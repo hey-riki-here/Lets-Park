@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:lets_park/globals/globals.dart' as globals;
+import 'package:lets_park/models/parking_space.dart';
 import 'package:lets_park/screens/drawer_screens/manage_space/earnings_menu.dart';
 import 'package:lets_park/screens/drawer_screens/manage_space/parking_history_menu.dart';
 import 'package:lets_park/screens/drawer_screens/manage_space/upcoming_parkings_menu.dart';
@@ -30,6 +32,7 @@ class ManageSpace extends StatelessWidget {
           Column(
             children: const [
               Header(),
+              AvailableSpacesList(),
               Menu(),
             ],
           ),
@@ -111,6 +114,84 @@ class Header extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class AvailableSpacesList extends StatefulWidget {
+  const AvailableSpacesList({Key? key}) : super(key: key);
+
+  @override
+  State<AvailableSpacesList> createState() => _AvailableSpacesListState();
+}
+
+class _AvailableSpacesListState extends State<AvailableSpacesList> {
+  List<ParkingSpace>? parkingSpaces = globals.userData.getOwnedParkingSpaces;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 150,
+      child: ListView.builder(
+        padding: const EdgeInsets.all(8),
+        scrollDirection: Axis.horizontal,
+        itemCount: 10,
+        itemBuilder: (BuildContext context, int index) {
+          return Card(
+            elevation: 2,
+            shape: const RoundedRectangleBorder(
+              borderRadius: BorderRadius.all(
+                Radius.circular(12),
+              ),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Text(
+                    "Space $index",
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  Row(
+                    children: [
+                      Center(
+                        child: Container(
+                          child: const Center(
+                            child: Text(
+                              "Test",
+                              style: TextStyle(
+                                color: Colors.green,
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                          width: 60,
+                          height: 60,
+                          decoration: BoxDecoration(
+                            borderRadius: const BorderRadius.all(
+                              Radius.circular(100),
+                            ),
+                            color: Colors.white,
+                            border: Border.all(
+                              color: Colors.green,
+                              width: 2,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  )
+                ],
+              ),
+            ),
+          );
+        },
       ),
     );
   }

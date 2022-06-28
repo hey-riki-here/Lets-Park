@@ -230,94 +230,92 @@ class UserServices {
   }
 
   void checkParkingSessionsOnOwnedSpaces(BuildContext context) async {
-    if (globals.goCheckOwnedSpaces) {
-      spaces = globals.userData.getOwnedParkingSpaces!;
+    spaces = globals.userData.getOwnedParkingSpaces!;
 
-      spaces.forEach((space) async {
-        await parkingSpacesDb
-            .doc(space.getSpaceId)
-            .collection('parking-sessions')
-            .snapshots()
-            .forEach((sessions) {
-          sessions.docs.forEach((session) async {
-            Parking parking = Parking.fromJson(session.data());
+    spaces.forEach((space) async {
+      await parkingSpacesDb
+          .doc(space.getSpaceId)
+          .collection('parking-sessions')
+          .snapshots()
+          .forEach((sessions) {
+        sessions.docs.forEach((session) async {
+          Parking parking = Parking.fromJson(session.data());
 
-            DateTime now = DateTime(0, 0, 0, 0, 0);
-            await WorldTimeServices.getDateTimeNow().then((time) {
-              now = DateTime(
-                time.year,
-                time.month,
-                time.day,
-                time.hour,
-                time.minute,
-              );
+          DateTime now = DateTime(0, 0, 0, 0, 0);
+          await WorldTimeServices.getDateTimeNow().then((time) {
+            now = DateTime(
+              time.year,
+              time.month,
+              time.day,
+              time.hour,
+              time.minute,
+            );
+          });
+
+          if ((_getDateTimeFromMillisecondEpoch(parking.getArrival!)
+                          .compareTo(now) ==
+                      0 ||
+                  _getDateTimeFromMillisecondEpoch(parking.getArrival!)
+                          .compareTo(now) ==
+                      -1) &&
+              (_getDateTimeFromMillisecondEpoch(parking.getDeparture!)
+                      .compareTo(now) ==
+                  1) &&
+              parking.isInProgress == false) {
+            _ownedParkingSessionsStreams.pause();
+            await parkingSpacesDb
+                .doc(parking.getParkingSpaceId)
+                .collection("parking-sessions")
+                .doc(parking.getParkingId)
+                .update({
+              'inProgress': true,
+              'upcoming': false,
+              'inHistory': false,
             });
-
-            if ((_getDateTimeFromMillisecondEpoch(parking.getArrival!)
-                            .compareTo(now) ==
-                        0 ||
-                    _getDateTimeFromMillisecondEpoch(parking.getArrival!)
-                            .compareTo(now) ==
-                        -1) &&
-                (_getDateTimeFromMillisecondEpoch(parking.getDeparture!)
-                        .compareTo(now) ==
-                    1) &&
-                parking.isInProgress == false) {
-              _ownedParkingSessionsStreams.pause();
-              await parkingSpacesDb
-                  .doc(parking.getParkingSpaceId)
-                  .collection("parking-sessions")
-                  .doc(parking.getParkingId)
-                  .update({
-                'inProgress': true,
-                'upcoming': false,
-                'inHistory': false,
-              });
-              _ownedParkingSessionsStreams.resume();
-            } else if ((_getDateTimeFromMillisecondEpoch(parking.getArrival!)
-                            .compareTo(now) ==
-                        -1 &&
-                    (_getDateTimeFromMillisecondEpoch(parking.getDeparture!)
-                                .compareTo(now) ==
-                            0 ||
-                        _getDateTimeFromMillisecondEpoch(parking.getDeparture!)
-                                .compareTo(now) ==
-                            -1)) &&
-                parking.isInHistory == false) {
-              _ownedParkingSessionsStreams.pause();
-              await parkingSpacesDb
-                  .doc(parking.getParkingSpaceId)
-                  .collection("parking-sessions")
-                  .doc(parking.getParkingId)
-                  .update({
-                'inProgress': false,
-                'upcoming': false,
-                'inHistory': true,
-              });
-              _ownedParkingSessionsStreams.resume();
-              UserServices.notifyUser(
+            _ownedParkingSessionsStreams.resume();
+          } else if ((_getDateTimeFromMillisecondEpoch(parking.getArrival!)
+                          .compareTo(now) ==
+                      -1 &&
+                  (_getDateTimeFromMillisecondEpoch(parking.getDeparture!)
+                              .compareTo(now) ==
+                          0 ||
+                      _getDateTimeFromMillisecondEpoch(parking.getDeparture!)
+                              .compareTo(now) ==
+                          -1)) &&
+              parking.isInHistory == false) {
+            _ownedParkingSessionsStreams.pause();
+            await parkingSpacesDb
+                .doc(parking.getParkingSpaceId)
+                .collection("parking-sessions")
+                .doc(parking.getParkingId)
+                .update({
+              'inProgress': false,
+              'upcoming': false,
+              'inHistory': true,
+            });
+            _ownedParkingSessionsStreams.resume();
+            UserServices.notifyUser(
+              "NOTIF" +
+                  globals.userData.getUserNotifications!.length.toString(),
+              parking.getParkingOwner!,
+              UserNotification(
                 "NOTIF" +
                     globals.userData.getUserNotifications!.length.toString(),
-                parking.getParkingOwner!,
-                UserNotification(
-                  "NOTIF" +
-                      globals.userData.getUserNotifications!.length.toString(),
-                  parking.getParkingSpaceId!,
-                  parking.getDriverImage!,
-                  parking.getDriver!,
-                  "finished parking in your parking space. Give him a rate now.",
-                  false,
-                  true,
-                  now.millisecondsSinceEpoch,
-                  false,
-                  false,
-                ),
-              );
-            }
-          });
+                parking.getParkingSpaceId!,
+                parking.getDriverImage!,
+                parking.getDriver!,
+                "finished parking in your parking space. Give him a rate now.",
+                false,
+                true,
+                now.millisecondsSinceEpoch,
+                false,
+                false,
+              ),
+            );
+          }
         });
       });
-    }
+    });
   }
 
   static void notifyUser(
