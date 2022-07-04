@@ -25,3 +25,5 @@ bool updateState = false;
 late StreamSubscription sub;
 bool goCheck = true;
 bool goCheckOwnedSpaces = false;
+ParkingSpace nonReservable = ParkingSpace();
+String selectedType = "Daily";

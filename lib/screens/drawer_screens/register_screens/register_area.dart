@@ -87,11 +87,17 @@ class _RegisterAreaState extends State<RegisterArea> {
                     globals.parkingSpace.setVerticalClearance =
                         _informationState.currentState!.getVerticalClearance;
 
+                    globals.parkingSpace.setDailyOrMonthly =
+                        _informationState.currentState!.getDailyOrMonthly;
+
                     globals.parkingSpace.setType =
-                        _informationState.currentState!.getType;
+                        _informationState.currentState!.getReservability;
 
                     globals.parkingSpace.setFeatures =
                         _informationState.currentState!.getSelectedFeatures;
+
+                    globals.parkingSpace.setRules =
+                        _informationState.currentState!.getRules;
 
                     globals.parkingSpace.setOwnerId =
                         FirebaseAuth.instance.currentUser!.uid;

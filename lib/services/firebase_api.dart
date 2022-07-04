@@ -69,9 +69,18 @@ class FirebaseServices {
   }
 
   Set<Marker> getMarkers(BuildContext context) {
-    late BitmapDescriptor marker;
-    _getIcon().then((BitmapDescriptor value) {
-      marker = value;
+    late BitmapDescriptor reservableMarker, nonReservableMarker, monthlyMarker;
+
+    _getReservableIcon().then((BitmapDescriptor value) {
+      reservableMarker = value;
+    });
+
+    _getNonReservableIcon().then((BitmapDescriptor value) {
+      nonReservableMarker = value;
+    });
+
+    _getMonthlyIcon().then((BitmapDescriptor value) {
+      monthlyMarker = value;
     });
 
     _spaces.first.then((value) {
@@ -90,7 +99,14 @@ class FirebaseServices {
                 ),
               );
             },
-            icon: marker,
+            icon: parkingSpace.getType!.compareTo("Reservable") == 0 &&
+                    parkingSpace.getDailyOrMonthly!.compareTo("Daily") == 0
+                ? reservableMarker
+                : parkingSpace.getType!.compareTo("Reservable") == 0 &&
+                        parkingSpace.getDailyOrMonthly!.compareTo("Monthly") ==
+                            0
+                    ? monthlyMarker
+                    : nonReservableMarker,
             markerId: MarkerId(parkingSpace.getLatLng.toString()),
             position: parkingSpace.getLatLng!,
           ),
@@ -101,10 +117,26 @@ class FirebaseServices {
     return _markers;
   }
 
-  Future<BitmapDescriptor> _getIcon() async {
+  Future<BitmapDescriptor> _getReservableIcon() async {
     BitmapDescriptor markerbitmap = await BitmapDescriptor.fromAssetImage(
       const ImageConfiguration(),
       "assets/icons/parking-marker.png",
+    );
+    return markerbitmap;
+  }
+
+  Future<BitmapDescriptor> _getNonReservableIcon() async {
+    BitmapDescriptor markerbitmap = await BitmapDescriptor.fromAssetImage(
+      const ImageConfiguration(),
+      "assets/icons/parking-marker-pay.png",
+    );
+    return markerbitmap;
+  }
+
+  Future<BitmapDescriptor> _getMonthlyIcon() async {
+    BitmapDescriptor markerbitmap = await BitmapDescriptor.fromAssetImage(
+      const ImageConfiguration(),
+      "assets/icons/parking-marker-monthly.png",
     );
     return markerbitmap;
   }
@@ -157,6 +189,18 @@ class FirebaseServices {
     });
 
     return securedParkingSpaces;
+  }
+
+  static List<ParkingSpace> getMonthlyParkings() {
+    List<ParkingSpace> monthlyParkingSpaces = [];
+
+    globals.currentParkingSpaces.forEach((space) {
+      if (space.getDailyOrMonthly!.compareTo("Monthly") == 0) {
+        monthlyParkingSpaces.add(space);
+      }
+    });
+
+    return monthlyParkingSpaces;
   }
 
   static double calculateDistance(lat1, lon1, lat2, lon2) {

@@ -6,10 +6,13 @@ import 'package:flutter/material.dart';
 import 'package:lets_park/models/parking_space.dart';
 import 'package:lets_park/models/review.dart';
 import 'package:lets_park/screens/popups/checkout.dart';
+import 'package:lets_park/screens/popups/checkout_monthly.dart';
+import 'package:lets_park/screens/popups/notice_dialog.dart';
 import 'package:lets_park/services/firebase_api.dart';
 import 'package:lets_park/services/parking_space_services.dart';
 import 'package:geolocator/geolocator.dart' as geolocator;
 import 'package:location/location.dart';
+import 'package:lets_park/globals/globals.dart' as globals;
 
 class ParkingAreaInfo extends StatefulWidget {
   final ParkingSpace parkingSpace;
@@ -48,7 +51,7 @@ class _ParkingAreaInfoState extends State<ParkingAreaInfo> {
           bottom: PreferredSize(
             child: Container(
               color: Colors.white,
-              height: 365,
+              height: 375,
               width: double.infinity,
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -60,6 +63,7 @@ class _ParkingAreaInfoState extends State<ParkingAreaInfo> {
                       imageUrl: widget.parkingSpace.getImageUrl!,
                       address: widget.parkingSpace.getAddress!,
                       type: widget.parkingSpace.getType!,
+                      dailyOrMonthly: widget.parkingSpace.getDailyOrMonthly!,
                       stars: widget.parkingSpace.getRating!,
                       isLocationEnabled: isLocationEnabled,
                     ),
@@ -94,15 +98,17 @@ class _ParkingAreaInfoState extends State<ParkingAreaInfo> {
                 ],
               ),
             ),
-            preferredSize: const Size.fromHeight(365),
+            preferredSize: const Size.fromHeight(375),
           ),
         ),
         body: InfoAndReviews(
           spaceId: widget.parkingSpace.getSpaceId!,
           info: widget.parkingSpace.getInfo!,
+          rules: widget.parkingSpace.getRules!,
           features: widget.parkingSpace.getFeatures!,
           capacity: widget.parkingSpace.getCapacity!,
           verticalClearance: widget.parkingSpace.getVerticalClearance!,
+          type: widget.parkingSpace.getType!,
         ),
         bottomNavigationBar: Padding(
           padding: const EdgeInsets.symmetric(
@@ -111,14 +117,40 @@ class _ParkingAreaInfoState extends State<ParkingAreaInfo> {
           ),
           child: ElevatedButton(
             onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  fullscreenDialog: true,
-                  builder: (context) =>
-                      Checkout(parkingSpace: widget.parkingSpace),
-                ),
-              );
+              globals.nonReservable = widget.parkingSpace;
+              widget.parkingSpace.getDailyOrMonthly!.compareTo("Monthly") == 0
+                  ? Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        fullscreenDialog: true,
+                        builder: (context) => CheckoutMonthly(
+                          parkingSpace: widget.parkingSpace,
+                        ),
+                      ),
+                    )
+                  : widget.parkingSpace.getType!.compareTo("Reservable") == 0
+                      ? Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            fullscreenDialog: true,
+                            builder: (context) => Checkout(
+                              parkingSpace: widget.parkingSpace,
+                            ),
+                          ),
+                        )
+                      : showDialog(
+                          context: context,
+                          barrierDismissible: true,
+                          builder: (context) => NoticeDialog(
+                            imageLink: "assets/logo/lets-park-logo.png",
+                            header:
+                                "You're about to rent a non-reservable space...",
+                            parkingAreaAddress: widget.parkingSpace.getAddress!,
+                            message:
+                                "Please confirm that you are currently at the parking location.",
+                            forNonreservableConfirmation: true,
+                          ),
+                        );
             },
             child: const Text(
               "Rent parking space",
@@ -159,10 +191,12 @@ class _ParkingAreaInfoState extends State<ParkingAreaInfo> {
         widget.parkingSpace.getLatLng!.latitude,
         widget.parkingSpace.getLatLng!.longitude,
       );
-      setState(() {
-        destinationDistance = getDistance(distance);
-        isLocationEnabled = true;
-      });
+      if (mounted) {
+        setState(() {
+          destinationDistance = getDistance(distance);
+          isLocationEnabled = true;
+        });
+      }
     }
   }
 
@@ -182,6 +216,7 @@ class Header extends StatelessWidget {
   final String imageUrl;
   final String address;
   final String type;
+  final String dailyOrMonthly;
   final double stars;
   final bool isLocationEnabled;
   const Header({
@@ -189,6 +224,7 @@ class Header extends StatelessWidget {
     required this.imageUrl,
     required this.address,
     required this.type,
+    required this.dailyOrMonthly,
     required this.stars,
     required this.isLocationEnabled,
   }) : super(key: key);
@@ -205,12 +241,41 @@ class Header extends StatelessWidget {
             fontWeight: FontWeight.w400,
           ),
         ),
+        const SizedBox(height: 2),
         ParkingSpaceServices.getStars(stars),
-        Text(
-          type,
-          style: const TextStyle(
-            color: Colors.blue,
-          ),
+        const SizedBox(height: 5),
+        Row(
+          children: [
+            Container(
+              decoration: BoxDecoration(
+                color: Colors.blue[400],
+                borderRadius: const BorderRadius.all(Radius.circular(3)),
+              ),
+              padding: const EdgeInsets.all(3),
+              child: Text(
+                type,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+            const SizedBox(width: 5),
+            Container(
+              decoration: BoxDecoration(
+                color: Colors.orange[400],
+                borderRadius: const BorderRadius.all(Radius.circular(3)),
+              ),
+              padding: const EdgeInsets.all(3),
+              child: Text(
+                dailyOrMonthly,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+          ],
         ),
         const SizedBox(height: 10),
         Center(
@@ -340,16 +405,20 @@ class PriceAndDistance extends StatelessWidget {
 class InfoAndReviews extends StatelessWidget {
   final String spaceId;
   final String info;
+  final String rules;
   final List<String> features;
   final int capacity;
   final double verticalClearance;
+  final String type;
   const InfoAndReviews({
     Key? key,
     required this.spaceId,
     required this.info,
+    required this.rules,
     required this.features,
     required this.capacity,
     required this.verticalClearance,
+    required this.type,
   }) : super(key: key);
 
   @override
@@ -375,8 +444,38 @@ class InfoAndReviews extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.blue[50],
+                    borderRadius: const BorderRadius.all(Radius.circular(8)),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.info,
+                        color: Colors.blue.shade700,
+                      ),
+                      const SizedBox(width: 10),
+                      Text("This parking space is ${type.toLowerCase()}."),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 20),
                 Text(
                   info,
+                  style: const TextStyle(
+                    fontSize: 16,
+                  ),
+                ),
+                const SizedBox(height: 20),
+                const Text(
+                  "Rules",
+                  style: labelStyle,
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  rules,
                   style: const TextStyle(
                     fontSize: 16,
                   ),
@@ -434,103 +533,105 @@ class InfoAndReviews extends StatelessWidget {
         ),
         Center(
           child: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-              stream: ParkingSpaceServices.getParkingSpaceReviews(spaceId),
-              builder: (context, snapshot) {
-                if (snapshot.hasData) {
-                  reviews.clear();
-                  snapshot.data!.docs.forEach((review) {
-                    reviews.add(Review.fromJson(review.data()));
-                  });
-                }
+            stream: ParkingSpaceServices.getParkingSpaceReviews(spaceId),
+            builder: (context, snapshot) {
+              if (snapshot.hasData) {
+                reviews.clear();
+                snapshot.data!.docs.forEach((review) {
+                  reviews.add(Review.fromJson(review.data()));
+                });
+              }
 
-                return reviews.isEmpty
-                    ? Center(
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: const [
-                            Icon(
-                              Icons.info_outline,
+              return reviews.isEmpty
+                  ? Center(
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: const [
+                          Icon(
+                            Icons.info_outline,
+                            color: Colors.grey,
+                          ),
+                          SizedBox(width: 10),
+                          Text(
+                            "No reviews yet.",
+                            style: TextStyle(
                               color: Colors.grey,
+                              fontSize: 16,
                             ),
-                            SizedBox(width: 10),
-                            Text(
-                              "No reviews yet.",
-                              style: TextStyle(
-                                color: Colors.grey,
-                                fontSize: 16,
+                          ),
+                        ],
+                      ),
+                    )
+                  : ListView.builder(
+                      padding: const EdgeInsets.all(16),
+                      itemCount: reviews.length,
+                      itemBuilder: (context, index) {
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                CircleAvatar(
+                                  backgroundColor: Colors.white,
+                                  backgroundImage: NetworkImage(
+                                      reviews[index].getDisplayPhoto!),
+                                  radius: 15,
+                                ),
+                                const SizedBox(width: 10),
+                                Text(
+                                  reviews[index].getReviewer!,
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                                Expanded(
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.end,
+                                    children: const [
+                                      Icon(
+                                        Icons.more_vert_rounded,
+                                        color: Colors.black54,
+                                        size: 18,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 15),
+                            ParkingSpaceServices.getStars(
+                              reviews[index].getRating!,
+                            ),
+                            const SizedBox(height: 10),
+                            Text(reviews[index].getReview!),
+                            const Center(
+                              child: SizedBox(
+                                height: 30,
+                                width: 30,
+                                child: Divider(
+                                  color: Colors.black87,
+                                ),
                               ),
                             ),
                           ],
-                        ),
-                      )
-                    : ListView.builder(
-                        padding: const EdgeInsets.all(16),
-                        itemCount: reviews.length,
-                        itemBuilder: (context, index) {
-                          return Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                children: [
-                                  CircleAvatar(
-                                    backgroundColor: Colors.white,
-                                    backgroundImage: NetworkImage(
-                                        reviews[index].getDisplayPhoto!),
-                                    radius: 15,
-                                  ),
-                                  const SizedBox(width: 10),
-                                  Text(
-                                    reviews[index].getReviewer!,
-                                    style: const TextStyle(
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  ),
-                                  Expanded(
-                                    child: Row(
-                                      mainAxisAlignment: MainAxisAlignment.end,
-                                      children: const [
-                                        Icon(
-                                          Icons.more_vert_rounded,
-                                          color: Colors.black54,
-                                          size: 18,
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 15),
-                              ParkingSpaceServices.getStars(
-                                reviews[index].getRating!,
-                              ),
-                              const SizedBox(height: 10),
-                              Text(reviews[index].getReview!),
-                              const Center(
-                                child: SizedBox(
-                                  height: 30,
-                                  width: 30,
-                                  child: Divider(
-                                    color: Colors.black87,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          );
-                        },
-                      );
-              }),
+                        );
+                      },
+                    );
+            },
+          ),
         ),
       ],
     );
   }
 
-  Row getFeatures() {
+  Widget getFeatures() {
     List<Widget> newChildren = [];
 
     for (String feature in features) {
       if (feature.compareTo("With gate") == 0) {
         newChildren.add(
           Row(
+            mainAxisSize: MainAxisSize.min,
             children: [
               const Icon(
                 CommunityMaterialIcons.gate,
@@ -551,6 +652,7 @@ class InfoAndReviews extends StatelessWidget {
       } else if (feature.compareTo("CCTV") == 0) {
         newChildren.add(
           Row(
+            mainAxisSize: MainAxisSize.min,
             children: [
               const Icon(
                 CommunityMaterialIcons.cctv,
@@ -568,9 +670,10 @@ class InfoAndReviews extends StatelessWidget {
             ],
           ),
         );
-      } else {
+      } else if (feature.compareTo("Covered Parking") == 0) {
         newChildren.add(
           Row(
+            mainAxisSize: MainAxisSize.min,
             children: [
               const Icon(
                 CommunityMaterialIcons.bus_stop_covered,
@@ -587,8 +690,33 @@ class InfoAndReviews extends StatelessWidget {
             ],
           ),
         );
+      } else {
+        newChildren.add(
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(
+                CommunityMaterialIcons.lightbulb_on_outline,
+                color: Colors.blue,
+                size: 30,
+              ),
+              const SizedBox(width: 12),
+              Text(
+                feature,
+                style: const TextStyle(
+                  fontSize: 16,
+                ),
+              ),
+            ],
+          ),
+        );
       }
     }
-    return Row(children: newChildren);
+
+    return Wrap(
+      direction: Axis.horizontal,
+      runSpacing: 10,
+      children: newChildren,
+    );
   }
 }

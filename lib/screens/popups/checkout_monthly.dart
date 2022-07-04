@@ -11,6 +11,7 @@ import 'package:flutter_time_picker_spinner/flutter_time_picker_spinner.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
+import 'package:jiffy/jiffy.dart';
 import 'package:lets_park/main.dart';
 import 'package:lets_park/models/notification.dart';
 import 'package:lets_park/models/parking.dart';
@@ -23,15 +24,16 @@ import 'package:lets_park/services/world_time_api.dart';
 import 'package:numberpicker/numberpicker.dart';
 import 'package:lets_park/globals/globals.dart' as globals;
 
-class Checkout extends StatefulWidget {
+class CheckoutMonthly extends StatefulWidget {
   final ParkingSpace parkingSpace;
-  const Checkout({Key? key, required this.parkingSpace}) : super(key: key);
+  const CheckoutMonthly({Key? key, required this.parkingSpace})
+      : super(key: key);
 
   @override
-  State<Checkout> createState() => _CheckoutState();
+  State<CheckoutMonthly> createState() => _CheckoutMonthlyState();
 }
 
-class _CheckoutState extends State<Checkout> {
+class _CheckoutMonthlyState extends State<CheckoutMonthly> {
   final GlobalKey<VehicleState> _vehicleState = GlobalKey();
   final GlobalKey<SetUpTimeState> _setupTimeState = GlobalKey();
 
@@ -191,7 +193,7 @@ class _CheckoutState extends State<Checkout> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: ((context) => SuccessfulBooking()),
+                  builder: ((context) => const SuccessfulBooking()),
                 ),
               );
             } else {
@@ -277,9 +279,8 @@ class SetUpTimeState extends State<SetUpTime> {
   String _departureDate = "Today";
   String? _departureTime;
   String _parkingDuration = "";
-  int _selectedHour = 0;
-  int _selectedMinute = 15;
-  double price = 50;
+  int _selectedMonth = 1;
+  double price = 1500;
   bool isTimeBehind = true;
 
   @override
@@ -295,10 +296,11 @@ class SetUpTimeState extends State<SetUpTime> {
     _selectedDateTime = _selectedArrivalDateTime;
 
     _selectedDepartureDateTime =
-        _selectedArrivalDateTime!.add(const Duration(minutes: 15));
+        Jiffy(_selectedArrivalDateTime!).add(months: 1).dateTime;
     _departureTime = DateFormat("h:mm a").format(_selectedDepartureDateTime!);
 
     setDuration();
+    getDepartureTime();
     super.initState();
   }
 
@@ -307,6 +309,28 @@ class SetUpTimeState extends State<SetUpTime> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: Colors.blue[50],
+            borderRadius: const BorderRadius.all(Radius.circular(8)),
+          ),
+          child: Row(
+            children: [
+              Icon(
+                Icons.info,
+                color: Colors.blue.shade700,
+              ),
+              const SizedBox(width: 10),
+              const Expanded(
+                child: Text(
+                  "You are about to rent a monthly parking space.",
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 5),
         const Text(
           "Setup time",
           style: TextStyle(
@@ -395,7 +419,7 @@ class SetUpTimeState extends State<SetUpTime> {
                                 return AlertDialog(
                                   title: Center(
                                     child: Text(
-                                      "Select parking duration (HH:MM)",
+                                      "Select parking duration (months)",
                                       style: TextStyle(
                                         fontSize: 15,
                                         color: Colors.blue.shade900,
@@ -412,35 +436,19 @@ class SetUpTimeState extends State<SetUpTime> {
                                             textStyle: const TextStyle(
                                               color: Colors.grey,
                                             ),
-                                            value: _selectedHour,
-                                            minValue: 0,
-                                            maxValue: 23,
+                                            value: _selectedMonth,
+                                            minValue: 1,
+                                            maxValue: 12,
                                             onChanged: (value) {
                                               setState(
                                                 () {
-                                                  _selectedHour = value;
+                                                  _selectedMonth = value;
                                                 },
                                               );
                                               sbSetState(
                                                 () {
-                                                  _selectedHour = value;
+                                                  _selectedMonth = value;
                                                 },
-                                              );
-                                            },
-                                          ),
-                                          NumberPicker(
-                                            textStyle: const TextStyle(
-                                              color: Colors.grey,
-                                            ),
-                                            value: _selectedMinute,
-                                            minValue: 0,
-                                            maxValue: 59,
-                                            onChanged: (value) {
-                                              setState(
-                                                () => _selectedMinute = value,
-                                              );
-                                              sbSetState(
-                                                () => _selectedMinute = value,
                                               );
                                             },
                                           ),
@@ -558,6 +566,21 @@ class SetUpTimeState extends State<SetUpTime> {
                   ),
                 ),
                 const SizedBox(height: 20),
+                DatePickerWidget(
+                  initialDate: _selectedArrivalDateTime,
+                  looping: false,
+                  firstDate: DateTime.now(),
+                  dateFormat: "MMM/dd/yyyy",
+                  onChange: (DateTime newDate, _) {
+                    _selectedDate = newDate;
+                  },
+                  pickerTheme: const DateTimePickerTheme(
+                    itemTextStyle: TextStyle(
+                      color: Colors.black,
+                      fontSize: 19,
+                    ),
+                  ),
+                ),
                 TimePickerSpinner(
                   time: _selectedArrivalDateTime,
                   is24HourMode: false,
@@ -575,21 +598,6 @@ class SetUpTimeState extends State<SetUpTime> {
                   onTimeChange: (time) {
                     _selectedTime = time;
                   },
-                ),
-                DatePickerWidget(
-                  initialDate: _selectedArrivalDateTime,
-                  looping: false,
-                  firstDate: DateTime.now(),
-                  dateFormat: "MMM/dd/yyyy",
-                  onChange: (DateTime newDate, _) {
-                    _selectedDate = newDate;
-                  },
-                  pickerTheme: const DateTimePickerTheme(
-                    itemTextStyle: TextStyle(
-                      color: Colors.black,
-                      fontSize: 19,
-                    ),
-                  ),
                 ),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.end,
@@ -630,28 +638,13 @@ class SetUpTimeState extends State<SetUpTime> {
   }
 
   void setDuration() {
-    if (_selectedHour != 0 || _selectedMinute != 0) {
-      setState(() {
-        if (_selectedHour == 0 && _selectedMinute == 1) {
-          _parkingDuration = "$_selectedMinute minute";
-        } else if (_selectedHour == 1 && _selectedMinute == 0) {
-          _parkingDuration = "$_selectedHour hour";
-        } else if (_selectedHour == 0 && _selectedMinute > 1) {
-          _parkingDuration = "$_selectedMinute minutes";
-        } else if (_selectedHour > 1 && _selectedMinute == 0) {
-          _parkingDuration = "$_selectedHour hours";
-        } else if (_selectedHour > 1 && _selectedMinute > 1) {
-          _parkingDuration =
-              "$_selectedHour  hours and $_selectedMinute minutes";
-        } else if (_selectedHour == 1 && _selectedMinute == 1) {
-          _parkingDuration = "$_selectedHour hour and $_selectedMinute minute";
-        } else if (_selectedHour > 1 && _selectedMinute == 1) {
-          _parkingDuration = "$_selectedHour hours and $_selectedMinute minute";
-        } else if (_selectedHour == 1 && _selectedMinute > 1) {
-          _parkingDuration = "$_selectedHour hour and $_selectedMinute minutes";
-        }
-      });
-    }
+    setState(() {
+      if (_selectedMonth == 1) {
+        _parkingDuration = "$_selectedMonth month";
+      } else {
+        _parkingDuration = "$_selectedMonth months";
+      }
+    });
   }
 
   void getArrivalDateTime(DateTime selectedDateTime) {
@@ -682,44 +675,22 @@ class SetUpTimeState extends State<SetUpTime> {
 
   void getDepartureTime() {
     setState(() {
-      if (_selectedHour != 0 || _selectedMinute != 0) {
-        _selectedDepartureDateTime = _selectedArrivalDateTime!.add(
-          Duration(
-            hours: _selectedHour,
-            minutes: _selectedMinute,
-          ),
-        );
-      }
+      _selectedDepartureDateTime = Jiffy(DateTime(
+        _selectedArrivalDateTime!.year,
+        _selectedArrivalDateTime!.month,
+        _selectedArrivalDateTime!.day,
+        _selectedArrivalDateTime!.hour,
+        _selectedArrivalDateTime!.minute,
+      )).add(months: _selectedMonth).dateTime;
 
-      DateTime now = DateTime(
-        DateTime.now().year,
-        DateTime.now().month,
-        DateTime.now().day,
-      );
+      _departureDate = DateFormat('MMM. dd, yyyy').format(_selectedDepartureDateTime!);
 
-      DateTime departure = DateTime(
-        _selectedDepartureDateTime!.year,
-        _selectedDepartureDateTime!.month,
-        _selectedDepartureDateTime!.day,
-      );
-
-      if (departure.compareTo(now) == 0) {
-        _departureDate = "Today";
-      } else {
-        _departureDate = DateFormat('MMM. dd, yyyy').format(departure);
-      }
       _departureTime = DateFormat("h:mm a").format(_selectedDepartureDateTime!);
     });
   }
 
   void getPrice() {
-    price = 50;
-    if (_selectedHour <= 8) {
-      price = 50;
-    } else {
-      int exceededHours = _selectedHour - 8;
-      price += exceededHours * 10;
-    }
+    price = 1500 * _selectedMonth.toDouble();
   }
 
   bool isTimeValid() {

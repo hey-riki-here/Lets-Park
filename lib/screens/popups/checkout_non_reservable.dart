@@ -23,15 +23,16 @@ import 'package:lets_park/services/world_time_api.dart';
 import 'package:numberpicker/numberpicker.dart';
 import 'package:lets_park/globals/globals.dart' as globals;
 
-class Checkout extends StatefulWidget {
+class NonReservableCheckout extends StatefulWidget {
   final ParkingSpace parkingSpace;
-  const Checkout({Key? key, required this.parkingSpace}) : super(key: key);
+  const NonReservableCheckout({Key? key, required this.parkingSpace})
+      : super(key: key);
 
   @override
-  State<Checkout> createState() => _CheckoutState();
+  State<NonReservableCheckout> createState() => _NonReservableCheckoutState();
 }
 
-class _CheckoutState extends State<Checkout> {
+class _NonReservableCheckoutState extends State<NonReservableCheckout> {
   final GlobalKey<VehicleState> _vehicleState = GlobalKey();
   final GlobalKey<SetUpTimeState> _setupTimeState = GlobalKey();
 
@@ -67,7 +68,10 @@ class _CheckoutState extends State<Checkout> {
                   children: [
                     Column(
                       children: [
-                        SetUpTime(key: _setupTimeState),
+                        SetUpTime(
+                          key: _setupTimeState,
+                          type: widget.parkingSpace.getType!,
+                        ),
                         Vehicle(key: _vehicleState),
                         //const PhotoPicker(),
                         //const Payment(),
@@ -126,86 +130,58 @@ class _CheckoutState extends State<Checkout> {
                 onWillPop: () async => false,
                 child: const NoticeDialog(
                   imageLink: "assets/logo/lets-park-logo.png",
-                  message: "Checking and verifying your booking...",
+                  message: "We are now finishing up your booking...",
                   forLoading: true,
                 ),
               ),
             );
             globals.goCheck = false;
             await Future.delayed(const Duration(seconds: 2));
-            bool isAvailable = true;
-            if (availableSlot > 0) {
-              isAvailable = true;
-            } else {
-              isAvailable =
-                  await ParkingSpaceServices.isParkingSpaceAvailableAtTimeRange(
-                widget.parkingSpace.getSpaceId,
-                _setupTimeState
-                    .currentState!.getArrival!.millisecondsSinceEpoch,
-                _setupTimeState
-                    .currentState!.getDeparture!.millisecondsSinceEpoch,
-              ).then((isAvailable) async {
-                return isAvailable;
-              });
-            }
 
-            if (isAvailable) {
-              ParkingSpaceServices.updateParkingSpaceData(
-                widget.parkingSpace,
-                newParking,
+            ParkingSpaceServices.updateParkingSpaceData(
+              widget.parkingSpace,
+              newParking,
+            );
+
+            DateTime now = DateTime(0, 0, 0, 0, 0);
+            await WorldTimeServices.getDateTimeNow().then((time) {
+              now = DateTime(
+                time.year,
+                time.month,
+                time.day,
+                time.hour,
+                time.minute,
               );
+            });
 
-              DateTime now = DateTime(0, 0, 0, 0, 0);
-              await WorldTimeServices.getDateTimeNow().then((time) {
-                now = DateTime(
-                  time.year,
-                  time.month,
-                  time.day,
-                  time.hour,
-                  time.minute,
-                );
-              });
+            UserServices.updateUserParkingData(newParking);
 
-              UserServices.updateUserParkingData(newParking);
-
-              UserServices.notifyUser(
+            UserServices.notifyUser(
+              "NOTIF" +
+                  globals.userData.getUserNotifications!.length.toString(),
+              widget.parkingSpace.getOwnerId!,
+              UserNotification(
                 "NOTIF" +
                     globals.userData.getUserNotifications!.length.toString(),
-                widget.parkingSpace.getOwnerId!,
-                UserNotification(
-                  "NOTIF" +
-                      globals.userData.getUserNotifications!.length.toString(),
-                  widget.parkingSpace.getSpaceId!,
-                  FirebaseAuth.instance.currentUser!.photoURL!,
-                  FirebaseAuth.instance.currentUser!.displayName!,
-                  "just booked on your parking space. Tap to view details.",
-                  true,
-                  false,
-                  now.millisecondsSinceEpoch,
-                  false,
-                  false,
-                ),
-              );
-              globals.goCheck = true;
-              navigatorKey.currentState!.popUntil((route) => route.isFirst);
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: ((context) => SuccessfulBooking()),
-                ),
-              );
-            } else {
-              showDialog(
-                context: context,
-                builder: (context) {
-                  return (const NoticeDialog(
-                    imageLink: "assets/logo/lets-park-logo.png",
-                    message:
-                        "We're sorry, but the time alloted is not available. Please try different time.",
-                  ));
-                },
-              );
-            }
+                widget.parkingSpace.getSpaceId!,
+                FirebaseAuth.instance.currentUser!.photoURL!,
+                FirebaseAuth.instance.currentUser!.displayName!,
+                "just booked on your parking space. Tap to view details.",
+                true,
+                false,
+                now.millisecondsSinceEpoch,
+                false,
+                false,
+              ),
+            );
+            globals.goCheck = true;
+            navigatorKey.currentState!.popUntil((route) => route.isFirst);
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: ((context) => const SuccessfulBooking()),
+              ),
+            );
           },
           child: const Text(
             "Pay now",
@@ -250,7 +226,11 @@ class _CheckoutState extends State<Checkout> {
 }
 
 class SetUpTime extends StatefulWidget {
-  const SetUpTime({Key? key}) : super(key: key);
+  final String type;
+  const SetUpTime({
+    Key? key,
+    required this.type,
+  }) : super(key: key);
 
   @override
   State<SetUpTime> createState() => SetUpTimeState();
@@ -272,8 +252,7 @@ class SetUpTimeState extends State<SetUpTime> {
   DateTime? _selectedArrivalDateTime;
   DateTime? _selectedDepartureDateTime;
   String _arrivalDate = "Today";
-  String? _arrivalTime = DateFormat("h:mm a")
-      .format(DateTime.now().add(const Duration(minutes: 15)));
+  String? _arrivalTime = DateFormat("h:mm a").format(DateTime.now());
   String _departureDate = "Today";
   String? _departureTime;
   String _parkingDuration = "";
@@ -307,6 +286,30 @@ class SetUpTimeState extends State<SetUpTime> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: Colors.blue[50],
+            borderRadius: const BorderRadius.all(Radius.circular(8)),
+          ),
+          child: Row(
+            children: [
+              Icon(
+                Icons.info,
+                color: Colors.blue.shade700,
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  widget.type.compareTo("Reservable") == 0
+                      ? "You are about to rent a reservable space. Please be mindful on choosing the time of arrival and parking duration."
+                      : "You are about to rent a non-reservable space. By that, you cannot specify your time of arrival.",
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 5),
         const Text(
           "Setup time",
           style: TextStyle(
@@ -329,49 +332,34 @@ class SetUpTimeState extends State<SetUpTime> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
-                  const Text(
-                    "Please select the time of arrival and departure",
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: Colors.grey,
-                    ),
-                  ),
-                  const SizedBox(height: 5),
+                  widget.type.compareTo("Reservable") == 0
+                      ? const Text(
+                          "Please select the time of arrival and parking duration",
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: Colors.grey,
+                          ),
+                        )
+                      : const Text(
+                          "Please input parking duration",
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: Colors.grey,
+                          ),
+                        ),
+                  const SizedBox(height: 10),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text("Arrival:", style: labelStyle),
-                      Card(
-                        elevation: 2,
-                        shape: const RoundedRectangleBorder(
-                          borderRadius: BorderRadius.all(
-                            Radius.circular(12),
+                      Text("Start:", style: labelStyle),
+                      Row(
+                        children: [
+                          Text(
+                            "$_arrivalDate at $_arrivalTime",
+                            style: timeStampStyle,
                           ),
-                        ),
-                        child: InkWell(
-                          onTap: () {
-                            showDateTimePicker(context);
-                          },
-                          child: Ink(
-                            child: Padding(
-                              padding: const EdgeInsets.all(7.0),
-                              child: Row(
-                                children: [
-                                  Text(
-                                    "$_arrivalDate at $_arrivalTime",
-                                    style: timeStampStyle,
-                                  ),
-                                  const SizedBox(width: 10),
-                                  const Icon(
-                                    FontAwesomeIcons.calendarAlt,
-                                    color: Colors.blue,
-                                    size: 15,
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
+                          const SizedBox(width: 10),
+                        ],
                       ),
                     ],
                   ),

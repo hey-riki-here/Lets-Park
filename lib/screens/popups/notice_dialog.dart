@@ -1,32 +1,37 @@
 import 'package:flutter/material.dart';
 import 'package:lets_park/globals/globals.dart' as globals;
+import 'package:lets_park/screens/popups/checkout.dart';
+import 'package:lets_park/screens/popups/checkout_non_reservable.dart';
 
 class NoticeDialog extends StatelessWidget {
   final String message;
+  final String header;
   final String imageLink;
   final bool forLoading;
   final bool forConfirmation;
+  final bool forNonreservableConfirmation;
+  final String parkingAreaAddress;
   const NoticeDialog({
     Key? key,
     required this.imageLink,
     required this.message,
+    this.header = "",
     this.forLoading = false,
     this.forConfirmation = false,
+    this.forNonreservableConfirmation = false,
+    this.parkingAreaAddress = "",
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Dialog(
-      child: SizedBox(
-        width: 200,
-        height: 207,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            _buildImageAndMessage(imageLink, message),
-            _buildFooter(context),
-          ],
-        ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          _buildImageAndMessage(imageLink, message),
+          _buildFooter(context),
+        ],
       ),
     );
   }
@@ -43,12 +48,67 @@ class NoticeDialog extends StatelessWidget {
           ),
           const SizedBox(height: 15),
           Text(
-            message,
+            header,
             textAlign: TextAlign.center,
             style: const TextStyle(
+              color: Colors.blue,
               fontSize: 16,
+              fontWeight: FontWeight.bold,
             ),
           ),
+          const SizedBox(height: 15),
+          forNonreservableConfirmation
+              ? Column(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: Colors.blue[50],
+                        borderRadius:
+                            const BorderRadius.all(Radius.circular(8)),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.info,
+                            color: Colors.blue.shade700,
+                          ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: Text(
+                              message,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 15),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          "Parking space address",
+                          style: TextStyle(
+                            color: Colors.grey,
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Text(
+                            parkingAreaAddress,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                )
+              : Text(
+                  message,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    fontSize: 16,
+                  ),
+                ),
         ],
       ),
     );
@@ -87,6 +147,48 @@ class NoticeDialog extends StatelessWidget {
               onPressed: () {
                 globals.popWindow = true;
                 Navigator.of(context, rootNavigator: true).pop();
+              },
+            ),
+          ],
+        ),
+      );
+    } else if (forNonreservableConfirmation == true) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 10),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            TextButton(
+              child: Text(
+                "Cancel".toUpperCase(),
+                style:
+                    const TextStyle(fontSize: 14, fontWeight: FontWeight.w400),
+              ),
+              onPressed: () {
+                globals.popWindow = false;
+                Navigator.of(context, rootNavigator: true).pop();
+              },
+            ),
+            TextButton(
+              child: Text(
+                "Yes, I'm at the parking location".toUpperCase(),
+                style:
+                    const TextStyle(fontSize: 14, fontWeight: FontWeight.w400),
+              ),
+              onPressed: () {
+                print(globals.nonReservable);
+                globals.popWindow = true;
+                Navigator.of(context, rootNavigator: true).pop();
+
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    fullscreenDialog: true,
+                    builder: (context) => NonReservableCheckout(
+                      parkingSpace: globals.nonReservable,
+                    ),
+                  ),
+                );
               },
             ),
           ],

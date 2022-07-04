@@ -11,7 +11,9 @@ class ParkingSpace {
   String? _info;
   double? _verticalClearance;
   String? _type;
+  String? _dailyOrMonthly;
   List<String>? _features = [];
+  String? _rules;
   bool? _isFull;
 
   ParkingSpace();
@@ -27,7 +29,9 @@ class ParkingSpace {
     String? info,
     double? verticalClearance,
     String? type,
+    String? dailyOrMonthly,
     List<String>? features,
+    String? rules,
   ) {
     _id = id;
     _ownerId = ownerId;
@@ -38,8 +42,10 @@ class ParkingSpace {
     _rating = rating;
     _info = info;
     _verticalClearance = verticalClearance;
+    _dailyOrMonthly = dailyOrMonthly;
     _type = type;
     _features = features;
+    _rules = rules;
   }
 
   String? get getSpaceId => _id;
@@ -102,10 +108,22 @@ class ParkingSpace {
     _type = type;
   }
 
+  String? get getDailyOrMonthly => _dailyOrMonthly;
+
+  set setDailyOrMonthly (String? dailyOrMonthly) {
+    _dailyOrMonthly = dailyOrMonthly;
+  }
+
   List<String>? get getFeatures => _features;
 
   set setFeatures(List<String>? features) {
     _features = features;
+  }
+
+   String? get getRules => _rules;
+
+  set setRules(String? rules) {
+    _rules = rules;
   }
 
   bool? get isSpaceFull => _isFull;
@@ -130,13 +148,15 @@ class ParkingSpace {
         'info': _info,
         'verticalClearance': _verticalClearance,
         'type': _type,
+        'dailyOrMonthly' : _dailyOrMonthly,
         'features': _features,
+        'rules': _rules,
       };
 
   static ParkingSpace fromJson(Map<String, dynamic> json) {
-    List fromDatabase = json['features'];
+    List fromDatabaseFeatures = json['features'];
     List<String>? features = [];
-    features = fromDatabase.cast<String>();
+    features = fromDatabaseFeatures.cast<String>();
 
     return ParkingSpace.fromDatabase(
       json['id'],
@@ -149,7 +169,9 @@ class ParkingSpace {
       json['info'],
       json['verticalClearance'],
       json['type'],
+      json['dailyOrMonthly'],
       features,
+      json['rules'],
     );
   }
 }

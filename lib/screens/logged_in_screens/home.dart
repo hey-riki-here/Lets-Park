@@ -73,16 +73,22 @@ class _HomeState extends State<Home> {
                   Padding(
                     padding: const EdgeInsets.all(16.0),
                     child: Column(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Row(
+                        Column(
                           children: [
-                            DrawerButton(scaffoldKey: _scaffoldKey),
-                            const SizedBox(width: 10),
-                            SearchBox(gMapKey: _gMapKey),
+                            Row(
+                              children: [
+                                DrawerButton(scaffoldKey: _scaffoldKey),
+                                const SizedBox(width: 10),
+                                SearchBox(gMapKey: _gMapKey),
+                              ],
+                            ),
+                            const SizedBox(height: 10),
+                            FilterButtons(gMapKey: _gMapKey),
                           ],
                         ),
-                        const SizedBox(height: 10),
-                        FilterButtons(gMapKey: _gMapKey),
+                        const MarkerLegends(),
                       ],
                     ),
                   ),
@@ -363,7 +369,22 @@ class _FilterButtonsState extends State<FilterButtons> {
           width: 80,
           context: context,
           canShowModal: monthlyCanShowModal,
-          onTap: () {},
+          onTap: () {
+            if (monthlyCanShowModal == true) {
+              setState(() {
+                monthlyCanShowModal = false;
+              });
+
+              _showContentOnFilterTap(
+                title: "Monthly parking spaces",
+                spaces: FirebaseServices.getMonthlyParkings(),
+              );
+
+              setState(() {
+                monthlyCanShowModal = true;
+              });
+            }
+          },
         ),
       ],
     );
@@ -619,12 +640,33 @@ class NearbyParkingCard extends StatelessWidget {
             ],
           ),
         );
-      } else {
+      } else if (feature.compareTo("Covered Parking") == 0) {
         newChildren.add(
           Row(
+            mainAxisSize: MainAxisSize.min,
             children: [
               const Icon(
                 CommunityMaterialIcons.bus_stop_covered,
+                color: Colors.blue,
+                size: 15,
+              ),
+              const SizedBox(width: 12),
+              Text(
+                feature,
+                style: const TextStyle(
+                  fontSize: 14,
+                ),
+              ),
+            ],
+          ),
+        );
+      } else {
+        newChildren.add(
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(
+                CommunityMaterialIcons.lightbulb_on_outline,
                 color: Colors.blue,
                 size: 15,
               ),
@@ -643,6 +685,95 @@ class NearbyParkingCard extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: newChildren,
+    );
+  }
+}
+
+class MarkerLegends extends StatelessWidget {
+  const MarkerLegends({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      //crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisAlignment: MainAxisAlignment.start,
+      children: [
+        Card(
+          shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.all(
+              Radius.circular(12),
+            ),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: 10,
+              vertical: 2,
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  Icons.location_on,
+                  color: Colors.blue[400],
+                ),
+                const SizedBox(width: 10),
+                const Text("Reservable"),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(width: 5),
+        Card(
+          shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.all(
+              Radius.circular(12),
+            ),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: 10,
+              vertical: 2,
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  Icons.location_on,
+                  color: Colors.green[400],
+                ),
+                const SizedBox(width: 10),
+                const Text("Non-Reservable"),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(height: 5),
+        Card(
+          shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.all(
+              Radius.circular(12),
+            ),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: 10,
+              vertical: 2,
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  Icons.location_on,
+                  color: Colors.orange[400],
+                ),
+                const SizedBox(width: 10),
+                const Text("Monthly"),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(height: 10),
+      ],
     );
   }
 }
