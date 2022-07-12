@@ -152,48 +152,14 @@ class _CheckoutMonthlyState extends State<CheckoutMonthly> {
             }
 
             if (isAvailable) {
-              ParkingSpaceServices.updateParkingSpaceData(
-                widget.parkingSpace,
-                newParking,
-              );
-
-              DateTime now = DateTime(0, 0, 0, 0, 0);
-              await WorldTimeServices.getDateTimeNow().then((time) {
-                now = DateTime(
-                  time.year,
-                  time.month,
-                  time.day,
-                  time.hour,
-                  time.minute,
-                );
-              });
-
-              UserServices.updateUserParkingData(newParking);
-
-              UserServices.notifyUser(
-                "NOTIF" +
-                    globals.userData.getUserNotifications!.length.toString(),
-                widget.parkingSpace.getOwnerId!,
-                UserNotification(
-                  "NOTIF" +
-                      globals.userData.getUserNotifications!.length.toString(),
-                  widget.parkingSpace.getSpaceId!,
-                  FirebaseAuth.instance.currentUser!.photoURL!,
-                  FirebaseAuth.instance.currentUser!.displayName!,
-                  "just booked on your parking space. Tap to view details.",
-                  true,
-                  false,
-                  now.millisecondsSinceEpoch,
-                  false,
-                  false,
-                ),
-              );
-              globals.goCheck = true;
               navigatorKey.currentState!.popUntil((route) => route.isFirst);
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: ((context) => const SuccessfulBooking()),
+                  builder: ((context) => SuccessfulBooking(
+                        newParking: newParking,
+                        parkingSpace: widget.parkingSpace,
+                      )),
                 ),
               );
             } else {
@@ -683,7 +649,8 @@ class SetUpTimeState extends State<SetUpTime> {
         _selectedArrivalDateTime!.minute,
       )).add(months: _selectedMonth).dateTime;
 
-      _departureDate = DateFormat('MMM. dd, yyyy').format(_selectedDepartureDateTime!);
+      _departureDate =
+          DateFormat('MMM. dd, yyyy').format(_selectedDepartureDateTime!);
 
       _departureTime = DateFormat("h:mm a").format(_selectedDepartureDateTime!);
     });

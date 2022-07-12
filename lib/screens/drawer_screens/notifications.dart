@@ -85,7 +85,8 @@ class _NotificationsState extends State<Notifications> {
                           fullscreenDialog: true,
                           builder: (context) => ReviewParkingArea(
                             spaceId: notifications[index].getParkingSpaceId!,
-                            notificationId: notifications[index].getNotificationId!,
+                            notificationId:
+                                notifications[index].getNotificationId!,
                           ),
                         ),
                       );

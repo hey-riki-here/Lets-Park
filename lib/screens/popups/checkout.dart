@@ -131,7 +131,6 @@ class _CheckoutState extends State<Checkout> {
                 ),
               ),
             );
-            globals.goCheck = false;
             await Future.delayed(const Duration(seconds: 2));
             bool isAvailable = true;
             if (availableSlot > 0) {
@@ -148,50 +147,15 @@ class _CheckoutState extends State<Checkout> {
                 return isAvailable;
               });
             }
-
+            navigatorKey.currentState!.popUntil((route) => route.isFirst);
             if (isAvailable) {
-              ParkingSpaceServices.updateParkingSpaceData(
-                widget.parkingSpace,
-                newParking,
-              );
-
-              DateTime now = DateTime(0, 0, 0, 0, 0);
-              await WorldTimeServices.getDateTimeNow().then((time) {
-                now = DateTime(
-                  time.year,
-                  time.month,
-                  time.day,
-                  time.hour,
-                  time.minute,
-                );
-              });
-
-              UserServices.updateUserParkingData(newParking);
-
-              UserServices.notifyUser(
-                "NOTIF" +
-                    globals.userData.getUserNotifications!.length.toString(),
-                widget.parkingSpace.getOwnerId!,
-                UserNotification(
-                  "NOTIF" +
-                      globals.userData.getUserNotifications!.length.toString(),
-                  widget.parkingSpace.getSpaceId!,
-                  FirebaseAuth.instance.currentUser!.photoURL!,
-                  FirebaseAuth.instance.currentUser!.displayName!,
-                  "just booked on your parking space. Tap to view details.",
-                  true,
-                  false,
-                  now.millisecondsSinceEpoch,
-                  false,
-                  false,
-                ),
-              );
-              globals.goCheck = true;
-              navigatorKey.currentState!.popUntil((route) => route.isFirst);
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: ((context) => SuccessfulBooking()),
+                  builder: ((context) => SuccessfulBooking(
+                        newParking: newParking,
+                        parkingSpace: widget.parkingSpace,
+                      )),
                 ),
               );
             } else {

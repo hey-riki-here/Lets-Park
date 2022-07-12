@@ -1,6 +1,9 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:lets_park/globals/globals.dart' as globals;
+import 'package:lets_park/models/user_data.dart';
+import 'package:lets_park/screens/drawer_screens/profile_page/update_profile_info.dart';
 import 'package:lets_park/services/signin_provider.dart';
 import 'package:lets_park/shared/navigation_drawer.dart';
 import 'package:provider/provider.dart';
@@ -14,7 +17,7 @@ class Profile extends StatefulWidget {
 
 class _ProfileState extends State<Profile> {
   final _scaffoldKey = GlobalKey<ScaffoldState>();
-  final user = FirebaseAuth.instance.currentUser!;
+  final user = globals.loggedIn;
 
   String phoneNumber = "None";
   String photoUrl =
@@ -22,12 +25,12 @@ class _ProfileState extends State<Profile> {
 
   @override
   void initState() {
-    if (user.phoneNumber != null) {
-      phoneNumber = user.phoneNumber!;
+    if (user.getPhoneNumber != null) {
+      phoneNumber = user.getPhoneNumber!;
     }
 
-    if (user.photoURL != null) {
-      photoUrl = user.photoURL!;
+    if (user.getImageURL != null) {
+      photoUrl = user.getImageURL!;
     }
     super.initState();
   }
@@ -61,7 +64,7 @@ class _ProfileState extends State<Profile> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: <Widget>[
                         Text(
-                          user.displayName!,
+                          user.getFirstName! + " " + user.getLastName!,
                           style: const TextStyle(
                             fontSize: 21,
                             color: Colors.white,
@@ -77,7 +80,7 @@ class _ProfileState extends State<Profile> {
                             ),
                             const SizedBox(width: 10),
                             Text(
-                              user.email!,
+                              FirebaseAuth.instance.currentUser!.email!,
                               style: const TextStyle(
                                 color: Colors.white,
                               ),
@@ -91,9 +94,9 @@ class _ProfileState extends State<Profile> {
                               color: Colors.green[400],
                             ),
                             const SizedBox(width: 10),
-                            const Text(
-                              "09123456789",
-                              style: TextStyle(
+                            Text(
+                              user.getPhoneNumber!,
+                              style: const TextStyle(
                                 color: Colors.white,
                               ),
                             ),
@@ -126,7 +129,9 @@ class _ProfileState extends State<Profile> {
                 ),
               ),
               const SizedBox(height: 10),
-              const Menu(),
+              Menu(
+                user: user,
+              ),
               const SizedBox(height: 15),
               const Text(
                 "RECENT PARKINGS (Pending)",
@@ -152,7 +157,11 @@ class _ProfileState extends State<Profile> {
 }
 
 class Menu extends StatelessWidget {
-  const Menu({Key? key}) : super(key: key);
+  final UserData user;
+  const Menu({
+    Key? key,
+    required this.user,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -177,7 +186,16 @@ class Menu extends StatelessWidget {
                   topRight: Radius.circular(12),
                   topLeft: Radius.circular(12),
                 ),
-                onTap: () {},
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: ((context) => UpdateProfile(
+                            userData: user,
+                          )),
+                    ),
+                  );
+                },
               ),
               buildMenuItem(
                 icon: Icons.star_rounded,

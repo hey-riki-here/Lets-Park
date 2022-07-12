@@ -6,6 +6,10 @@ import 'package:lets_park/models/parking_space.dart';
 
 class UserData {
   String? _id;
+  String? _firstName = "";
+  String? _lastName;
+  String? _phoneNumber;
+  String? _imageUrl;
   List<ParkingSpace>? _ownedParkingSpace = [];
   int? _stars = 0;
   List<Parking>? _userParkings = [];
@@ -15,15 +19,39 @@ class UserData {
 
   UserData.fromDatabase(
     String? id,
+    String? firstName,
+    String? lastName,
+    String? phoneNumber,
+    String? imageUrl,
     int? stars,
   ) {
     _id = id;
+    _firstName = firstName;
+    _lastName = lastName;
+    _phoneNumber = phoneNumber;
+    _imageUrl = imageUrl;
     _stars = stars;
   }
 
   String? get getUserId => _id;
 
   set setUserId(String? id) => _id = id;
+
+  String? get getFirstName => _firstName;
+
+  set setFirstName(String? firstName) => _firstName = firstName;
+
+  String? get getLastName => _lastName;
+
+  set setLastName(String? lastName) => _lastName = lastName;
+
+  String? get getPhoneNumber => _phoneNumber;
+
+  set setPhoneNumber(String? phoneNumber) => _phoneNumber = phoneNumber;
+
+  String? get getImageURL => _imageUrl;
+
+  set setImageURL(String? imageUrl) => _imageUrl = imageUrl;
 
   List<ParkingSpace>? get getOwnedParkingSpaces => _ownedParkingSpace;
 
@@ -48,17 +76,25 @@ class UserData {
 
   @override
   String toString() {
-    return "UserData [ $_id , $_stars , $_userParkings]";
+    return "UserData [ $_id , $_stars , $_firstName , $_userParkings]";
   }
 
   Map<String, dynamic> toJson() => {
         'id': _id,
+        'firstName': _firstName,
+        'lastName': _lastName,
+        'phoneNumber': _phoneNumber,
+        'imageUrl': _imageUrl,
         'stars': _stars,
       };
 
   static UserData fromJson(Map<String, dynamic> json) {
     return UserData.fromDatabase(
       json['id'],
+      json['firstName'],
+      json['lastName'],
+      json['phoneNumber'],
+      json['imageUrl'],
       json['stars'],
     );
   }

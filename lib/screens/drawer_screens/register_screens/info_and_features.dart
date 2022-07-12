@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:lets_park/shared/shared_widgets.dart';
-import 'package:lets_park/globals/globals.dart' as globals;
 
 class InfoAndFeatures extends StatefulWidget {
   const InfoAndFeatures({Key? key}) : super(key: key);

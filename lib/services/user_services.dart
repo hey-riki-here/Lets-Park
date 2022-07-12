@@ -35,29 +35,34 @@ class UserServices {
     return count;
   });
 
-  late StreamSubscription _parkingSessionsStreams;
-  late StreamSubscription _ownedParkingSessionsStreams;
+  static late StreamSubscription parkingSessionsStreams;
+  static late StreamSubscription ownedParkingSessionsStreams;
 
   void startSessionsStream(BuildContext context) {
-    _parkingSessionsStreams = checkParkingSessionsStream.listen((event) {
-      if (globals.goCheck) {
-        distributeParkingSessions(context);
-      }
+    parkingSessionsStreams = checkParkingSessionsStream.listen((event) {
+      distributeParkingSessions(context);
     });
 
-    _ownedParkingSessionsStreams =
+    ownedParkingSessionsStreams =
         checkOwnedParkingSessionsStream.listen((event) {
-      if (globals.goCheck) {
-        checkParkingSessionsOnOwnedSpaces(context);
-      }
+      checkParkingSessionsOnOwnedSpaces(context);
     });
   }
 
-  static Future registerNewUserData() async {
+  static Future registerNewUserData(
+    String firstName,
+    String lastName,
+    String phoneNumber,
+    String imageURL,
+  ) async {
     String id = FirebaseAuth.instance.currentUser!.uid;
     final docUser = FirebaseFirestore.instance.collection('user-data').doc(id);
 
     globals.userData.setUserId = id;
+    globals.userData.setFirstName = firstName;
+    globals.userData.setLastName = lastName;
+    globals.userData.setPhoneNumber = phoneNumber;
+    globals.userData.setImageURL = imageURL;
 
     await docUser.set(globals.userData.toJson());
   }
@@ -121,7 +126,7 @@ class UserServices {
                     .compareTo(now) ==
                 1) &&
             parking.isInProgress == false) {
-          _parkingSessionsStreams.pause();
+          parkingSessionsStreams.pause();
           await userParkings.doc(parking.getParkingId).update({
             'inProgress': true,
             'upcoming': false,
@@ -137,12 +142,12 @@ class UserServices {
             'upcoming': false,
             'inHistory': false,
           });
-          _parkingSessionsStreams.resume();
+          parkingSessionsStreams.resume();
         } else if (_getDateTimeFromMillisecondEpoch(parking.getArrival!)
                     .compareTo(now) ==
                 1 &&
             parking.isUpcoming == false) {
-          _parkingSessionsStreams.pause();
+          parkingSessionsStreams.pause();
           await userParkings.doc(parking.getParkingId).update({
             'inProgress': false,
             'upcoming': true,
@@ -158,7 +163,7 @@ class UserServices {
             'upcoming': true,
             'inHistory': false,
           });
-          _parkingSessionsStreams.resume();
+          parkingSessionsStreams.resume();
         } else if ((_getDateTimeFromMillisecondEpoch(parking.getArrival!)
                         .compareTo(now) ==
                     -1 &&
@@ -169,7 +174,7 @@ class UserServices {
                             .compareTo(now) ==
                         -1)) &&
             parking.isInHistory == false) {
-          _parkingSessionsStreams.pause();
+          parkingSessionsStreams.pause();
           await userParkings.doc(parking.getParkingId).update({
             'inProgress': false,
             'upcoming': false,
@@ -223,7 +228,7 @@ class UserServices {
             'upcoming': false,
             'inHistory': true,
           });
-          _parkingSessionsStreams.resume();
+          parkingSessionsStreams.resume();
         }
       }
     } on Exception catch (e) {}
@@ -262,7 +267,7 @@ class UserServices {
                       .compareTo(now) ==
                   1) &&
               parking.isInProgress == false) {
-            _ownedParkingSessionsStreams.pause();
+            ownedParkingSessionsStreams.pause();
             await parkingSpacesDb
                 .doc(parking.getParkingSpaceId)
                 .collection("parking-sessions")
@@ -272,7 +277,7 @@ class UserServices {
               'upcoming': false,
               'inHistory': false,
             });
-            _ownedParkingSessionsStreams.resume();
+            ownedParkingSessionsStreams.resume();
           } else if ((_getDateTimeFromMillisecondEpoch(parking.getArrival!)
                           .compareTo(now) ==
                       -1 &&
@@ -283,7 +288,7 @@ class UserServices {
                               .compareTo(now) ==
                           -1)) &&
               parking.isInHistory == false) {
-            _ownedParkingSessionsStreams.pause();
+            ownedParkingSessionsStreams.pause();
             await parkingSpacesDb
                 .doc(parking.getParkingSpaceId)
                 .collection("parking-sessions")
@@ -293,7 +298,7 @@ class UserServices {
               'upcoming': false,
               'inHistory': true,
             });
-            _ownedParkingSessionsStreams.resume();
+            ownedParkingSessionsStreams.resume();
             UserServices.notifyUser(
               "NOTIF" +
                   globals.userData.getUserNotifications!.length.toString(),
@@ -383,8 +388,8 @@ class UserServices {
   //   );
   // }
 
-  StreamSubscription get getParkingSessionsStream => _parkingSessionsStreams;
+  StreamSubscription get getParkingSessionsStream => parkingSessionsStreams;
 
   StreamSubscription get getOwnedParkingSessionsStream =>
-      _ownedParkingSessionsStreams;
+      ownedParkingSessionsStreams;
 }

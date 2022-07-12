@@ -6,8 +6,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dotted_border/dotted_border.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_holo_date_picker/flutter_holo_date_picker.dart';
-import 'package:flutter_time_picker_spinner/flutter_time_picker_spinner.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
@@ -89,10 +87,6 @@ class _NonReservableCheckoutState extends State<NonReservableCheckout> {
         ),
         child: ElevatedButton(
           onPressed: () async {
-            if (!(_setupTimeState.currentState!.isTimeValid())) {
-              return;
-            }
-
             if (_vehicleState.currentState!.getPlateNumber!.isEmpty) {
               showAlertDialog("Please provide car's plate number.");
               return;
@@ -135,51 +129,16 @@ class _NonReservableCheckoutState extends State<NonReservableCheckout> {
                 ),
               ),
             );
-            globals.goCheck = false;
             await Future.delayed(const Duration(seconds: 2));
 
-            ParkingSpaceServices.updateParkingSpaceData(
-              widget.parkingSpace,
-              newParking,
-            );
-
-            DateTime now = DateTime(0, 0, 0, 0, 0);
-            await WorldTimeServices.getDateTimeNow().then((time) {
-              now = DateTime(
-                time.year,
-                time.month,
-                time.day,
-                time.hour,
-                time.minute,
-              );
-            });
-
-            UserServices.updateUserParkingData(newParking);
-
-            UserServices.notifyUser(
-              "NOTIF" +
-                  globals.userData.getUserNotifications!.length.toString(),
-              widget.parkingSpace.getOwnerId!,
-              UserNotification(
-                "NOTIF" +
-                    globals.userData.getUserNotifications!.length.toString(),
-                widget.parkingSpace.getSpaceId!,
-                FirebaseAuth.instance.currentUser!.photoURL!,
-                FirebaseAuth.instance.currentUser!.displayName!,
-                "just booked on your parking space. Tap to view details.",
-                true,
-                false,
-                now.millisecondsSinceEpoch,
-                false,
-                false,
-              ),
-            );
-            globals.goCheck = true;
             navigatorKey.currentState!.popUntil((route) => route.isFirst);
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: ((context) => const SuccessfulBooking()),
+                builder: ((context) => SuccessfulBooking(
+                      newParking: newParking,
+                      parkingSpace: widget.parkingSpace,
+                    )),
               ),
             );
           },
@@ -246,8 +205,7 @@ class SetUpTimeState extends State<SetUpTime> {
     fontWeight: FontWeight.bold,
   );
 
-  DateTime? _selectedDate = DateTime.now();
-  DateTime? _selectedTime;
+  final DateTime? _selectedDate = DateTime.now();
   DateTime? _selectedDateTime;
   DateTime? _selectedArrivalDateTime;
   DateTime? _selectedDepartureDateTime;
@@ -269,7 +227,7 @@ class SetUpTimeState extends State<SetUpTime> {
       _selectedDate!.day,
       _selectedDate!.hour,
       _selectedDate!.minute,
-    ).add(const Duration(minutes: 15));
+    );
 
     _selectedDateTime = _selectedArrivalDateTime;
 
@@ -527,95 +485,95 @@ class SetUpTimeState extends State<SetUpTime> {
     );
   }
 
-  Future<dynamic> showDateTimePicker(BuildContext context) {
-    return showDialog(
-      barrierDismissible: false,
-      context: context,
-      builder: (context) => Dialog(
-        child: SizedBox(
-          height: 335,
-          child: Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Column(
-              children: [
-                Text(
-                  "Please select valid time and date of arrival",
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: Colors.blue.shade900,
-                  ),
-                ),
-                const SizedBox(height: 20),
-                TimePickerSpinner(
-                  time: _selectedArrivalDateTime,
-                  is24HourMode: false,
-                  normalTextStyle: const TextStyle(
-                    fontSize: 18,
-                    color: Colors.grey,
-                  ),
-                  highlightedTextStyle: const TextStyle(
-                    fontSize: 23,
-                    color: Colors.black,
-                  ),
-                  spacing: 40,
-                  itemHeight: 25,
-                  isForce2Digits: true,
-                  onTimeChange: (time) {
-                    _selectedTime = time;
-                  },
-                ),
-                DatePickerWidget(
-                  initialDate: _selectedArrivalDateTime,
-                  looping: false,
-                  firstDate: DateTime.now(),
-                  dateFormat: "MMM/dd/yyyy",
-                  onChange: (DateTime newDate, _) {
-                    _selectedDate = newDate;
-                  },
-                  pickerTheme: const DateTimePickerTheme(
-                    itemTextStyle: TextStyle(
-                      color: Colors.black,
-                      fontSize: 19,
-                    ),
-                  ),
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    TextButton(
-                      onPressed: () => Navigator.pop(context),
-                      child: const Text("Cancel"),
-                    ),
-                    ElevatedButton(
-                      onPressed: () {
-                        try {
-                          _selectedDateTime = DateTime(
-                            _selectedDate!.year,
-                            _selectedDate!.month,
-                            _selectedDate!.day,
-                            _selectedTime!.hour,
-                            _selectedTime!.minute,
-                          );
-                          Navigator.pop(context);
-                          getArrivalDateTime(_selectedDateTime!);
-                        } on Exception catch (e) {
-                          Navigator.pop(context);
-                          getArrivalDateTime(DateTime.now());
-                        } finally {
-                          getPrice();
-                        }
-                      },
-                      child: const Text("Confirm"),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
+  // Future<dynamic> showDateTimePicker(BuildContext context) {
+  //   return showDialog(
+  //     barrierDismissible: false,
+  //     context: context,
+  //     builder: (context) => Dialog(
+  //       child: SizedBox(
+  //         height: 335,
+  //         child: Padding(
+  //           padding: const EdgeInsets.all(8.0),
+  //           child: Column(
+  //             children: [
+  //               Text(
+  //                 "Please select valid time and date of arrival",
+  //                 style: TextStyle(
+  //                   fontSize: 16,
+  //                   color: Colors.blue.shade900,
+  //                 ),
+  //               ),
+  //               const SizedBox(height: 20),
+  //               TimePickerSpinner(
+  //                 time: _selectedArrivalDateTime,
+  //                 is24HourMode: false,
+  //                 normalTextStyle: const TextStyle(
+  //                   fontSize: 18,
+  //                   color: Colors.grey,
+  //                 ),
+  //                 highlightedTextStyle: const TextStyle(
+  //                   fontSize: 23,
+  //                   color: Colors.black,
+  //                 ),
+  //                 spacing: 40,
+  //                 itemHeight: 25,
+  //                 isForce2Digits: true,
+  //                 onTimeChange: (time) {
+  //                   _selectedTime = time;
+  //                 },
+  //               ),
+  //               DatePickerWidget(
+  //                 initialDate: _selectedArrivalDateTime,
+  //                 looping: false,
+  //                 firstDate: DateTime.now(),
+  //                 dateFormat: "MMM/dd/yyyy",
+  //                 onChange: (DateTime newDate, _) {
+  //                   _selectedDate = newDate;
+  //                 },
+  //                 pickerTheme: const DateTimePickerTheme(
+  //                   itemTextStyle: TextStyle(
+  //                     color: Colors.black,
+  //                     fontSize: 19,
+  //                   ),
+  //                 ),
+  //               ),
+  //               Row(
+  //                 mainAxisAlignment: MainAxisAlignment.end,
+  //                 children: [
+  //                   TextButton(
+  //                     onPressed: () => Navigator.pop(context),
+  //                     child: const Text("Cancel"),
+  //                   ),
+  //                   ElevatedButton(
+  //                     onPressed: () {
+  //                       try {
+  //                         _selectedDateTime = DateTime(
+  //                           _selectedDate!.year,
+  //                           _selectedDate!.month,
+  //                           _selectedDate!.day,
+  //                           _selectedTime!.hour,
+  //                           _selectedTime!.minute,
+  //                         );
+  //                         Navigator.pop(context);
+  //                         getArrivalDateTime(_selectedDateTime!);
+  //                       } on Exception catch (e) {
+  //                         Navigator.pop(context);
+  //                         getArrivalDateTime(DateTime.now());
+  //                       } finally {
+  //                         getPrice();
+  //                       }
+  //                     },
+  //                     child: const Text("Confirm"),
+  //                   ),
+  //                 ],
+  //               ),
+  //             ],
+  //           ),
+  //         ),
+  //       ),
+  //     ),
+  //   );
+  // }
 
   void setDuration() {
     if (_selectedHour != 0 || _selectedMinute != 0) {

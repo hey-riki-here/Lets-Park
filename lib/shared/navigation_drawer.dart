@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:lets_park/main.dart';
+import 'package:lets_park/models/user_data.dart';
 import 'package:lets_park/screens/drawer_screens/about_us.dart';
 import 'package:lets_park/screens/drawer_screens/manage_space/manage_space.dart';
 import 'package:lets_park/screens/drawer_screens/messages.dart';
@@ -21,20 +22,21 @@ class NavigationDrawer extends StatefulWidget {
 }
 
 class _NavigationDrawerState extends State<NavigationDrawer> {
-  final user = FirebaseAuth.instance.currentUser!;
+  final UserData user = globals.loggedIn;
   String photoURL =
       "https://cdn4.iconfinder.com/data/icons/user-people-2/48/5-512.png";
 
   @override
   void initState() {
-    if (user.photoURL != null) {
-      photoURL = user.photoURL!;
+    if (user.getImageURL != null) {
+      photoURL = user.getImageURL!;
     }
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
+    print(user);
     return SafeArea(
       child: Drawer(
         child: Material(
@@ -51,7 +53,7 @@ class _NavigationDrawerState extends State<NavigationDrawer> {
                 MyAccount(
                   id: 1,
                   currentPage: widget.currentPage,
-                  name: user.displayName!,
+                  name: user.getFirstName! + " " + user.getLastName!,
                   photoUrl: photoURL,
                 ),
                 const SizedBox(height: 40),
