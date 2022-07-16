@@ -13,14 +13,11 @@ import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:jiffy/jiffy.dart';
 import 'package:lets_park/main.dart';
-import 'package:lets_park/models/notification.dart';
 import 'package:lets_park/models/parking.dart';
 import 'package:lets_park/models/parking_space.dart';
 import 'package:lets_park/screens/popups/notice_dialog.dart';
 import 'package:lets_park/screens/popups/successful_booking.dart';
 import 'package:lets_park/services/parking_space_services.dart';
-import 'package:lets_park/services/user_services.dart';
-import 'package:lets_park/services/world_time_api.dart';
 import 'package:numberpicker/numberpicker.dart';
 import 'package:lets_park/globals/globals.dart' as globals;
 

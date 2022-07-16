@@ -1,3 +1,5 @@
+// ignore_for_file: empty_catches, unused_catch_clause
+
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -432,7 +434,7 @@ class _UpdateProfileState extends State<UpdateProfile> {
 
                     await SignInProvider.getUserData(widget.userData.getUserId!).then((userData) {
                       globals.loggedIn = userData;
-                    } );
+                    });
 
                     navigatorKey.currentState!
                         .popUntil((route) => route.isFirst);

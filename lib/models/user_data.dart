@@ -14,6 +14,7 @@ class UserData {
   int? _stars = 0;
   List<Parking>? _userParkings = [];
   List<UserNotification>? _notifications = [];
+  List<String>? _favorites = [];
 
   UserData();
 
@@ -24,6 +25,7 @@ class UserData {
     String? phoneNumber,
     String? imageUrl,
     int? stars,
+    List<String>? favorites,
   ) {
     _id = id;
     _firstName = firstName;
@@ -31,6 +33,7 @@ class UserData {
     _phoneNumber = phoneNumber;
     _imageUrl = imageUrl;
     _stars = stars;
+    _favorites = favorites;
   }
 
   String? get getUserId => _id;
@@ -74,6 +77,12 @@ class UserData {
     _notifications = notifications;
   }
 
+  List<String>? get getUserFavorites => _favorites;
+
+  set setUserFavories(List<String>? favorites) {
+    _favorites = favorites;
+  }
+
   @override
   String toString() {
     return "UserData [ $_id , $_stars , $_firstName , $_userParkings]";
@@ -86,9 +95,14 @@ class UserData {
         'phoneNumber': _phoneNumber,
         'imageUrl': _imageUrl,
         'stars': _stars,
+        'favorites': _favorites,
       };
 
   static UserData fromJson(Map<String, dynamic> json) {
+    List fromDatabaseFavorites = json['favorites'];
+    List<String>? favorites = [];
+    favorites = fromDatabaseFavorites.cast<String>();
+
     return UserData.fromDatabase(
       json['id'],
       json['firstName'],
@@ -96,6 +110,7 @@ class UserData {
       json['phoneNumber'],
       json['imageUrl'],
       json['stars'],
+      favorites,
     );
   }
 }

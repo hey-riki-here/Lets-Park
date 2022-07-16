@@ -5,10 +5,12 @@ import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:lets_park/models/car.dart';
 import 'package:lets_park/models/notification.dart';
 import 'package:lets_park/models/parking.dart';
 import 'package:lets_park/globals/globals.dart' as globals;
 import 'package:lets_park/models/parking_space.dart';
+import 'package:lets_park/services/signin_provider.dart';
 import 'package:lets_park/services/world_time_api.dart';
 
 class UserServices {
@@ -63,6 +65,7 @@ class UserServices {
     globals.userData.setLastName = lastName;
     globals.userData.setPhoneNumber = phoneNumber;
     globals.userData.setImageURL = imageURL;
+    globals.userData.setUserFavories = [];
 
     await docUser.set(globals.userData.toJson());
   }
@@ -372,6 +375,73 @@ class UserServices {
       fromEpoch.hour,
       fromEpoch.minute,
     );
+  }
+
+  static void addSpaceonFavorites(String uid, String spaceId) async {
+    List<String> newFavList = globals.loggedIn.getUserFavorites!;
+    newFavList.add(spaceId);
+    await FirebaseFirestore.instance.collection('user-data').doc(uid).update({
+      'favorites': newFavList,
+    });
+
+    await SignInProvider.getUserData(uid).then((userData) {
+      globals.loggedIn = userData;
+    });
+  }
+
+  static void removeSpaceonFavorites(String uid, String spaceId) async {
+    List<String> newFavList = globals.loggedIn.getUserFavorites!;
+    newFavList.remove(spaceId);
+    await FirebaseFirestore.instance.collection('user-data').doc(uid).update({
+      'favorites': newFavList,
+    });
+  }
+
+  static Future<int> _getRegisteredCarsQuantity() async {
+    int size = 0;
+    await FirebaseFirestore.instance
+        .collection('user-data')
+        .doc(FirebaseAuth.instance.currentUser!.uid)
+        .collection('cars')
+        .snapshots()
+        .first
+        .then((value) {
+      size = value.size;
+    });
+    return size;
+  }
+
+  static void registerCar(Car car) async {
+    int number = 0;
+    await _getRegisteredCarsQuantity().then((value) {
+      number = value;
+    });
+    String dateAdded = DateTime.now().day.toString() +
+        DateTime.now().month.toString() +
+        DateTime.now().year.toString() +
+        DateTime.now().hour.toString() +
+        DateTime.now().minute.toString() +
+        DateTime.now().second.toString() +
+        DateTime.now().microsecond.toString();
+
+    car.setCarId = "CAR$dateAdded$number";
+
+    final newCarDoc = FirebaseFirestore.instance
+        .collection('user-data')
+        .doc(FirebaseAuth.instance.currentUser!.uid)
+        .collection('cars')
+        .doc(car.getCarId);
+
+    await newCarDoc.set(car.toJson());
+  }
+
+  static void removeCar(Car car) async {
+    await FirebaseFirestore.instance
+        .collection('user-data')
+        .doc(FirebaseAuth.instance.currentUser!.uid)
+        .collection('cars')
+        .doc(car.getCarId)
+        .delete();
   }
 
   // void showNotice(BuildContext context, String message) {

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:lets_park/globals/globals.dart' as globals;
-import 'package:lets_park/screens/popups/checkout.dart';
 import 'package:lets_park/screens/popups/checkout_non_reservable.dart';
 
 class NoticeDialog extends StatelessWidget {
@@ -176,7 +175,6 @@ class NoticeDialog extends StatelessWidget {
                     const TextStyle(fontSize: 14, fontWeight: FontWeight.w400),
               ),
               onPressed: () {
-                print(globals.nonReservable);
                 globals.popWindow = true;
                 Navigator.of(context, rootNavigator: true).pop();
 

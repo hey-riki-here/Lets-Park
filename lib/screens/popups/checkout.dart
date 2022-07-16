@@ -12,20 +12,20 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:lets_park/main.dart';
-import 'package:lets_park/models/notification.dart';
 import 'package:lets_park/models/parking.dart';
 import 'package:lets_park/models/parking_space.dart';
 import 'package:lets_park/screens/popups/notice_dialog.dart';
 import 'package:lets_park/screens/popups/successful_booking.dart';
 import 'package:lets_park/services/parking_space_services.dart';
-import 'package:lets_park/services/user_services.dart';
-import 'package:lets_park/services/world_time_api.dart';
 import 'package:numberpicker/numberpicker.dart';
 import 'package:lets_park/globals/globals.dart' as globals;
 
 class Checkout extends StatefulWidget {
   final ParkingSpace parkingSpace;
-  const Checkout({Key? key, required this.parkingSpace}) : super(key: key);
+  const Checkout({
+    Key? key,
+    required this.parkingSpace,
+  }) : super(key: key);
 
   @override
   State<Checkout> createState() => _CheckoutState();
@@ -109,7 +109,8 @@ class _CheckoutState extends State<Checkout> {
               globals.userData.getStars,
               widget.parkingSpace.getAddress,
               _vehicleState.currentState!.getPlateNumber,
-              _setupTimeState.currentState!.getArrival!.millisecondsSinceEpoch,
+              _setupTimeState
+                  .currentState!.getArrival!.millisecondsSinceEpoch,
               _setupTimeState
                   .currentState!.getDeparture!.millisecondsSinceEpoch,
               _setupTimeState.currentState!.getDuration,
@@ -136,8 +137,8 @@ class _CheckoutState extends State<Checkout> {
             if (availableSlot > 0) {
               isAvailable = true;
             } else {
-              isAvailable =
-                  await ParkingSpaceServices.isParkingSpaceAvailableAtTimeRange(
+              isAvailable = await ParkingSpaceServices
+                  .isParkingSpaceAvailableAtTimeRange(
                 widget.parkingSpace.getSpaceId,
                 _setupTimeState
                     .currentState!.getArrival!.millisecondsSinceEpoch,

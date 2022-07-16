@@ -1,4 +1,3 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:lets_park/main.dart';
 import 'package:lets_park/models/user_data.dart';
@@ -36,7 +35,6 @@ class _NavigationDrawerState extends State<NavigationDrawer> {
 
   @override
   Widget build(BuildContext context) {
-    print(user);
     return SafeArea(
       child: Drawer(
         child: Material(

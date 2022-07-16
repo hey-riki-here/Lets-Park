@@ -225,7 +225,6 @@ class SignInProvider extends ChangeNotifier {
         .get()
         .then((userData) {
       data = UserData.fromJson(userData.data()!);
-      print(data);
     });
 
     return data;

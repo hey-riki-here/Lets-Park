@@ -11,11 +11,13 @@ import 'package:lets_park/models/parking.dart';
 import 'package:lets_park/models/parking_space.dart';
 import 'package:lets_park/screens/logged_in_screens/google_map_screen.dart';
 import 'package:lets_park/services/firebase_api.dart';
+import 'package:lets_park/services/signin_provider.dart';
 import 'package:lets_park/services/user_services.dart';
 import 'package:lets_park/services/parking_space_services.dart';
 import 'package:lets_park/shared/navigation_drawer.dart';
 import 'package:location/location.dart';
 import 'package:geolocator/geolocator.dart' as geolocator;
+import 'package:provider/provider.dart';
 
 class Home extends StatefulWidget {
   final int _pageId = 2;
@@ -53,7 +55,6 @@ class _HomeState extends State<Home> {
 
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
       key: _scaffoldKey,
       drawer: NavigationDrawer(currentPage: widget._pageId),
@@ -180,8 +181,12 @@ class SearchBox extends StatelessWidget {
                   decoration: InputDecoration(
                     suffixIcon: IconButton(
                         onPressed: () {
-                          gMapKey.currentState!.goToLocation(
-                              _controller.text.trim() + ", Valenzuela");
+                          Provider.of<SignInProvider>(
+                            context,
+                            listen: false,
+                          ).logout(context);
+                          // gMapKey.currentState!.goToLocation(
+                          //     _controller.text.trim() + ", Valenzuela");
                         },
                         icon: const Icon(
                           Icons.search,

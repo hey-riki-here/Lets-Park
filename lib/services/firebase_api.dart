@@ -94,8 +94,9 @@ class FirebaseServices {
                 context,
                 MaterialPageRoute(
                   fullscreenDialog: true,
-                  builder: (context) =>
-                      ParkingAreaInfo(parkingSpace: parkingSpace),
+                  builder: (context) => ParkingAreaInfo(
+                    parkingSpace: parkingSpace,
+                  ),
                 ),
               );
             },

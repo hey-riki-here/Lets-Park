@@ -2,6 +2,7 @@
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:community_material_icon/community_material_icon.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:lets_park/models/parking_space.dart';
 import 'package:lets_park/models/review.dart';
@@ -11,13 +12,16 @@ import 'package:lets_park/screens/popups/notice_dialog.dart';
 import 'package:lets_park/services/firebase_api.dart';
 import 'package:lets_park/services/parking_space_services.dart';
 import 'package:geolocator/geolocator.dart' as geolocator;
+import 'package:lets_park/services/user_services.dart';
 import 'package:location/location.dart';
 import 'package:lets_park/globals/globals.dart' as globals;
 
 class ParkingAreaInfo extends StatefulWidget {
   final ParkingSpace parkingSpace;
-  const ParkingAreaInfo({Key? key, required this.parkingSpace})
-      : super(key: key);
+  const ParkingAreaInfo({
+    Key? key,
+    required this.parkingSpace,
+  }) : super(key: key);
 
   @override
   State<ParkingAreaInfo> createState() => _ParkingAreaInfoState();
@@ -26,6 +30,7 @@ class ParkingAreaInfo extends StatefulWidget {
 class _ParkingAreaInfoState extends State<ParkingAreaInfo> {
   String destinationDistance = "";
   bool isLocationEnabled = false;
+
   @override
   void initState() {
     toDestination();
@@ -66,6 +71,7 @@ class _ParkingAreaInfoState extends State<ParkingAreaInfo> {
                       dailyOrMonthly: widget.parkingSpace.getDailyOrMonthly!,
                       stars: widget.parkingSpace.getRating!,
                       isLocationEnabled: isLocationEnabled,
+                      spaceId: widget.parkingSpace.getSpaceId!,
                     ),
                   ),
                   PriceAndDistance(
@@ -212,13 +218,14 @@ class _ParkingAreaInfoState extends State<ParkingAreaInfo> {
   }
 }
 
-class Header extends StatelessWidget {
+class Header extends StatefulWidget {
   final String imageUrl;
   final String address;
   final String type;
   final String dailyOrMonthly;
   final double stars;
   final bool isLocationEnabled;
+  final String spaceId;
   const Header({
     Key? key,
     required this.imageUrl,
@@ -227,51 +234,149 @@ class Header extends StatelessWidget {
     required this.dailyOrMonthly,
     required this.stars,
     required this.isLocationEnabled,
+    required this.spaceId,
   }) : super(key: key);
+
+  @override
+  State<Header> createState() => _HeaderState();
+}
+
+class _HeaderState extends State<Header> {
+  Icon _favIcon = Icon(
+    Icons.star_border_rounded,
+    color: Colors.amber[300],
+  );
+  bool _added = false;
+  String _label = "Add to Favorites";
+
+  @override
+  void initState() {
+    _favIcon = Icon(
+      globals.loggedIn.getUserFavorites!.contains(widget.spaceId)
+          ? Icons.star_rounded
+          : Icons.star_border_rounded,
+      color: Colors.amber[300],
+    );
+
+    _added = globals.loggedIn.getUserFavorites!.contains(widget.spaceId)
+        ? true
+        : false;
+
+    _label = globals.loggedIn.getUserFavorites!.contains(widget.spaceId)
+        ? "Added to Favorites"
+        : "Add to Favorites";
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          address,
-          style: const TextStyle(
-            color: Colors.black54,
-            fontWeight: FontWeight.w400,
-          ),
-        ),
-        const SizedBox(height: 2),
-        ParkingSpaceServices.getStars(stars),
-        const SizedBox(height: 5),
         Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Container(
-              decoration: BoxDecoration(
-                color: Colors.blue[400],
-                borderRadius: const BorderRadius.all(Radius.circular(3)),
-              ),
-              padding: const EdgeInsets.all(3),
-              child: Text(
-                type,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w500,
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  widget.address,
+                  style: const TextStyle(
+                    color: Colors.black54,
+                    fontWeight: FontWeight.w400,
+                  ),
                 ),
-              ),
+                const SizedBox(height: 2),
+                ParkingSpaceServices.getStars(widget.stars),
+                const SizedBox(height: 5),
+                Row(
+                  children: [
+                    Container(
+                      decoration: BoxDecoration(
+                        color: Colors.blue[400],
+                        borderRadius:
+                            const BorderRadius.all(Radius.circular(3)),
+                      ),
+                      padding: const EdgeInsets.all(3),
+                      child: Text(
+                        widget.type,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 5),
+                    Container(
+                      decoration: BoxDecoration(
+                        color: Colors.orange[400],
+                        borderRadius:
+                            const BorderRadius.all(Radius.circular(3)),
+                      ),
+                      padding: const EdgeInsets.all(3),
+                      child: Text(
+                        widget.dailyOrMonthly,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ),
-            const SizedBox(width: 5),
-            Container(
-              decoration: BoxDecoration(
-                color: Colors.orange[400],
-                borderRadius: const BorderRadius.all(Radius.circular(3)),
-              ),
-              padding: const EdgeInsets.all(3),
-              child: Text(
-                dailyOrMonthly,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w500,
+            GestureDetector(
+              onTap: () {
+                setState(() {
+                  if (_added) {
+                    _favIcon = Icon(
+                      Icons.star_border_rounded,
+                      color: Colors.amber[300],
+                    );
+                    _label = "Add to Favorites";
+                    showNotice(
+                      context,
+                      "Parking space remove from My Favorites",
+                    );
+                    UserServices.removeSpaceonFavorites(
+                      FirebaseAuth.instance.currentUser!.uid,
+                      widget.spaceId,
+                    );
+                    _added = false;
+                  } else {
+                    _favIcon = Icon(
+                      Icons.star_rounded,
+                      color: Colors.amber[300],
+                    );
+                    _label = "Added to Favorites";
+                    showNotice(context, "Parking space added to My Favorites");
+                    UserServices.addSpaceonFavorites(
+                      FirebaseAuth.instance.currentUser!.uid,
+                      widget.spaceId,
+                    );
+                    _added = true;
+                  }
+                });
+              },
+              child: Container(
+                decoration: BoxDecoration(
+                  border: Border.all(
+                    width: 1,
+                    color: Colors.black54,
+                  ),
+                  borderRadius: const BorderRadius.all(Radius.circular(12)),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 3),
+                  child: Row(
+                    children: [
+                      _favIcon,
+                      Text(
+                        _label,
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -280,8 +385,8 @@ class Header extends StatelessWidget {
         const SizedBox(height: 10),
         Center(
           child: Container(
-            width: 250,
-            height: 150,
+            width: 240,
+            height: 140,
             decoration: BoxDecoration(
               border: Border.all(width: 1),
               borderRadius: const BorderRadius.all(Radius.circular(12)),
@@ -289,14 +394,14 @@ class Header extends StatelessWidget {
             child: ClipRRect(
               borderRadius: BorderRadius.circular(12),
               child: Image.network(
-                imageUrl,
+                widget.imageUrl,
                 fit: BoxFit.fill,
               ),
             ),
           ),
         ),
         const SizedBox(height: 10),
-        !isLocationEnabled
+        !widget.isLocationEnabled
             ? Row(
                 children: [
                   Icon(
@@ -315,6 +420,20 @@ class Header extends StatelessWidget {
               )
             : const Text(""),
       ],
+    );
+  }
+
+  void showNotice(BuildContext context, String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        backgroundColor: Colors.blue,
+        duration: const Duration(seconds: 5),
+      ),
     );
   }
 }

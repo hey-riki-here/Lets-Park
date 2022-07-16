@@ -7,7 +7,8 @@ class WorldTimeServices {
   static Future<DateTime> getDateTimeNow() async {
     try {
       Response response = await get(
-          Uri.parse("http://worldtimeapi.org/api/timezone/Asia/Macau"));
+        Uri.parse("http://worldtimeapi.org/api/timezone/Asia/Macau"),
+      );
       Map data = jsonDecode(response.body);
 
       String dateTime = data["datetime"];

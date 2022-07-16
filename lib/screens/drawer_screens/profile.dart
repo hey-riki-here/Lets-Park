@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:lets_park/globals/globals.dart' as globals;
 import 'package:lets_park/models/user_data.dart';
+import 'package:lets_park/screens/drawer_screens/profile_page/my_favorites.dart';
+import 'package:lets_park/screens/drawer_screens/profile_page/registered_cars.dart';
 import 'package:lets_park/screens/drawer_screens/profile_page/update_profile_info.dart';
 import 'package:lets_park/services/signin_provider.dart';
 import 'package:lets_park/shared/navigation_drawer.dart';
@@ -207,16 +209,30 @@ class Menu extends StatelessWidget {
                   topRight: Radius.circular(12),
                   topLeft: Radius.circular(12),
                 ),
-                onTap: () {},
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: ((context) => const MyFavorites()),
+                    ),
+                  );
+                },
               ),
               buildMenuItem(
                 icon: FontAwesomeIcons.car,
                 iconSize: 20,
                 iconColor: Colors.green[400]!,
-                label: "Registered Cars",
+                label: "My Cars",
                 insets: const EdgeInsets.all(15),
                 borderRadius: const BorderRadius.all(Radius.zero),
-                onTap: () {},
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: ((context) => const RegisteredCars()),
+                    ),
+                  );
+                },
               ),
               buildMenuItem(
                 icon: Icons.credit_card_rounded,
