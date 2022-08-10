@@ -1,14 +1,14 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:lets_park/screens/drawer_screens/profile.dart';
-import 'package:lets_park/screens/logged_in_screens/home.dart';
 import 'package:lets_park/screens/wrapper.dart';
+import 'package:lets_park/services/notif_services.dart';
 import 'package:lets_park/services/signin_provider.dart';
 import 'package:provider/provider.dart';
 
 Future main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
+  NotificationServices.initChannel();
 
   runApp(const LetsPark());
 }
@@ -30,10 +30,6 @@ class LetsPark extends StatelessWidget {
           primarySwatch: Colors.blue,
         ),
         home: const Wrapper(),
-        routes: {
-          '/home': (context) => const Home(),
-          '/profile': (context) => const Profile(),
-        },
       ),
     );
   }

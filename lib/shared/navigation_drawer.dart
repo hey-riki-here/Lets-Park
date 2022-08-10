@@ -1,6 +1,6 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:lets_park/main.dart';
-import 'package:lets_park/models/user_data.dart';
 import 'package:lets_park/screens/drawer_screens/about_us.dart';
 import 'package:lets_park/screens/drawer_screens/manage_space/manage_space.dart';
 import 'package:lets_park/screens/drawer_screens/messages.dart';
@@ -21,14 +21,14 @@ class NavigationDrawer extends StatefulWidget {
 }
 
 class _NavigationDrawerState extends State<NavigationDrawer> {
-  final UserData user = globals.loggedIn;
+  final user = FirebaseAuth.instance.currentUser!;
   String photoURL =
       "https://cdn4.iconfinder.com/data/icons/user-people-2/48/5-512.png";
 
   @override
   void initState() {
-    if (user.getImageURL != null) {
-      photoURL = user.getImageURL!;
+    if (user.photoURL != null) {
+      photoURL = user.photoURL!;
     }
     super.initState();
   }
@@ -51,7 +51,7 @@ class _NavigationDrawerState extends State<NavigationDrawer> {
                 MyAccount(
                   id: 1,
                   currentPage: widget.currentPage,
-                  name: user.getFirstName! + " " + user.getLastName!,
+                  name: user.displayName!,
                   photoUrl: photoURL,
                 ),
                 const SizedBox(height: 40),
@@ -265,7 +265,10 @@ class Item extends StatelessWidget {
           }
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => const MyParkings()),
+            MaterialPageRoute(
+                builder: (context) => const MyParkings(
+                      initialIndex: 0,
+                    )),
           );
         }
         break;

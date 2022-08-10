@@ -298,4 +298,6 @@ class _RegisterAreaState extends State<RegisterArea> {
     Navigator.push(context,
         MaterialPageRoute(builder: ((context) => const ManageSpace())));
   }
+
+  
 }

@@ -189,7 +189,7 @@ class MyFavoritesState extends State<MyFavorites> {
     List<ParkingSpace> favorites = [];
 
     globals.currentParkingSpaces.forEach((space) {
-      if (globals.loggedIn.getUserFavorites!.contains(space.getSpaceId)) {
+      if (globals.favorites.contains(space.getSpaceId)) {
         favorites.add(space);
       }
     });

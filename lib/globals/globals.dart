@@ -27,4 +27,4 @@ bool goCheck = true;
 bool goCheckOwnedSpaces = false;
 ParkingSpace nonReservable = ParkingSpace();
 String selectedType = "Daily";
-UserData loggedIn = UserData();
+List<String> favorites = [];

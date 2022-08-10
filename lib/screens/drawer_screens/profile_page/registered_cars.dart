@@ -5,7 +5,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:lets_park/models/car.dart';
-import 'package:lets_park/screens/popups/notice_dialog.dart';
 import 'package:lets_park/services/user_services.dart';
 import 'package:lets_park/shared/shared_widgets.dart';
 

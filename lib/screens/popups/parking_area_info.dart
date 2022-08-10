@@ -252,17 +252,17 @@ class _HeaderState extends State<Header> {
   @override
   void initState() {
     _favIcon = Icon(
-      globals.loggedIn.getUserFavorites!.contains(widget.spaceId)
+      globals.favorites.contains(widget.spaceId)
           ? Icons.star_rounded
           : Icons.star_border_rounded,
       color: Colors.amber[300],
     );
 
-    _added = globals.loggedIn.getUserFavorites!.contains(widget.spaceId)
+    _added = globals.favorites.contains(widget.spaceId)
         ? true
         : false;
 
-    _label = globals.loggedIn.getUserFavorites!.contains(widget.spaceId)
+    _label = globals.favorites.contains(widget.spaceId)
         ? "Added to Favorites"
         : "Add to Favorites";
     super.initState();

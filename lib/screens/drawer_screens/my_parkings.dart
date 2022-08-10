@@ -1,5 +1,6 @@
 // ignore_for_file: empty_catches, unused_catch_clause, avoid_function_literals_in_foreach_calls
 
+import 'package:android_intent_plus/android_intent.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -12,7 +13,8 @@ import 'package:lets_park/shared/navigation_drawer.dart';
 
 class MyParkings extends StatefulWidget {
   final int _pageId = 3;
-  const MyParkings({Key? key}) : super(key: key);
+  final int initialIndex;
+  const MyParkings({Key? key, required this.initialIndex}) : super(key: key);
 
   @override
   _MyParkingsState createState() => _MyParkingsState();
@@ -36,6 +38,7 @@ class _MyParkingsState extends State<MyParkings> {
   Widget build(BuildContext context) {
     return DefaultTabController(
       length: 3,
+      initialIndex: widget.initialIndex,
       child: Scaffold(
         key: _scaffoldKey,
         appBar: AppBar(
@@ -606,19 +609,223 @@ class _UpcomingState extends State<Upcoming> {
                       scale: 2.7,
                     ),
                     const SizedBox(width: 10),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          parkings[index].getAddress!,
-                          style: textStyle,
-                        ),
-                        const SizedBox(height: 5),
-                        Text(
-                          parkings[index].getPrice!.toString(),
-                          style: textStyle,
-                        ),
-                      ],
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            parkings[index].getAddress!,
+                            style: textStyle,
+                          ),
+                          const SizedBox(height: 5),
+                          Text(
+                            parkings[index].getPrice!.toString(),
+                            style: textStyle,
+                          ),
+                        ],
+                      ),
+                    ),
+                    IconButton(
+                      onPressed: () {
+                        showModalBottomSheet<void>(
+                          context: context,
+                          backgroundColor: Colors.transparent,
+                          builder: (BuildContext context) {
+                            return Container(
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              height: 320,
+                              margin: const EdgeInsets.all(12),
+                              padding: const EdgeInsets.all(12),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  Center(
+                                    child: Container(
+                                      width: 200,
+                                      height: 100,
+                                      decoration: BoxDecoration(
+                                        border: Border.all(width: 1),
+                                        borderRadius: const BorderRadius.all(
+                                            Radius.circular(12)),
+                                      ),
+                                      child: ClipRRect(
+                                        borderRadius: BorderRadius.circular(12),
+                                        child: Image.network(
+                                          parkings[index].getImageUrl!,
+                                          fit: BoxFit.fill,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 10),
+                                  Text(
+                                    parkings[index].getAddress!,
+                                    style: const TextStyle(
+                                      color: Colors.black54,
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 5),
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Icon(
+                                        Icons.star,
+                                        color: Colors.yellow.shade600,
+                                        size: 15,
+                                      ),
+                                      Icon(
+                                        Icons.star,
+                                        color: Colors.yellow.shade600,
+                                        size: 15,
+                                      ),
+                                      Icon(
+                                        Icons.star,
+                                        color: Colors.yellow.shade600,
+                                        size: 15,
+                                      ),
+                                      Icon(
+                                        Icons.star,
+                                        color: Colors.yellow.shade600,
+                                        size: 15,
+                                      ),
+                                      Icon(
+                                        Icons.star,
+                                        color: Colors.yellow.shade600,
+                                        size: 15,
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 10),
+                                  Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      const Text(
+                                        "Parking space owner",
+                                        style: TextStyle(
+                                          color: Colors.black54,
+                                          fontSize: 16,
+                                        ),
+                                      ),
+                                      Text(
+                                        parkings[index].getParkingOwner!,
+                                        style: const TextStyle(
+                                          color: Colors.black54,
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 10),
+                                  const Divider(),
+                                  const SizedBox(height: 10),
+                                  Card(
+                                    elevation: 3,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    child: Container(
+                                      padding: const EdgeInsets.all(8),
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceEvenly,
+                                        children: [
+                                          Column(
+                                            children: [
+                                              IconButton(
+                                                onPressed: () {},
+                                                icon: Icon(
+                                                  Icons.stop_circle_outlined,
+                                                  color: Colors.red.shade300,
+                                                ),
+                                              ),
+                                              const Text(
+                                                "Stop",
+                                                style: TextStyle(
+                                                  color: Colors.black54,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                          Column(
+                                            children: [
+                                              IconButton(
+                                                onPressed: () {},
+                                                icon: Icon(
+                                                  Icons.message_outlined,
+                                                  color: Colors.blue.shade300,
+                                                ),
+                                              ),
+                                              const Text(
+                                                "Message",
+                                                style: TextStyle(
+                                                  color: Colors.black54,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                          Column(
+                                            children: [
+                                              IconButton(
+                                                onPressed: () {},
+                                                icon: Icon(
+                                                  Icons.more_time_rounded,
+                                                  color: Colors.green.shade300,
+                                                ),
+                                              ),
+                                              const Text(
+                                                "Extend",
+                                                style: TextStyle(
+                                                  color: Colors.black54,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                          Column(
+                                            children: [
+                                              IconButton(
+                                                onPressed: () {
+                                                  final intent = AndroidIntent(
+                                                      action: 'action_view',
+                                                      data: Uri.encodeFull(
+                                                          'google.navigation:q=14.70079467891017,+120.98280418664218&avoid=tf'),
+                                                      package:
+                                                          'com.google.android.apps.maps');
+                                                  intent.launch();
+                                                },
+                                                icon: const Icon(
+                                                  Icons.location_on_outlined,
+                                                  color: Colors.blue,
+                                                ),
+                                              ),
+                                              const Text(
+                                                "Location",
+                                                style: TextStyle(
+                                                  color: Colors.black54,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            );
+                          },
+                        );
+                      },
+                      icon: const Icon(
+                        Icons.more_horiz_rounded,
+                        color: Colors.black54,
+                      ),
                     ),
                   ],
                 ),

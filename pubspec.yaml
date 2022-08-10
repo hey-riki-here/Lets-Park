@@ -47,7 +47,7 @@ dependencies:
   google_maps_flutter: ^2.1.1
   geocoding: ^2.0.2
   geolocator: 4.0.3
-  location: ^4.3.0
+  location: ^4.4.0
   flutter_screenutil: ^5.3.1
   permission_handler: ^9.1.0
   cached_network_image: ^3.2.0
@@ -65,6 +65,8 @@ dependencies:
   jiffy: ^5.0.0
   rxdart: ^0.27.3
   schedulers: ^0.3.1
+  awesome_notifications: ^0.6.21
+  android_intent_plus: ^3.1.1+1
   
 dev_dependencies:
   flutter_test:

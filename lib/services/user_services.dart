@@ -10,7 +10,7 @@ import 'package:lets_park/models/notification.dart';
 import 'package:lets_park/models/parking.dart';
 import 'package:lets_park/globals/globals.dart' as globals;
 import 'package:lets_park/models/parking_space.dart';
-import 'package:lets_park/services/signin_provider.dart';
+import 'package:lets_park/services/notif_services.dart';
 import 'package:lets_park/services/world_time_api.dart';
 
 class UserServices {
@@ -145,6 +145,11 @@ class UserServices {
             'upcoming': false,
             'inHistory': false,
           });
+
+          NotificationServices.showNotification(
+            "Parking session started",
+            "Your parking session has started. Click View Parking to view parking session details.",
+          );
           parkingSessionsStreams.resume();
         } else if (_getDateTimeFromMillisecondEpoch(parking.getArrival!)
                     .compareTo(now) ==
@@ -231,6 +236,11 @@ class UserServices {
             'upcoming': false,
             'inHistory': true,
           });
+
+          NotificationServices.showNotification(
+            "Parking session ended",
+            "Your parking session has ended. Click View Parking to view parking session details.",
+          );
           parkingSessionsStreams.resume();
         }
       }
@@ -377,20 +387,30 @@ class UserServices {
     );
   }
 
+  static void getFavorites(String uid) async {
+    try {
+      FirebaseFirestore.instance
+          .collection('user-data')
+          .doc(uid)
+          .get()
+          .then((value) {
+        List fromDatabaseFavs = value.data()!['favorites'];
+        globals.favorites = fromDatabaseFavs.cast<String>();
+      });
+    } on Exception catch (e) {}
+  }
+
   static void addSpaceonFavorites(String uid, String spaceId) async {
-    List<String> newFavList = globals.loggedIn.getUserFavorites!;
+    List<String> newFavList = globals.favorites;
     newFavList.add(spaceId);
     await FirebaseFirestore.instance.collection('user-data').doc(uid).update({
       'favorites': newFavList,
     });
-
-    await SignInProvider.getUserData(uid).then((userData) {
-      globals.loggedIn = userData;
-    });
+    getFavorites(uid);
   }
 
   static void removeSpaceonFavorites(String uid, String spaceId) async {
-    List<String> newFavList = globals.loggedIn.getUserFavorites!;
+    List<String> newFavList = globals.favorites;
     newFavList.remove(spaceId);
     await FirebaseFirestore.instance.collection('user-data').doc(uid).update({
       'favorites': newFavList,

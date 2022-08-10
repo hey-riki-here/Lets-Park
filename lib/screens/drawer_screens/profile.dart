@@ -1,8 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:lets_park/globals/globals.dart' as globals;
-import 'package:lets_park/models/user_data.dart';
 import 'package:lets_park/screens/drawer_screens/profile_page/my_favorites.dart';
 import 'package:lets_park/screens/drawer_screens/profile_page/registered_cars.dart';
 import 'package:lets_park/screens/drawer_screens/profile_page/update_profile_info.dart';
@@ -19,7 +17,7 @@ class Profile extends StatefulWidget {
 
 class _ProfileState extends State<Profile> {
   final _scaffoldKey = GlobalKey<ScaffoldState>();
-  final user = globals.loggedIn;
+  User user = FirebaseAuth.instance.currentUser!;
 
   String phoneNumber = "None";
   String photoUrl =
@@ -27,12 +25,12 @@ class _ProfileState extends State<Profile> {
 
   @override
   void initState() {
-    if (user.getPhoneNumber != null) {
-      phoneNumber = user.getPhoneNumber!;
+    if (user.phoneNumber != null) {
+      phoneNumber = user.phoneNumber!;
     }
 
-    if (user.getImageURL != null) {
-      photoUrl = user.getImageURL!;
+    if (user.photoURL != null) {
+      photoUrl = user.photoURL!;
     }
     super.initState();
   }
@@ -66,7 +64,7 @@ class _ProfileState extends State<Profile> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: <Widget>[
                         Text(
-                          user.getFirstName! + " " + user.getLastName!,
+                          user.displayName!,
                           style: const TextStyle(
                             fontSize: 21,
                             color: Colors.white,
@@ -97,7 +95,7 @@ class _ProfileState extends State<Profile> {
                             ),
                             const SizedBox(width: 10),
                             Text(
-                              user.getPhoneNumber!,
+                              phoneNumber,
                               style: const TextStyle(
                                 color: Colors.white,
                               ),
@@ -107,7 +105,9 @@ class _ProfileState extends State<Profile> {
                       ],
                     ),
                     CircleAvatar(
-                      backgroundImage: NetworkImage(photoUrl),
+                      backgroundImage: NetworkImage(
+                        photoUrl,
+                      ),
                       radius: 40,
                     ),
                   ],
@@ -131,9 +131,7 @@ class _ProfileState extends State<Profile> {
                 ),
               ),
               const SizedBox(height: 10),
-              Menu(
-                user: user,
-              ),
+              Menu(notifyParent: refresh),
               const SizedBox(height: 15),
               const Text(
                 "RECENT PARKINGS (Pending)",
@@ -156,13 +154,29 @@ class _ProfileState extends State<Profile> {
       ),
     );
   }
+
+  refresh() {
+    setState(() {
+      user = FirebaseAuth.instance.currentUser!;
+      phoneNumber = "None";
+      photoUrl =
+          "https://cdn4.iconfinder.com/data/icons/user-people-2/48/5-512.png";
+      if (user.phoneNumber != null) {
+        phoneNumber = user.phoneNumber!;
+      }
+
+      if (user.photoURL != null) {
+        photoUrl = user.photoURL!;
+      }
+    });
+  }
 }
 
 class Menu extends StatelessWidget {
-  final UserData user;
+  final Function notifyParent;
   const Menu({
     Key? key,
-    required this.user,
+    required this.notifyParent,
   }) : super(key: key);
 
   @override
@@ -193,7 +207,7 @@ class Menu extends StatelessWidget {
                     context,
                     MaterialPageRoute(
                       builder: ((context) => UpdateProfile(
-                            userData: user,
+                            notifyParent: notifyParent,
                           )),
                     ),
                   );
@@ -292,6 +306,10 @@ class Menu extends StatelessWidget {
         ),
       ],
     );
+  }
+
+  refresh() {
+    //setS
   }
 
   Widget buildMenuItem({

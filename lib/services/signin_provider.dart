@@ -89,9 +89,6 @@ class SignInProvider extends ChangeNotifier {
         photoURL: _googleUser!.photoUrl!,
         token: googleAuth.idToken!,
       );
-      await getUserData(authResult.user!.uid).then((userData) {
-        globals.loggedIn = userData;
-      });
     } on Exception catch (e) {
     } finally {
       notifyListeners();
@@ -113,9 +110,6 @@ class SignInProvider extends ChangeNotifier {
         fbFirstName: authResult.additionalUserInfo!.profile!["first_name"],
         fbLastName: authResult.additionalUserInfo!.profile!["last_name"],
       );
-      await getUserData(FirebaseAuth.instance.currentUser!.uid).then((userData) {
-        globals.loggedIn = userData;
-      });
     } on Exception catch (e) {
       await _showDialog(
         context,

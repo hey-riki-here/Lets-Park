@@ -11,6 +11,7 @@ import 'package:lets_park/models/parking.dart';
 import 'package:lets_park/models/parking_space.dart';
 import 'package:lets_park/screens/logged_in_screens/google_map_screen.dart';
 import 'package:lets_park/services/firebase_api.dart';
+import 'package:lets_park/services/notif_services.dart';
 import 'package:lets_park/services/signin_provider.dart';
 import 'package:lets_park/services/user_services.dart';
 import 'package:lets_park/services/parking_space_services.dart';
@@ -37,7 +38,9 @@ class _HomeState extends State<Home> {
   void initState() {
     grantPermission();
 
-    WidgetsBinding.instance!.addPostFrameCallback((_) {
+    UserServices.getFavorites(user!.uid);
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
         _userServices.startSessionsStream(context);
       }
@@ -55,6 +58,10 @@ class _HomeState extends State<Home> {
 
   @override
   Widget build(BuildContext context) {
+    try {
+      NotificationServices.startListening(context);
+    } catch (e) {}
+
     return Scaffold(
       key: _scaffoldKey,
       drawer: NavigationDrawer(currentPage: widget._pageId),
@@ -181,12 +188,11 @@ class SearchBox extends StatelessWidget {
                   decoration: InputDecoration(
                     suffixIcon: IconButton(
                         onPressed: () {
-                          Provider.of<SignInProvider>(
-                            context,
-                            listen: false,
-                          ).logout(context);
-                          // gMapKey.currentState!.goToLocation(
-                          //     _controller.text.trim() + ", Valenzuela");
+                          NotificationServices.showNotification(
+                            "Parking session started",
+                            "Your parking session has started. Click View Parking to view parking\n session details.",
+                          );
+                          //gMapKey.currentState!.goToLocation(query + ", Valenzuela");
                         },
                         icon: const Icon(
                           Icons.search,
