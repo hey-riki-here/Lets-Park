@@ -103,14 +103,18 @@ class _CheckoutState extends State<Checkout> {
               parkingId,
               widget.parkingSpace.getImageUrl,
               widget.parkingSpace.getOwnerId,
+              widget.parkingSpace.getOwnerName,
               FirebaseAuth.instance.currentUser!.displayName,
               FirebaseAuth.instance.currentUser!.uid,
               FirebaseAuth.instance.currentUser!.photoURL,
-              globals.userData.getStars,
+              widget.parkingSpace.getRating!.toInt(),
               widget.parkingSpace.getAddress,
+              [
+                widget.parkingSpace.getLatLng!.latitude,
+                widget.parkingSpace.getLatLng!.longitude
+              ],
               _vehicleState.currentState!.getPlateNumber,
-              _setupTimeState
-                  .currentState!.getArrival!.millisecondsSinceEpoch,
+              _setupTimeState.currentState!.getArrival!.millisecondsSinceEpoch,
               _setupTimeState
                   .currentState!.getDeparture!.millisecondsSinceEpoch,
               _setupTimeState.currentState!.getDuration,
@@ -137,8 +141,8 @@ class _CheckoutState extends State<Checkout> {
             if (availableSlot > 0) {
               isAvailable = true;
             } else {
-              isAvailable = await ParkingSpaceServices
-                  .isParkingSpaceAvailableAtTimeRange(
+              isAvailable =
+                  await ParkingSpaceServices.isParkingSpaceAvailableAtTimeRange(
                 widget.parkingSpace.getSpaceId,
                 _setupTimeState
                     .currentState!.getArrival!.millisecondsSinceEpoch,

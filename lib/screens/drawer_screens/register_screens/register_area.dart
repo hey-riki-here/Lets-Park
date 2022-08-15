@@ -102,6 +102,9 @@ class _RegisterAreaState extends State<RegisterArea> {
                     globals.parkingSpace.setOwnerId =
                         FirebaseAuth.instance.currentUser!.uid;
 
+                    globals.parkingSpace.setOwnerName =
+                        FirebaseAuth.instance.currentUser!.displayName;
+
                     uploadParkingSpace(context);
                   }
                 }
@@ -298,6 +301,4 @@ class _RegisterAreaState extends State<RegisterArea> {
     Navigator.push(context,
         MaterialPageRoute(builder: ((context) => const ManageSpace())));
   }
-
-  
 }

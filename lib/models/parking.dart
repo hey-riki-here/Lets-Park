@@ -1,13 +1,17 @@
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+
 class Parking {
   String? _parkingSpaceId;
   String? _parkingId;
   String? _imageUrl;
   String? _ownerId;
+  String? _ownerName;
   String? _driver;
   String? _driverId;
   String? _driverImage;
   int? _stars;
   String? _address;
+  LatLng? _latLng;
   String? _plateNumber;
   int? _arrival;
   int? _departure;
@@ -22,11 +26,13 @@ class Parking {
     String? parkingId,
     String? imageUrl,
     String? ownerId,
+    String? ownerName,
     String? driver,
     String? driverId,
     String? driverImage,
     int? stars,
     String? address,
+    List geoposition,
     String? plateNumber,
     int? arrival,
     int? departure,
@@ -40,11 +46,13 @@ class Parking {
     _parkingId = parkingId;
     _imageUrl = imageUrl;
     _ownerId = ownerId;
+    _ownerName = ownerName;
     _driver = driver;
     _driverId = driverId;
     _driverImage = driverImage;
     _stars = stars;
     _address = address;
+    _latLng = LatLng(geoposition[0], geoposition[1]);
     _plateNumber = plateNumber;
     _arrival = arrival;
     _departure = departure;
@@ -63,6 +71,8 @@ class Parking {
 
   String? get getParkingOwner => _ownerId;
 
+  String? get getParkingOwnerName => _ownerName;
+
   String? get getDriver => _driver;
   
   String? get getDriverId => _driverId;
@@ -79,6 +89,12 @@ class Parking {
 
   set setAddress(String? address) {
     _address = address;
+  }
+
+  LatLng? get getLatLng => _latLng;
+
+  set setLatLng(LatLng? latLng) {
+    _latLng = latLng;
   }
 
   String? get getPlateNumber => _plateNumber;
@@ -139,11 +155,13 @@ class Parking {
         'parkingId': _parkingId,
         'imageUrl': _imageUrl,
         'ownerId': _ownerId,
+        'ownerName': _ownerName,
         'driver': _driver,
         'driverId': _driverId,
         'driverImage': _driverImage,
         'stars': _stars,
         'address': _address,
+        'geoposition': [_latLng!.latitude, _latLng!.longitude],
         'plateNumber': _plateNumber,
         'arrival': _arrival,
         'departure': _departure,
@@ -160,11 +178,13 @@ class Parking {
       json['parkingId'],
       json['imageUrl'],
       json['ownerId'],
+      json['ownerName'],
       json['driver'],
       json['driverId'],
       json['driverImage'],
       json['stars'],
       json['address'],
+      json['geoposition'],
       json['plateNumber'],
       json['arrival'],
       json['departure'],

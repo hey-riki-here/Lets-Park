@@ -8,13 +8,14 @@ class NotificationServices {
   static bool _inProgress = true;
 
   static void initChannel() {
-    AwesomeNotifications().initialize('resource://drawable/app_icon', [
+    AwesomeNotifications().initialize('resource://drawable/ic_app_icon', [
       // notification icon
       NotificationChannel(
         channelGroupKey: 'basic_test',
         channelKey: 'basic',
         channelName: 'Basic notifications',
         channelDescription: 'Notification channel for basic tests',
+        defaultColor: Colors.blue,
         channelShowBadge: true,
         importance: NotificationImportance.High,
         enableVibration: false,

@@ -8,6 +8,7 @@ import 'package:intl/intl.dart';
 import 'package:lets_park/globals/globals.dart' as globals;
 import 'package:lets_park/models/parking.dart';
 import 'package:lets_park/models/user_data.dart';
+import 'package:lets_park/services/parking_space_services.dart';
 import 'package:lets_park/services/user_services.dart';
 import 'package:lets_park/shared/navigation_drawer.dart';
 
@@ -670,36 +671,8 @@ class _UpcomingState extends State<Upcoming> {
                                     ),
                                   ),
                                   const SizedBox(height: 5),
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Icon(
-                                        Icons.star,
-                                        color: Colors.yellow.shade600,
-                                        size: 15,
-                                      ),
-                                      Icon(
-                                        Icons.star,
-                                        color: Colors.yellow.shade600,
-                                        size: 15,
-                                      ),
-                                      Icon(
-                                        Icons.star,
-                                        color: Colors.yellow.shade600,
-                                        size: 15,
-                                      ),
-                                      Icon(
-                                        Icons.star,
-                                        color: Colors.yellow.shade600,
-                                        size: 15,
-                                      ),
-                                      Icon(
-                                        Icons.star,
-                                        color: Colors.yellow.shade600,
-                                        size: 15,
-                                      ),
-                                    ],
-                                  ),
+                                  ParkingSpaceServices.getStars(
+                                      parkings[index].getStars!.toDouble()),
                                   const SizedBox(height: 10),
                                   Row(
                                     mainAxisAlignment:
@@ -713,7 +686,7 @@ class _UpcomingState extends State<Upcoming> {
                                         ),
                                       ),
                                       Text(
-                                        parkings[index].getParkingOwner!,
+                                        parkings[index].getParkingOwnerName!,
                                         style: const TextStyle(
                                           color: Colors.black54,
                                           fontSize: 16,
@@ -791,13 +764,10 @@ class _UpcomingState extends State<Upcoming> {
                                             children: [
                                               IconButton(
                                                 onPressed: () {
-                                                  final intent = AndroidIntent(
-                                                      action: 'action_view',
-                                                      data: Uri.encodeFull(
-                                                          'google.navigation:q=14.70079467891017,+120.98280418664218&avoid=tf'),
-                                                      package:
-                                                          'com.google.android.apps.maps');
-                                                  intent.launch();
+                                                  ParkingSpaceServices
+                                                      .showNavigator(
+                                                    parkings[index].getLatLng!,
+                                                  );
                                                 },
                                                 icon: const Icon(
                                                   Icons.location_on_outlined,

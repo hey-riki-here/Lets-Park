@@ -3,6 +3,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 class ParkingSpace {
   String? _id;
   String? _ownerId;
+  String? _ownerName;
   String? _imageUrl;
   String? _address;
   LatLng? _latLng;
@@ -21,6 +22,7 @@ class ParkingSpace {
   ParkingSpace.fromDatabase(
     String? id,
     String? ownerId,
+    String? ownerName,
     String? imageUrl,
     String? address,
     List geoposition,
@@ -35,6 +37,7 @@ class ParkingSpace {
   ) {
     _id = id;
     _ownerId = ownerId;
+    _ownerName = ownerName;
     _imageUrl = imageUrl;
     _address = address;
     _latLng = LatLng(geoposition[0], geoposition[1]);
@@ -59,6 +62,13 @@ class ParkingSpace {
   set setOwnerId(String? id) {
     _ownerId = id;
   }
+
+  String? get getOwnerName => _ownerName;
+
+  set setOwnerName(String? name) {
+    _ownerName = name;
+  }
+
 
   String? get getImageUrl => _imageUrl;
 
@@ -140,6 +150,7 @@ class ParkingSpace {
   Map<String, dynamic> toJson() => {
         'id': _id,
         'ownerId': _ownerId,
+        'ownerName': _ownerName,
         'imageUrl': _imageUrl,
         'address': _address,
         'geoposition': [_latLng!.latitude, _latLng!.longitude],
@@ -161,6 +172,7 @@ class ParkingSpace {
     return ParkingSpace.fromDatabase(
       json['id'],
       json['ownerId'],
+      json['ownerName'],
       json['imageUrl'],
       json['address'],
       json['geoposition'],
