@@ -37,8 +37,14 @@ class UserServices {
     return count;
   });
 
+  final Stream checkPayed =
+      Stream.periodic(const Duration(milliseconds: 1000), (int count) {
+    return count;
+  });
+
   static late StreamSubscription parkingSessionsStreams;
   static late StreamSubscription ownedParkingSessionsStreams;
+  late StreamSubscription checkPayedStream;
 
   void startSessionsStream(BuildContext context) {
     parkingSessionsStreams = checkParkingSessionsStream.listen((event) {
@@ -50,6 +56,8 @@ class UserServices {
       checkParkingSessionsOnOwnedSpaces(context);
     });
   }
+
+  void startCheckPayedStream() {}
 
   static Future registerNewUserData(
     String firstName,
@@ -462,6 +470,34 @@ class UserServices {
         .collection('cars')
         .doc(car.getCarId)
         .delete();
+  }
+
+  static Future<bool> isPayed(String uid) async {
+    return await FirebaseFirestore.instance
+        .collection('user-data')
+        .doc(uid)
+        .get()
+        .then((value) {
+      return value.data()!['isPayed'];
+    });
+  }
+
+  static void setPayedToFalse(String uid) async {
+    return await FirebaseFirestore.instance
+        .collection('user-data')
+        .doc(uid)
+        .update({
+      'isPayed': false,
+    });
+  }
+
+  static void setPaymentParams(String uid, String params) async {
+    return await FirebaseFirestore.instance
+        .collection('user-data')
+        .doc(uid)
+        .update({
+      'paymentParams': params,
+    });
   }
 
   // void showNotice(BuildContext context, String message) {

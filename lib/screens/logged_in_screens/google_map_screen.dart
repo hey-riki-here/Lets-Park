@@ -60,7 +60,7 @@ class GoogleMapScreenState extends State<GoogleMapScreen> {
                 rotateGesturesEnabled: false,
                 zoomControlsEnabled: false,
                 mapToolbarEnabled: false,
-                minMaxZoomPreference: const MinMaxZoomPreference(15, 18),
+                minMaxZoomPreference: const MinMaxZoomPreference(15, 22),
                 onMapCreated: (GoogleMapController controller) async {
                   _controller.complete(controller);
                   googleMapController = controller;

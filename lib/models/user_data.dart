@@ -15,6 +15,8 @@ class UserData {
   List<Parking>? _userParkings = [];
   List<UserNotification>? _notifications = [];
   List<String>? _favorites = [];
+  bool? _isPayed = false;
+  String? _paymentParams = "";
 
   UserData();
 
@@ -26,6 +28,8 @@ class UserData {
     String? imageUrl,
     int? stars,
     List<String>? favorites,
+    bool isPayed,
+    String paymentParams,
   ) {
     _id = id;
     _firstName = firstName;
@@ -34,6 +38,8 @@ class UserData {
     _imageUrl = imageUrl;
     _stars = stars;
     _favorites = favorites;
+    _isPayed = isPayed;
+    _paymentParams = paymentParams;
   }
 
   String? get getUserId => _id;
@@ -83,6 +89,18 @@ class UserData {
     _favorites = favorites;
   }
 
+  bool? get userIsPayed => _isPayed;
+
+  set setIsPayed(bool? isPayed) {
+    _isPayed = isPayed;
+  }
+
+  String? get getPaymentParams => _paymentParams;
+
+  set setPaymentParams(String? paymentParams) {
+    _paymentParams = paymentParams;
+  }
+
   @override
   String toString() {
     return "UserData [ $_id , $_stars , $_firstName , $_userParkings]";
@@ -96,6 +114,8 @@ class UserData {
         'imageUrl': _imageUrl,
         'stars': _stars,
         'favorites': _favorites,
+        'isPayed': _isPayed,
+        'paymentParams': _paymentParams,
       };
 
   static UserData fromJson(Map<String, dynamic> json) {
@@ -111,6 +131,8 @@ class UserData {
       json['imageUrl'],
       json['stars'],
       favorites,
+      json['isPayed'],
+      json['paymentParams'],
     );
   }
 }

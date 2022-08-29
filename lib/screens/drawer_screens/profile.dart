@@ -255,7 +255,7 @@ class Menu extends StatelessWidget {
                 label: "Linked Cards",
                 insets: const EdgeInsets.all(15),
                 borderRadius: const BorderRadius.all(Radius.zero),
-                onTap: () {},
+                onTap: ()  {},
               ),
               buildMenuItem(
                 icon: FontAwesomeIcons.key,

@@ -14,6 +14,7 @@ class InfoAndFeaturesState extends State<InfoAndFeatures> {
   final GlobalKey<CapacityState> _capacityState = GlobalKey();
   final GlobalKey<ReservabilityState> _reservabilityState = GlobalKey();
   final GlobalKey<FeaturesState> _featuresState = GlobalKey();
+  final GlobalKey<PaypalState> _paypalState = GlobalKey();
 
   @override
   Widget build(BuildContext context) {
@@ -30,6 +31,10 @@ class InfoAndFeaturesState extends State<InfoAndFeatures> {
         const SizedBox(height: 20),
         _sharedWidget.stepHeader("Features"),
         Features(key: _featuresState),
+        _sharedWidget.stepHeader("Paypal Account"),
+        const SizedBox(height: 10),
+        Paypal(key: _paypalState),
+        const SizedBox(height: 30),
       ],
     );
   }
@@ -38,6 +43,9 @@ class InfoAndFeaturesState extends State<InfoAndFeatures> {
 
   GlobalKey<FormState> get getFormKey =>
       _informationState.currentState!._infoKey;
+
+  GlobalKey<FormState> get getPaypalFormKey =>
+      _paypalState.currentState!._paypalKey;
 
   String get getInfo => _informationState.currentState!.getInfo;
 
@@ -54,6 +62,8 @@ class InfoAndFeaturesState extends State<InfoAndFeatures> {
 
   List<String> get getSelectedFeatures =>
       _featuresState.currentState!.getSelectedFeatures;
+
+  String get getPaypalEmail => _paypalState.currentState!.getPaypaEmail;
 }
 
 class Capacity extends StatefulWidget {
@@ -571,4 +581,58 @@ class FeaturesItem {
   bool isChecked;
 
   FeaturesItem({required this.title, this.isChecked = false});
+}
+
+class Paypal extends StatefulWidget {
+  const Paypal({Key? key}) : super(key: key);
+
+  @override
+  State<Paypal> createState() => PaypalState();
+}
+
+class PaypalState extends State<Paypal> {
+  final _paypalKey = GlobalKey<FormState>();
+  final _paypalController = TextEditingController();
+
+  @override
+  Widget build(BuildContext context) {
+    return Form(
+      key: _paypalKey,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            "Link your paypal account",
+            style: TextStyle(
+              fontSize: 18,
+            ),
+          ),
+          const SizedBox(height: 10),
+          TextFormField(
+            controller: _paypalController,
+            style: const TextStyle(
+              fontSize: 16,
+            ),
+            keyboardType: TextInputType.emailAddress,
+            textInputAction: TextInputAction.done,
+            decoration: const InputDecoration(
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.all(Radius.circular(12)),
+              ),
+            ),
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return "Field is required.";
+              }
+              return null;
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  GlobalKey<FormState> get getFormKey => _paypalKey;
+
+  String get getPaypaEmail => _paypalController.text.trim();
 }

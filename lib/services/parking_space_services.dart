@@ -226,7 +226,7 @@ class ParkingSpaceServices {
     );
   }
 
-  static void showNavigator(LatLng position) {
+  static void showNavigator(LatLng position) async {
     AndroidIntent(
       action: 'action_view',
       data: Uri.encodeFull(

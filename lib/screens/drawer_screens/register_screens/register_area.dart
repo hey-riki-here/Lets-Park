@@ -74,8 +74,19 @@ class _RegisterAreaState extends State<RegisterArea> {
             onStepContinue: () async {
               setState(() {
                 if (_currentStep == _steps().length - 1) {
-                  if (_informationState.currentState!.getFormKey.currentState!
+                  bool valid = true;
+
+                  if (!_informationState.currentState!.getFormKey.currentState!
                       .validate()) {
+                    valid = false;
+                  }
+
+                  if (!_informationState
+                      .currentState!.getPaypalFormKey.currentState!
+                      .validate()) {
+                    valid = false;
+                  }
+                  if (valid) {
                     globals.parkingSpace.setCapacity =
                         _informationState.currentState!.getCapacity;
 
@@ -98,6 +109,9 @@ class _RegisterAreaState extends State<RegisterArea> {
 
                     globals.parkingSpace.setRules =
                         _informationState.currentState!.getRules;
+
+                    globals.parkingSpace.setPaypalEmail =
+                        _informationState.currentState!.getPaypalEmail;
 
                     globals.parkingSpace.setOwnerId =
                         FirebaseAuth.instance.currentUser!.uid;

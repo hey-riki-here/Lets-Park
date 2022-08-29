@@ -8,7 +8,7 @@ class NotificationServices {
   static bool _inProgress = true;
 
   static void initChannel() {
-    AwesomeNotifications().initialize('resource://drawable/ic_app_icon', [
+    AwesomeNotifications().initialize('resource://drawable/ic_icon', [
       // notification icon
       NotificationChannel(
         channelGroupKey: 'basic_test',

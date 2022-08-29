@@ -63,60 +63,7 @@ class SuccessfulBooking extends StatelessWidget {
           padding: const EdgeInsets.all(8.0),
           child: ElevatedButton(
             onPressed: () async {
-              showDialog(
-                context: context,
-                barrierDismissible: false,
-                builder: (context) => WillPopScope(
-                  onWillPop: () async => false,
-                  child: const NoticeDialog(
-                    imageLink: "assets/logo/lets-park-logo.png",
-                    message: "Checking and verifying your booking...",
-                    forLoading: true,
-                  ),
-                ),
-              );
-              UserServices.parkingSessionsStreams.pause();
-              UserServices.ownedParkingSessionsStreams.pause();
-              ParkingSpaceServices.updateParkingSpaceData(
-                parkingSpace,
-                newParking,
-              );
-
-              DateTime now = DateTime(0, 0, 0, 0, 0);
-              await WorldTimeServices.getDateTimeNow().then((time) {
-                now = DateTime(
-                  time.year,
-                  time.month,
-                  time.day,
-                  time.hour,
-                  time.minute,
-                );
-              });
-
-              UserServices.updateUserParkingData(newParking);
-
-              UserServices.notifyUser(
-                "NOTIF" +
-                    globals.userData.getUserNotifications!.length.toString(),
-                parkingSpace.getOwnerId!,
-                UserNotification(
-                  "NOTIF" +
-                      globals.userData.getUserNotifications!.length.toString(),
-                  parkingSpace.getSpaceId!,
-                  FirebaseAuth.instance.currentUser!.photoURL!,
-                  FirebaseAuth.instance.currentUser!.displayName!,
-                  "just booked on your parking space. Tap to view details.",
-                  true,
-                  false,
-                  now.millisecondsSinceEpoch,
-                  false,
-                  false,
-                ),
-              );
               navigatorKey.currentState!.popUntil((route) => route.isFirst);
-              UserServices.parkingSessionsStreams.resume();
-              UserServices.ownedParkingSessionsStreams.resume();
-              // Navigator.pop(context);
             },
             child: const Text(
               "Confirm",

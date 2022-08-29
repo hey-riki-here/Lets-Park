@@ -1,4 +1,4 @@
-// ignore_for_file: avoid_function_literals_in_foreach_calls
+// ignore_for_file: avoid_function_literals_in_foreach_calls, empty_catches
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:community_material_icon/community_material_icon.dart';
@@ -12,13 +12,11 @@ import 'package:lets_park/models/parking_space.dart';
 import 'package:lets_park/screens/logged_in_screens/google_map_screen.dart';
 import 'package:lets_park/services/firebase_api.dart';
 import 'package:lets_park/services/notif_services.dart';
-import 'package:lets_park/services/signin_provider.dart';
 import 'package:lets_park/services/user_services.dart';
 import 'package:lets_park/services/parking_space_services.dart';
 import 'package:lets_park/shared/navigation_drawer.dart';
 import 'package:location/location.dart';
 import 'package:geolocator/geolocator.dart' as geolocator;
-import 'package:provider/provider.dart';
 
 class Home extends StatefulWidget {
   final int _pageId = 2;
@@ -39,6 +37,26 @@ class _HomeState extends State<Home> {
     grantPermission();
 
     UserServices.getFavorites(user!.uid);
+
+    Location().onLocationChanged.listen((currentLocation) {
+      if (globals.parkingLoc.latitude != 0 &&
+          globals.parkingLoc.longitude != 0) {
+        if ((FirebaseServices.calculateDistance(
+                  currentLocation.latitude,
+                  currentLocation.longitude,
+                  globals.parkingLoc.latitude,
+                  globals.parkingLoc.longitude,
+                ) *
+                1000) <
+            5) {
+          NotificationServices.showNotification(
+            "You have arrived at the parking space",
+            "You have succesfully at the parking space location.",
+          );
+          globals.parkingLoc = const LatLng(0, 0);
+        }
+      }
+    });
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {

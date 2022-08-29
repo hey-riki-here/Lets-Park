@@ -16,6 +16,7 @@ class ParkingSpace {
   List<String>? _features = [];
   String? _rules;
   bool? _isFull;
+  String? _paypalEmail;
 
   ParkingSpace();
 
@@ -34,6 +35,7 @@ class ParkingSpace {
     String? dailyOrMonthly,
     List<String>? features,
     String? rules,
+    String? paypalEmail,
   ) {
     _id = id;
     _ownerId = ownerId;
@@ -49,6 +51,7 @@ class ParkingSpace {
     _type = type;
     _features = features;
     _rules = rules;
+    _paypalEmail = paypalEmail;
   }
 
   String? get getSpaceId => _id;
@@ -142,6 +145,12 @@ class ParkingSpace {
     _isFull = isFull;
   }
 
+  String? get getPaypalEmail => _paypalEmail;
+
+  set setPaypalEmail(String? paypalEmail) {
+    _paypalEmail = paypalEmail;
+  }
+
   @override
   String toString() {
     return "ParkingSpace [ $_ownerId , $_imageUrl , $_address, $_latLng , $_capacity , $_rating , $_info , $_verticalClearance, $_type , $_features, $_isFull]";
@@ -162,6 +171,7 @@ class ParkingSpace {
         'dailyOrMonthly' : _dailyOrMonthly,
         'features': _features,
         'rules': _rules,
+        'paypalEmail': _paypalEmail,
       };
 
   static ParkingSpace fromJson(Map<String, dynamic> json) {
@@ -184,6 +194,7 @@ class ParkingSpace {
       json['dailyOrMonthly'],
       features,
       json['rules'],
+      json['paypalEmail'],    
     );
   }
 }

@@ -764,18 +764,21 @@ class _UpcomingState extends State<Upcoming> {
                                             children: [
                                               IconButton(
                                                 onPressed: () {
+                                                  globals.parkingLoc =
+                                                      parkings[index]
+                                                          .getLatLng!;
                                                   ParkingSpaceServices
                                                       .showNavigator(
                                                     parkings[index].getLatLng!,
                                                   );
                                                 },
                                                 icon: const Icon(
-                                                  Icons.location_on_outlined,
+                                                  Icons.directions_outlined,
                                                   color: Colors.blue,
                                                 ),
                                               ),
                                               const Text(
-                                                "Location",
+                                                "Direction",
                                                 style: TextStyle(
                                                   color: Colors.black54,
                                                 ),
