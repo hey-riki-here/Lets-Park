@@ -15,8 +15,9 @@ class Parking {
   String? _plateNumber;
   int? _arrival;
   int? _departure;
+  int? _paymentDate;
   String? _duration;
-  double? _price;
+  num? _price;
   bool? _inProgress;
   bool? _upcoming;
   bool? _inHistory;
@@ -36,8 +37,9 @@ class Parking {
     String? plateNumber,
     int? arrival,
     int? departure,
+    int? paymentDate,
     String? duration,
-    double? price,
+    num? price,
     bool? inProgress,
     bool? upcoming,
     bool? inHistory,
@@ -56,6 +58,7 @@ class Parking {
     _plateNumber = plateNumber;
     _arrival = arrival;
     _departure = departure;
+    _paymentDate = paymentDate;
     _duration = duration;
     _price = price;
     _inProgress = inProgress;
@@ -121,9 +124,15 @@ class Parking {
     _duration = duration;
   }
 
-  double? get getPrice => _price;
+  int? get getPaymentDate => _paymentDate;
 
-  set setPrice(double price) {
+  set setPaymentDate(int? paymentDate) {
+    _paymentDate = paymentDate;
+  }
+
+  num? get getPrice => _price;
+
+  set setPrice(num price) {
     _price = price;
   }
 
@@ -165,6 +174,7 @@ class Parking {
         'plateNumber': _plateNumber,
         'arrival': _arrival,
         'departure': _departure,
+        'paymentDate': _paymentDate,
         'duration': _duration,
         'price': _price,
         'inProgress': _inProgress,
@@ -188,6 +198,7 @@ class Parking {
       json['plateNumber'],
       json['arrival'],
       json['departure'],
+      json['paymentDate'],
       json['duration'],
       json['price'],
       json['inProgress'],

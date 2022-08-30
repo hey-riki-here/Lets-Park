@@ -14,6 +14,7 @@ import 'package:lets_park/services/firebase_api.dart';
 import 'package:lets_park/services/notif_services.dart';
 import 'package:lets_park/services/user_services.dart';
 import 'package:lets_park/services/parking_space_services.dart';
+import 'package:lets_park/services/world_time_api.dart';
 import 'package:lets_park/shared/navigation_drawer.dart';
 import 'package:location/location.dart';
 import 'package:geolocator/geolocator.dart' as geolocator;
@@ -35,7 +36,7 @@ class _HomeState extends State<Home> {
   @override
   void initState() {
     grantPermission();
-
+    initDateNow();
     UserServices.getFavorites(user!.uid);
 
     Location().onLocationChanged.listen((currentLocation) {
@@ -72,6 +73,12 @@ class _HomeState extends State<Home> {
     _userServices.getParkingSessionsStream.cancel();
     _userServices.getOwnedParkingSessionsStream.cancel();
     super.dispose();
+  }
+
+  void initDateNow() async {
+    await WorldTimeServices.getDateOnlyNow().then((date) {
+      globals.today = date.millisecondsSinceEpoch;
+    });
   }
 
   @override

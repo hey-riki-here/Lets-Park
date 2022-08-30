@@ -12,7 +12,6 @@ import 'package:flutter_time_picker_spinner/flutter_time_picker_spinner.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
-import 'package:lets_park/main.dart';
 import 'package:lets_park/models/notification.dart';
 import 'package:lets_park/models/parking.dart';
 import 'package:lets_park/models/parking_space.dart';
@@ -114,6 +113,13 @@ class _CheckoutState extends State<Checkout> {
             String parkingId = "PARKSESS" +
                 DateTime.now().millisecondsSinceEpoch.toString().toString() +
                 "$qty";
+
+            int paymentDate = 0;
+
+            await WorldTimeServices.getDateOnlyNow().then((date) {
+              paymentDate = date.millisecondsSinceEpoch;
+            });
+
             Parking newParking = Parking(
               widget.parkingSpace.getSpaceId,
               parkingId,
@@ -133,6 +139,7 @@ class _CheckoutState extends State<Checkout> {
               _setupTimeState.currentState!.getArrival!.millisecondsSinceEpoch,
               _setupTimeState
                   .currentState!.getDeparture!.millisecondsSinceEpoch,
+              paymentDate,
               _setupTimeState.currentState!.getDuration,
               _setupTimeState.currentState!.getParkingPrice,
               false,

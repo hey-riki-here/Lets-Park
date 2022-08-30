@@ -39,7 +39,6 @@ class YourSpace extends StatelessWidget {
                 },
               ),
             ),
-            const AddMore(),
           ],
         ),
       ),
@@ -211,40 +210,6 @@ class ParkingCard extends StatelessWidget {
             color: Colors.white,
             fontSize: 12,
           ),
-        ),
-      ),
-    );
-  }
-}
-
-class AddMore extends StatelessWidget {
-  const AddMore({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: () {
-        Navigator.push(context,
-            MaterialPageRoute(builder: ((context) => const RegisterArea())));
-      },
-      child: Center(
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: const [
-            Icon(
-              FontAwesomeIcons.plusCircle,
-              color: Colors.grey,
-            ),
-            SizedBox(width: 10),
-            Text(
-              "Increase your level to add more space.",
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-                color: Colors.grey,
-              ),
-            ),
-          ],
         ),
       ),
     );

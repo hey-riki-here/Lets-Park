@@ -18,6 +18,7 @@ import 'package:lets_park/models/parking_space.dart';
 import 'package:lets_park/screens/popups/notice_dialog.dart';
 import 'package:lets_park/screens/popups/successful_booking.dart';
 import 'package:lets_park/services/parking_space_services.dart';
+import 'package:lets_park/services/world_time_api.dart';
 import 'package:numberpicker/numberpicker.dart';
 import 'package:lets_park/globals/globals.dart' as globals;
 
@@ -97,6 +98,13 @@ class _CheckoutMonthlyState extends State<CheckoutMonthly> {
             String parkingId = "PARKSESS" +
                 DateTime.now().millisecondsSinceEpoch.toString().toString() +
                 "$qty";
+
+            int paymentDate = 0;
+
+            await WorldTimeServices.getDateOnlyNow().then((date) {
+              paymentDate = date.millisecondsSinceEpoch;
+            });
+
             Parking newParking = Parking(
               widget.parkingSpace.getSpaceId,
               parkingId,
@@ -116,6 +124,7 @@ class _CheckoutMonthlyState extends State<CheckoutMonthly> {
               _setupTimeState.currentState!.getArrival!.millisecondsSinceEpoch,
               _setupTimeState
                   .currentState!.getDeparture!.millisecondsSinceEpoch,
+              paymentDate,
               _setupTimeState.currentState!.getDuration,
               _setupTimeState.currentState!.getParkingPrice,
               false,

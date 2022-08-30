@@ -6,6 +6,7 @@ import 'package:android_intent_plus/android_intent.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:lets_park/globals/globals.dart' as globals;
 import 'package:lets_park/main.dart';
 import 'package:lets_park/models/parking.dart';
 import 'package:lets_park/models/parking_space.dart';
@@ -234,5 +235,15 @@ class ParkingSpaceServices {
       ),
       package: 'com.google.android.apps.maps',
     ).launch();
+  }
+
+  static Stream<QuerySnapshot<Map<String, dynamic>>> getEearningsToday(
+      String parkingSpaceId) {
+    return FirebaseFirestore.instance
+        .collection('parking-spaces')
+        .doc(parkingSpaceId)
+        .collection('parking-sessions')
+        .where("paymentDate", isEqualTo: globals.today)
+        .snapshots();
   }
 }

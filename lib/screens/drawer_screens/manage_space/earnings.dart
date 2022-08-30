@@ -268,12 +268,12 @@ class _SpaceEarningsState extends State<SpaceEarnings> {
 class Earning {
   int? _parkingQuantity;
   int? _time;
-  double? _earned;
+  num? _earned;
 
   Earning(
     int parkingQuantity,
     int time,
-    double earned,
+    num earned,
   ) {
     _parkingQuantity = parkingQuantity;
     _time = time;
@@ -288,9 +288,9 @@ class Earning {
 
   int? get getTime => _time;
 
-  double? get getEarned => _earned;
+  num? get getEarned => _earned;
 
-  set setEarned(double? earned) {
+  set setEarned(num? earned) {
     _earned = _earned! + earned!;
   }
 

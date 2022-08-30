@@ -1,10 +1,16 @@
+// ignore_for_file: avoid_function_literals_in_foreach_calls
+
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:lets_park/globals/globals.dart' as globals;
 import 'package:lets_park/models/parking_space.dart';
 import 'package:lets_park/screens/drawer_screens/manage_space/earnings_menu.dart';
 import 'package:lets_park/screens/drawer_screens/manage_space/parking_history_menu.dart';
+import 'package:lets_park/screens/drawer_screens/manage_space/space.dart';
 import 'package:lets_park/screens/drawer_screens/manage_space/upcoming_parkings_menu.dart';
 import 'package:lets_park/screens/drawer_screens/manage_space/your_space.dart';
+import 'package:lets_park/screens/drawer_screens/register_screens/register_area.dart';
+import 'package:lets_park/services/parking_space_services.dart';
 import 'package:lets_park/shared/navigation_drawer.dart';
 import 'package:lets_park/shared/shared_widgets.dart';
 
@@ -25,29 +31,37 @@ class ManageSpace extends StatelessWidget {
         },
       ),
       drawer: NavigationDrawer(currentPage: _pageId),
-      backgroundColor: Colors.grey.shade300,
-      body: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Column(
-            children: const [
-              Header(),
-              AvailableSpacesList(),
-              Menu(),
-            ],
-          ),
-          const Padding(
-            padding: EdgeInsets.all(4.0),
-            child: Text(
-              "• Let's Park!",
-              style: TextStyle(
-                letterSpacing: 2,
-                fontSize: 20,
-                color: Colors.grey,
+      backgroundColor: Colors.grey.shade100,
+      body: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: const [
+            Header(),
+            //SizedBox(height: 10),
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 9.0, vertical: 1.0),
+              child: Text(
+                "Spaces and Earnings",
+                style: TextStyle(
+                  fontSize: 18,
+                  color: Colors.black87,
+                ),
               ),
             ),
-          ),
-        ],
+            SpacesAndEarningsWiget(),
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 9.0, vertical: 1.0),
+              child: Text(
+                "Menu",
+                style: TextStyle(
+                  fontSize: 18,
+                  color: Colors.black87,
+                ),
+              ),
+            ),
+            Menu(),
+          ],
+        ),
       ),
     );
   }
@@ -69,47 +83,108 @@ class Header extends StatelessWidget {
               ),
             ),
             elevation: 5,
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                children: [
-                  const Center(
-                    child: Text(
-                      "Today",
-                      style: TextStyle(
-                        fontSize: 18,
-                        color: Colors.black54,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  const Center(
-                    child: Text(
-                      "P250.0",
-                      style: TextStyle(
-                        fontSize: 35,
-                        fontWeight: FontWeight.w900,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  const Divider(),
-                  Row(
-                    children: [
-                      Image.asset(
-                        "assets/icons/parking-marker.png",
-                        width: 25,
-                      ),
-                      const SizedBox(width: 20),
-                      const Text(
-                        "5 Parkings",
+            child: Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(12),
+                gradient: LinearGradient(
+                  colors: [
+                    Colors.blue.shade900,
+                    Colors.blue.shade300,
+                  ],
+                  begin: Alignment.bottomLeft,
+                  end: Alignment.topRight,
+                  stops: const [0.0, 1.0],
+                  tileMode: TileMode.clamp,
+                ),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  children: [
+                    Center(
+                      child: Text(
+                        "Let's Park!",
                         style: TextStyle(
-                          fontSize: 20,
+                          fontSize: 18,
+                          color: Colors.grey.shade200,
                         ),
                       ),
-                    ],
-                  ),
-                ],
+                    ),
+                    const SizedBox(height: 20),
+                    Row(
+                      children: [
+                        Card(
+                          shape: const RoundedRectangleBorder(
+                            borderRadius: BorderRadius.all(
+                              Radius.circular(10),
+                            ),
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Image.asset(
+                              "assets/logo/app_icon.png",
+                              width: 50,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Text(
+                            "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla dapibus ex nulla, ac pharetra tellus blandit non. Integer pretium blandit interdum. Vivamus sit amet enim ante. Sed vitae volutpat nisi, sit amet dapibus ipsum.",
+                            style: TextStyle(
+                              color: Colors.grey.shade200,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 20),
+                    const Divider(),
+                    InkWell(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: ((context) => const RegisterArea()),
+                          ),
+                        );
+                      },
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            "Want to earn more?",
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: Colors.grey.shade200,
+                            ),
+                          ),
+                          Card(
+                            shape: const RoundedRectangleBorder(
+                              borderRadius: BorderRadius.all(
+                                Radius.circular(12),
+                              ),
+                            ),
+                            color: Colors.blue.shade400,
+                            child: const Padding(
+                              padding: EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 3,
+                              ),
+                              child: Text(
+                                "+ Add more space",
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
@@ -119,81 +194,320 @@ class Header extends StatelessWidget {
   }
 }
 
-class AvailableSpacesList extends StatefulWidget {
-  const AvailableSpacesList({Key? key}) : super(key: key);
+class SpacesAndEarningsWiget extends StatefulWidget {
+  const SpacesAndEarningsWiget({Key? key}) : super(key: key);
 
   @override
-  State<AvailableSpacesList> createState() => _AvailableSpacesListState();
+  State<SpacesAndEarningsWiget> createState() => _SpacesAndEarningsWigetState();
 }
 
-class _AvailableSpacesListState extends State<AvailableSpacesList> {
+class _SpacesAndEarningsWigetState extends State<SpacesAndEarningsWiget> {
   List<ParkingSpace>? parkingSpaces = globals.userData.getOwnedParkingSpaces;
 
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 150,
+      height: 275,
       child: ListView.builder(
         padding: const EdgeInsets.all(8),
         scrollDirection: Axis.horizontal,
-        itemCount: 10,
+        itemCount: parkingSpaces!.length,
         itemBuilder: (BuildContext context, int index) {
-          return Card(
-            elevation: 2,
-            shape: const RoundedRectangleBorder(
-              borderRadius: BorderRadius.all(
-                Radius.circular(12),
-              ),
-            ),
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Text(
-                    "Space $index",
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  Row(
-                    children: [
-                      Center(
-                        child: Container(
-                          child: const Center(
-                            child: Text(
-                              "Test",
-                              style: TextStyle(
-                                color: Colors.green,
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                          width: 60,
-                          height: 60,
-                          decoration: BoxDecoration(
-                            borderRadius: const BorderRadius.all(
-                              Radius.circular(100),
-                            ),
-                            color: Colors.white,
-                            border: Border.all(
-                              color: Colors.green,
-                              width: 2,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  )
-                ],
-              ),
-            ),
+          return SpaceCard(
+            index: index,
+            space: parkingSpaces![index],
           );
         },
       ),
     );
+  }
+}
+
+class SpaceCard extends StatefulWidget {
+  final ParkingSpace space;
+  final int index;
+  const SpaceCard({
+    Key? key,
+    required this.index,
+    required this.space,
+  }) : super(key: key);
+
+  @override
+  State<SpaceCard> createState() => _SpaceCardState();
+}
+
+class _SpaceCardState extends State<SpaceCard> {
+  final colors = [
+    {'fore': Colors.blue.shade600, 'back': Colors.blue.shade100},
+    {'fore': Colors.red.shade600, 'back': Colors.red.shade100},
+    {'fore': Colors.amber.shade600, 'back': Colors.amber.shade100},
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    final space = widget.space;
+    final index = widget.index;
+
+    return Card(
+      elevation: 2,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.all(
+          Radius.circular(12),
+        ),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Stack(
+              alignment: Alignment.center,
+              children: [
+                Container(
+                  width: 30,
+                  height: 30,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(5),
+                    color: colors[index]['back'],
+                  ),
+                ),
+                Container(
+                  width: 20,
+                  height: 20,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(5),
+                    color: colors[index]['fore'],
+                  ),
+                  child: Center(
+                    child: Text(
+                      "${index + 1}",
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 10),
+            Row(
+              children: [
+                Icon(
+                  Icons.location_on,
+                  color: Colors.red[400],
+                  size: 17,
+                ),
+                const SizedBox(width: 8),
+                space.getAddress!.length <= 30
+                    ? Text(
+                        space.getAddress!,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      )
+                    : Text(
+                        space.getAddress!.substring(0, 29) + "...",
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+              ],
+            ),
+            const SizedBox(height: 10),
+            Center(
+              child: Row(
+                children: [
+                  AvailableSpaceWidget(space: space),
+                  const SizedBox(width: 10),
+                  EarningsWidget(space: space),
+                ],
+              ),
+            ),
+            const SizedBox(height: 10),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => Space(
+                          space: space,
+                          title: "Space ${index + 1}",
+                        ),
+                      ),
+                    );
+                  },
+                  child: const Text("View space"),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class AvailableSpaceWidget extends StatefulWidget {
+  final ParkingSpace space;
+  const AvailableSpaceWidget({
+    Key? key,
+    required this.space,
+  }) : super(key: key);
+
+  @override
+  State<AvailableSpaceWidget> createState() => _AvailableSpaceWidgetState();
+}
+
+class _AvailableSpaceWidgetState extends State<AvailableSpaceWidget> {
+  @override
+  Widget build(BuildContext context) {
+    final space = widget.space;
+    final capacity = space.getCapacity!;
+    int availableSlot = 0;
+
+    return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+        stream: ParkingSpaceServices.getParkingSessionsDocs(space.getSpaceId!),
+        builder: (context, snapshot) {
+          if (snapshot.hasData) {
+            int occupied = 0;
+            snapshot.data!.docs.forEach((parking) {
+              if (parking.data()["inProgress"] == true) {
+                occupied++;
+              }
+            });
+            availableSlot = capacity - occupied;
+          }
+
+          return Column(
+            children: [
+              Card(
+                elevation: 0,
+                shape: const RoundedRectangleBorder(
+                  borderRadius: BorderRadius.all(
+                    Radius.circular(5),
+                  ),
+                ),
+                color: Colors.blue.shade50,
+                child: const Padding(
+                  padding: EdgeInsets.all(8.0),
+                  child: Text(
+                    "Available Space",
+                    style: TextStyle(
+                      color: Colors.blue,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 10),
+              Container(
+                child: Center(
+                  child: Text(
+                    "$availableSlot",
+                    style: const TextStyle(
+                      color: Colors.green,
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+                width: 60,
+                height: 60,
+                decoration: BoxDecoration(
+                  borderRadius: const BorderRadius.all(
+                    Radius.circular(100),
+                  ),
+                  color: Colors.white,
+                  border: Border.all(
+                    color: Colors.green,
+                    width: 2,
+                  ),
+                ),
+              ),
+            ],
+          );
+        });
+  }
+}
+
+class EarningsWidget extends StatefulWidget {
+  final ParkingSpace space;
+  const EarningsWidget({
+    Key? key,
+    required this.space,
+  }) : super(key: key);
+
+  @override
+  State<EarningsWidget> createState() => _EarningsWidgetState();
+}
+
+class _EarningsWidgetState extends State<EarningsWidget> {
+  @override
+  Widget build(BuildContext context) {
+    final space = widget.space;
+    double earned = 0;
+    return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+        stream: ParkingSpaceServices.getEearningsToday(space.getSpaceId!),
+        builder: (context, snapshot) {
+          earned = 0;
+          if (snapshot.hasData) {
+            snapshot.data!.docs.forEach((session) {
+              earned += session.data()['price'];
+            });
+          }
+          return Column(
+            children: [
+              Card(
+                elevation: 0,
+                shape: const RoundedRectangleBorder(
+                  borderRadius: BorderRadius.all(
+                    Radius.circular(5),
+                  ),
+                ),
+                color: Colors.blue.shade50,
+                child: const Padding(
+                  padding: EdgeInsets.all(8.0),
+                  child: Text(
+                    "Earnings Today",
+                    style: TextStyle(
+                      color: Colors.blue,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 10),
+              Container(
+                child: Center(
+                  child: Text(
+                    "$earned",
+                    style: const TextStyle(
+                      color: Colors.green,
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+                width: 60,
+                height: 60,
+                decoration: BoxDecoration(
+                  borderRadius: const BorderRadius.all(
+                    Radius.circular(100),
+                  ),
+                  color: Colors.white,
+                  border: Border.all(
+                    color: Colors.green,
+                    width: 2,
+                  ),
+                ),
+              ),
+            ],
+          );
+        });
   }
 }
 

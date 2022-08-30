@@ -1,6 +1,5 @@
 // ignore_for_file: empty_catches, unused_catch_clause, avoid_function_literals_in_foreach_calls
 
-import 'package:android_intent_plus/android_intent.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
