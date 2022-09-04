@@ -15,7 +15,12 @@ class InfoAndFeaturesState extends State<InfoAndFeatures> {
   final GlobalKey<ReservabilityState> _reservabilityState = GlobalKey();
   final GlobalKey<FeaturesState> _featuresState = GlobalKey();
   final GlobalKey<PaypalState> _paypalState = GlobalKey();
-
+  final featuresItems = <FeaturesItem>[
+    FeaturesItem(title: "With gate"),
+    FeaturesItem(title: "CCTV"),
+    FeaturesItem(title: "Covered Parking"),
+    FeaturesItem(title: "Lighting"),
+  ];
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -27,10 +32,14 @@ class InfoAndFeaturesState extends State<InfoAndFeatures> {
         const SizedBox(height: 20),
         Information(key: _informationState),
         const SizedBox(height: 20),
-        Reservability(key: _reservabilityState),
+        Reservability(
+          key: _reservabilityState,
+          reservability: "Reservable",
+          dailyOrMonthly: "Daily",
+        ),
         const SizedBox(height: 20),
         _sharedWidget.stepHeader("Features"),
-        Features(key: _featuresState),
+        Features(key: _featuresState, features: featuresItems),
         _sharedWidget.stepHeader("Paypal Account"),
         const SizedBox(height: 10),
         Paypal(key: _paypalState),
@@ -313,16 +322,29 @@ class InformationState extends State<Information> {
 }
 
 class Reservability extends StatefulWidget {
-  const Reservability({Key? key}) : super(key: key);
+  final String reservability;
+  final String dailyOrMonthly;
+  const Reservability({
+    Key? key,
+    required this.reservability,
+    required this.dailyOrMonthly,
+  }) : super(key: key);
 
   @override
   State<Reservability> createState() => ReservabilityState();
 }
 
 class ReservabilityState extends State<Reservability> {
-  String? _selectedReservability = "Reservable";
-  String? _selectedDailyOrMonthly = "Daily";
+  String? _selectedReservability = "";
+  String? _selectedDailyOrMonthly = "";
   bool enableRadios = true;
+
+  @override
+  void initState() {
+    _selectedReservability = widget.reservability;
+    _selectedDailyOrMonthly = widget.dailyOrMonthly;
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -524,20 +546,22 @@ class ReservabilityState extends State<Reservability> {
 }
 
 class Features extends StatefulWidget {
-  const Features({Key? key}) : super(key: key);
+  final List<FeaturesItem> features;
+  const Features({Key? key, required this.features}) : super(key: key);
 
   @override
   State<Features> createState() => FeaturesState();
 }
 
 class FeaturesState extends State<Features> {
-  final featuresItems = <FeaturesItem>[
-    FeaturesItem(title: "With gate"),
-    FeaturesItem(title: "CCTV"),
-    FeaturesItem(title: "Covered Parking"),
-    FeaturesItem(title: "Lighting"),
-  ];
+  List<FeaturesItem> featuresItems = [];
   List<String> selectedFeatures = [];
+
+  @override
+  void initState() {
+    featuresItems = widget.features;
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -581,6 +605,18 @@ class FeaturesItem {
   bool isChecked;
 
   FeaturesItem({required this.title, this.isChecked = false});
+
+  String get getTitle => title;
+
+  set setChecked(bool isChecked) {
+    this.isChecked = isChecked;
+  }
+
+  @override
+  String toString() {
+    
+    return "FeaturesITem[title: $title isChecked: $isChecked]";
+  }
 }
 
 class Paypal extends StatefulWidget {

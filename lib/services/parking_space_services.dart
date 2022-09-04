@@ -5,6 +5,7 @@ import 'dart:async';
 import 'package:android_intent_plus/android_intent.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:lets_park/globals/globals.dart' as globals;
@@ -277,5 +278,93 @@ class ParkingSpaceServices {
         .collection("parking-spaces")
         .doc(spaceId)
         .delete();
+  }
+
+  static void updateSpaceAddress(String spaceId, String newAddress) async {
+    await FirebaseFirestore.instance
+        .collection("parking-spaces")
+        .doc(spaceId)
+        .update({
+      'address': newAddress,
+    });
+  }
+
+  static void updateSpaceImageUrl(String spaceId, String newImageUrl) async {
+    await FirebaseFirestore.instance
+        .collection("parking-spaces")
+        .doc(spaceId)
+        .update({
+      'imageUrl': newImageUrl,
+    });
+  }
+
+  static Future<void> deleteImageUrl(String url) async {
+    await FirebaseStorage.instance.refFromURL(url).delete();
+  }
+
+  static void updateSpaceInfo(String spaceId, String newInfo) async {
+    await FirebaseFirestore.instance
+        .collection("parking-spaces")
+        .doc(spaceId)
+        .update({
+      'info': newInfo,
+    });
+  }
+
+  static void updateSpaceRules(String spaceId, String newRules) async {
+    await FirebaseFirestore.instance
+        .collection("parking-spaces")
+        .doc(spaceId)
+        .update({
+      'rules': newRules,
+    });
+  }
+
+  static void updateSpaceCapacity(String spaceId, int newCapacity) async {
+    await FirebaseFirestore.instance
+        .collection("parking-spaces")
+        .doc(spaceId)
+        .update({
+      'capacity': newCapacity,
+    });
+  }
+
+  static void updateSpaceType(String spaceId, String newType) async {
+    await FirebaseFirestore.instance
+        .collection("parking-spaces")
+        .doc(spaceId)
+        .update({
+      'type': newType,
+    });
+  }
+
+  static void updateSpaceDailyOrMonthly(
+      String spaceId, String newDailyOrMonthly) async {
+    await FirebaseFirestore.instance
+        .collection("parking-spaces")
+        .doc(spaceId)
+        .update({
+      'dailyOrMonthly': newDailyOrMonthly,
+    });
+  }
+
+  static void updateSpaceFeatures(
+      String spaceId, List<String> newFeatures) async {
+    await FirebaseFirestore.instance
+        .collection("parking-spaces")
+        .doc(spaceId)
+        .update({
+      'features': newFeatures,
+    });
+  }
+
+  static void updateSpacePaypalEmail(
+      String spaceId, String newPaypalEmail) async {
+    await FirebaseFirestore.instance
+        .collection("parking-spaces")
+        .doc(spaceId)
+        .update({
+      'paypalEmail': newPaypalEmail,
+    });
   }
 }

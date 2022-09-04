@@ -7,6 +7,7 @@ import 'package:intl/intl.dart';
 import 'package:lets_park/main.dart';
 import 'package:lets_park/models/parking.dart';
 import 'package:lets_park/models/parking_space.dart';
+import 'package:lets_park/screens/drawer_screens/manage_space/update_parking_space.dart';
 import 'package:lets_park/services/parking_space_services.dart';
 import 'package:lets_park/shared/shared_widgets.dart';
 import 'package:lets_park/models/review.dart';
@@ -501,6 +502,20 @@ class _SpaceState extends State<Space> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
+                        TextButton(
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (BuildContext context) =>
+                                    UpdateParkingSpace(
+                                  space: space,
+                                ),
+                              ),
+                            );
+                          },
+                          child: const Text("Update parking space"),
+                        ),
                         TextButton(
                           style: TextButton.styleFrom(
                             primary: space.isDisabled!
