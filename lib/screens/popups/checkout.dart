@@ -22,6 +22,8 @@ import 'package:lets_park/services/user_services.dart';
 import 'package:lets_park/services/world_time_api.dart';
 import 'package:numberpicker/numberpicker.dart';
 import 'package:lets_park/globals/globals.dart' as globals;
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 import 'package:url_launcher/url_launcher.dart' as launcher;
 
 class Checkout extends StatefulWidget {
@@ -120,6 +122,17 @@ class _CheckoutState extends State<Checkout> {
               paymentDate = date.millisecondsSinceEpoch;
             });
 
+            DateTime now = DateTime(0, 0, 0, 0, 0);
+            await WorldTimeServices.getDateTimeNow().then((time) {
+              now = DateTime(
+                time.year,
+                time.month,
+                time.day,
+                time.hour,
+                time.minute,
+              );
+            });
+
             Parking newParking = Parking(
               widget.parkingSpace.getSpaceId,
               parkingId,
@@ -147,6 +160,20 @@ class _CheckoutState extends State<Checkout> {
               false,
             );
 
+            final userNotif = UserNotification(
+              "NOTIF" +
+                  globals.userData.getUserNotifications!.length.toString(),
+              widget.parkingSpace.getSpaceId!,
+              FirebaseAuth.instance.currentUser!.photoURL!,
+              FirebaseAuth.instance.currentUser!.displayName!,
+              "just booked on your parking space. Tap to view details.",
+              true,
+              false,
+              now.millisecondsSinceEpoch,
+              false,
+              false,
+            );
+
             showDialog(
               context: context,
               barrierDismissible: false,
@@ -159,7 +186,6 @@ class _CheckoutState extends State<Checkout> {
                 ),
               ),
             );
-            await Future.delayed(const Duration(seconds: 2));
             bool isAvailable = true;
             if (availableSlot > 0) {
               isAvailable = true;
@@ -190,10 +216,13 @@ class _CheckoutState extends State<Checkout> {
                 );
               }
               showAlertDialogWithLoading("Now paying...");
+
               checkPayedStream = checkPayed.listen((event) {
                 UserServices.isPayed(FirebaseAuth.instance.currentUser!.uid)
                     .then((payed) async {
                   if (payed) {
+                    checkPayedStream.cancel();
+
                     Navigator.pop(context);
                     showDialog(
                       context: context,
@@ -207,48 +236,29 @@ class _CheckoutState extends State<Checkout> {
                         ),
                       ),
                     );
-                    UserServices.parkingSessionsStreams.pause();
-                    UserServices.ownedParkingSessionsStreams.pause();
-                    ParkingSpaceServices.updateParkingSpaceData(
-                      widget.parkingSpace,
-                      newParking,
-                    );
+                    var request = http.Request(
+                      'POST',
+                      Uri.parse(
+                        "https://sample-paypal-payment-sandbox.herokuapp.com/write/to/database",
+                      ),
+                    )..headers.addAll({
+                        HttpHeaders.contentTypeHeader: "application/json",
+                      });
 
-                    DateTime now = DateTime(0, 0, 0, 0, 0);
-                    await WorldTimeServices.getDateTimeNow().then((time) {
-                      now = DateTime(
-                        time.year,
-                        time.month,
-                        time.day,
-                        time.hour,
-                        time.minute,
-                      );
-                    });
-
-                    UserServices.updateUserParkingData(newParking);
-
-                    UserServices.notifyUser(
-                      "NOTIF" +
-                          globals.userData.getUserNotifications!.length
-                              .toString(),
-                      widget.parkingSpace.getOwnerId!,
-                      UserNotification(
-                        "NOTIF" +
+                    var params = {
+                      "parking": newParking.toJson(),
+                      "notification": {
+                        "notificationId": "NOTIF" +
                             globals.userData.getUserNotifications!.length
                                 .toString(),
-                        widget.parkingSpace.getSpaceId!,
-                        FirebaseAuth.instance.currentUser!.photoURL!,
-                        FirebaseAuth.instance.currentUser!.displayName!,
-                        "just booked on your parking space. Tap to view details.",
-                        true,
-                        false,
-                        now.millisecondsSinceEpoch,
-                        false,
-                        false,
-                      ),
-                    );
-                    UserServices.parkingSessionsStreams.resume();
-                    UserServices.ownedParkingSessionsStreams.resume();
+                        "userId": widget.parkingSpace.getOwnerId!,
+                        "userNotification": userNotif.toJson(),
+                      },
+                    };
+
+                    request.body = jsonEncode(params);
+                    await request.send();
+
                     UserServices.setPayedToFalse(
                         FirebaseAuth.instance.currentUser!.uid);
                     Navigator.pop(context);
@@ -261,7 +271,6 @@ class _CheckoutState extends State<Checkout> {
                             )),
                       ),
                     );
-                    checkPayedStream.cancel();
                   }
                 });
               });

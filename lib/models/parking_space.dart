@@ -17,6 +17,7 @@ class ParkingSpace {
   String? _rules;
   bool? _isFull;
   String? _paypalEmail;
+  bool? _disabled = false;
 
   ParkingSpace();
 
@@ -36,6 +37,7 @@ class ParkingSpace {
     List<String>? features,
     String? rules,
     String? paypalEmail,
+    bool? disabled,
   ) {
     _id = id;
     _ownerId = ownerId;
@@ -52,6 +54,7 @@ class ParkingSpace {
     _features = features;
     _rules = rules;
     _paypalEmail = paypalEmail;
+    _disabled = disabled;
   }
 
   String? get getSpaceId => _id;
@@ -151,6 +154,12 @@ class ParkingSpace {
     _paypalEmail = paypalEmail;
   }
 
+  bool? get isDisabled => _disabled;
+
+  set setDisabled(bool? disabled) {
+    _disabled = disabled;
+  }
+
   @override
   String toString() {
     return "ParkingSpace [ $_ownerId , $_imageUrl , $_address, $_latLng , $_capacity , $_rating , $_info , $_verticalClearance, $_type , $_features, $_isFull]";
@@ -172,6 +181,7 @@ class ParkingSpace {
         'features': _features,
         'rules': _rules,
         'paypalEmail': _paypalEmail,
+        'disabled': _disabled,
       };
 
   static ParkingSpace fromJson(Map<String, dynamic> json) {
@@ -194,7 +204,8 @@ class ParkingSpace {
       json['dailyOrMonthly'],
       features,
       json['rules'],
-      json['paypalEmail'],    
+      json['paypalEmail'], 
+      json['disabled'],   
     );
   }
 }

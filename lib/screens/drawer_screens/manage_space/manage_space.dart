@@ -2,7 +2,6 @@
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:lets_park/globals/globals.dart' as globals;
 import 'package:lets_park/models/parking_space.dart';
 import 'package:lets_park/screens/drawer_screens/manage_space/earnings_menu.dart';
 import 'package:lets_park/screens/drawer_screens/manage_space/parking_history_menu.dart';
@@ -202,24 +201,57 @@ class SpacesAndEarningsWiget extends StatefulWidget {
 }
 
 class _SpacesAndEarningsWigetState extends State<SpacesAndEarningsWiget> {
-  List<ParkingSpace>? parkingSpaces = globals.userData.getOwnedParkingSpaces;
+  List<ParkingSpace>? activeParkingSpaces = [];
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: 275,
-      child: ListView.builder(
-        padding: const EdgeInsets.all(8),
-        scrollDirection: Axis.horizontal,
-        itemCount: parkingSpaces!.length,
-        itemBuilder: (BuildContext context, int index) {
-          return SpaceCard(
-            index: index,
-            space: parkingSpaces![index],
+    return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+        stream: ParkingSpaceServices.getActiveParkingSpaces(),
+        builder: (context, snapshot) {
+          if (snapshot.hasData) {
+            activeParkingSpaces = [];
+            snapshot.data!.docs.forEach((space) {
+              activeParkingSpaces!.add(ParkingSpace.fromJson(space.data()));
+            });
+          }
+          return SizedBox(
+            height: activeParkingSpaces!.isEmpty ? 100 : 275,
+            child: activeParkingSpaces!.isEmpty
+                ? const Padding(
+                    padding: EdgeInsets.all(16.0),
+                    child: Card(
+                      elevation: 2,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.all(
+                          Radius.circular(12),
+                        ),
+                      ),
+                      child: Padding(
+                        padding: EdgeInsets.all(16),
+                        child: Center(
+                          child: Text(
+                            "There are no currently active parking spaces.",
+                            style: TextStyle(
+                              color: Colors.grey,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  )
+                : ListView.builder(
+                    padding: const EdgeInsets.all(8),
+                    scrollDirection: Axis.horizontal,
+                    itemCount: activeParkingSpaces!.length,
+                    itemBuilder: (BuildContext context, int index) {
+                      return SpaceCard(
+                        index: index,
+                        space: activeParkingSpaces![index],
+                      );
+                    },
+                  ),
           );
-        },
-      ),
-    );
+        });
   }
 }
 

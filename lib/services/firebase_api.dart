@@ -14,7 +14,6 @@ import 'package:lets_park/screens/popups/parking_area_info.dart';
 
 class FirebaseServices {
   late Stream<List<ParkingSpace>> _spaces;
-  final Set<Marker> _markers = {};
 
   static Future uploadParkingSpace() async {
     int id = globals.parkinSpaceQuantity + 1;
@@ -65,10 +64,12 @@ class FirebaseServices {
         .map((snapshot) => snapshot.docs
             .map<ParkingSpace>((doc) => ParkingSpace.fromJson(doc.data()))
             .toList());
+
     return _spaces;
   }
 
-  Set<Marker> getMarkers(BuildContext context) {
+  Future<Set<Marker>> getMarkers(BuildContext context) async {
+    Set<Marker> markers = {};
     late BitmapDescriptor reservableMarker, nonReservableMarker, monthlyMarker;
 
     _getReservableIcon().then((BitmapDescriptor value) {
@@ -83,39 +84,42 @@ class FirebaseServices {
       monthlyMarker = value;
     });
 
-    _spaces.first.then((value) {
+    await _spaces.first.then((value) {
       globals.parkinSpaceQuantity = value.length;
       globals.currentParkingSpaces = value;
       value.forEach((parkingSpace) {
-        _markers.add(
-          Marker(
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  fullscreenDialog: true,
-                  builder: (context) => ParkingAreaInfo(
-                    parkingSpace: parkingSpace,
+        if (parkingSpace.isDisabled == false) {
+          markers.add(
+            Marker(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    fullscreenDialog: true,
+                    builder: (context) => ParkingAreaInfo(
+                      parkingSpace: parkingSpace,
+                    ),
                   ),
-                ),
-              );
-            },
-            icon: parkingSpace.getType!.compareTo("Reservable") == 0 &&
-                    parkingSpace.getDailyOrMonthly!.compareTo("Daily") == 0
-                ? reservableMarker
-                : parkingSpace.getType!.compareTo("Reservable") == 0 &&
-                        parkingSpace.getDailyOrMonthly!.compareTo("Monthly") ==
-                            0
-                    ? monthlyMarker
-                    : nonReservableMarker,
-            markerId: MarkerId(parkingSpace.getLatLng.toString()),
-            position: parkingSpace.getLatLng!,
-          ),
-        );
+                );
+              },
+              icon: parkingSpace.getType!.compareTo("Reservable") == 0 &&
+                      parkingSpace.getDailyOrMonthly!.compareTo("Daily") == 0
+                  ? reservableMarker
+                  : parkingSpace.getType!.compareTo("Reservable") == 0 &&
+                          parkingSpace.getDailyOrMonthly!
+                                  .compareTo("Monthly") ==
+                              0
+                      ? monthlyMarker
+                      : nonReservableMarker,
+              markerId: MarkerId(parkingSpace.getLatLng.toString()),
+              position: parkingSpace.getLatLng!,
+            ),
+          );
+        }
       });
     });
 
-    return _markers;
+    return markers;
   }
 
   Future<BitmapDescriptor> _getReservableIcon() async {

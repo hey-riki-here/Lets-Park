@@ -4,11 +4,13 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
+import 'package:lets_park/main.dart';
 import 'package:lets_park/models/parking.dart';
 import 'package:lets_park/models/parking_space.dart';
 import 'package:lets_park/services/parking_space_services.dart';
 import 'package:lets_park/shared/shared_widgets.dart';
 import 'package:lets_park/models/review.dart';
+import 'package:lets_park/globals/globals.dart' as globals;
 
 class Space extends StatefulWidget {
   final ParkingSpace space;
@@ -25,6 +27,8 @@ class _SpaceState extends State<Space> {
   final textStyle = const TextStyle(
     fontSize: 16,
   );
+  final controller = TextEditingController();
+  final key = GlobalKey<FormState>();
 
   @override
   Widget build(BuildContext context) {
@@ -34,6 +38,9 @@ class _SpaceState extends State<Space> {
     int availableSlot = 0;
     List<Parking> inProgressParkings = [];
     final List<Review> reviews = [];
+    bool disableButton = true,
+        isLoading = false,
+        isDisabled = space.isDisabled!;
 
     return Scaffold(
       appBar: _sharedWidgets.manageSpaceAppBar("Space $title"),
@@ -495,17 +502,327 @@ class _SpaceState extends State<Space> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         TextButton(
-                          onPressed: () {},
+                          style: TextButton.styleFrom(
+                            primary: space.isDisabled!
+                                ? Colors.green.shade500
+                                : Colors.red.shade300,
+                          ),
+                          onPressed: () async {
+                            await showDialog<String>(
+                              context: context,
+                              barrierDismissible: false,
+                              builder: (BuildContext context) =>
+                                  StatefulBuilder(
+                                builder: (context, setState) => AlertDialog(
+                                  title: Container(
+                                    padding: const EdgeInsets.all(16),
+                                    decoration: BoxDecoration(
+                                      color: isDisabled
+                                          ? Colors.green.shade50
+                                          : Colors.red.shade50,
+                                      borderRadius: BorderRadius.circular(5),
+                                    ),
+                                    child: Column(
+                                      children: [
+                                        Row(
+                                          children: [
+                                            Icon(
+                                              Icons.warning_rounded,
+                                              color: isDisabled
+                                                  ? Colors.green.shade800
+                                                  : Colors.red.shade800,
+                                            ),
+                                            const SizedBox(width: 10),
+                                            Expanded(
+                                              child: Text(
+                                                isLoading
+                                                    ? isDisabled
+                                                        ? "Enabling parking space"
+                                                        : "Disabling parking space."
+                                                    : isDisabled
+                                                        ? "Enable this parking space?"
+                                                        : "Disable this parking space ?",
+                                                style: TextStyle(
+                                                  color: isDisabled
+                                                      ? Colors.green.shade800
+                                                      : Colors.red.shade800,
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                              ),
+                                              //
+                                            ),
+                                          ],
+                                        ),
+                                        const SizedBox(height: 15),
+                                        Text(
+                                          isLoading
+                                              ? "Please wait..."
+                                              : isDisabled
+                                                  ? "Doing so will continue the parking space to receive bookings."
+                                                  : "Doing so will make the parking space unable to receive bookings.",
+                                          style: TextStyle(
+                                            color: isDisabled
+                                                ? Colors.green.shade900
+                                                : Colors.red.shade900,
+                                            fontSize: 15,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  content: isLoading
+                                      ? Column(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: const [
+                                            CircularProgressIndicator(),
+                                          ],
+                                        )
+                                      : Column(
+                                          mainAxisSize: MainAxisSize.min,
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            const Text(
+                                              "Parking space",
+                                              style: TextStyle(
+                                                color: Colors.black54,
+                                              ),
+                                            ),
+                                            const SizedBox(height: 10),
+                                            Text(
+                                              "Space $title",
+                                              style: const TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                            const SizedBox(height: 20),
+                                            Text(
+                                              "Are you sure you want to ${isDisabled ? "enable" : "disable"} this space?",
+                                            ),
+                                          ],
+                                        ),
+                                  actions: isLoading
+                                      ? []
+                                      : [
+                                          TextButton(
+                                            style: TextButton.styleFrom(
+                                              primary: Colors.black54,
+                                            ),
+                                            onPressed: () => Navigator.pop(
+                                                context, 'Cancel'),
+                                            child: const Text('Cancel'),
+                                          ),
+                                          Padding(
+                                            padding: const EdgeInsets.only(
+                                              right: 10,
+                                            ),
+                                            child: ElevatedButton(
+                                              onPressed: () async {
+                                                setState(() {
+                                                  isLoading = true;
+                                                });
+                                                ParkingSpaceServices
+                                                    .updateDisableStatus(
+                                                  space.getSpaceId!,
+                                                  !space.isDisabled!,
+                                                );
+                                                Navigator.pop(
+                                                  context,
+                                                  "Confirm",
+                                                );
+                                              },
+                                              style: ElevatedButton.styleFrom(
+                                                primary: isDisabled
+                                                    ? Colors.green.shade800
+                                                    : Colors.red.shade800,
+                                                elevation: 0,
+                                              ),
+                                              child: const Text(
+                                                "Confirm",
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                ),
+                              ),
+                            ).then((value) {
+                              if (value!.compareTo("Confirm") == 0) {
+                                Navigator.of(context).pop();
+                              }
+                            });
+                          },
                           child: Text(
-                            "Disable space",
-                            style: TextStyle(
+                            isDisabled ? "Enable space" : "Disable space",
+                            style: const TextStyle(
                               fontSize: 15,
-                              color: Colors.red.shade300,
                             ),
                           ),
                         ),
                         TextButton(
-                          onPressed: () {},
+                          style: TextButton.styleFrom(
+                            primary: Colors.red.shade300,
+                          ),
+                          onPressed: () async {
+                            await showDialog<String>(
+                              context: context,
+                              builder: (BuildContext context) =>
+                                  StatefulBuilder(
+                                builder: (context, setState) => AlertDialog(
+                                  title: Container(
+                                    padding: const EdgeInsets.all(16),
+                                    decoration: BoxDecoration(
+                                      color: Colors.red.shade50,
+                                      borderRadius: BorderRadius.circular(5),
+                                    ),
+                                    child: Column(
+                                      children: [
+                                        Row(
+                                          children: [
+                                            Icon(
+                                              Icons.warning_rounded,
+                                              color: Colors.red.shade800,
+                                            ),
+                                            const SizedBox(width: 10),
+                                            Expanded(
+                                              child: Text(
+                                                isLoading
+                                                    ? "Deleting parking space"
+                                                    : "Delete this parking space ?",
+                                                style: TextStyle(
+                                                  color: Colors.red.shade800,
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                              ),
+                                              //
+                                            ),
+                                          ],
+                                        ),
+                                        const SizedBox(height: 15),
+                                        Text(
+                                          isLoading
+                                              ? "Please wait..."
+                                              : "Deleting this parking space will delete all the data including earnings, upcoming parkings, and parking history..",
+                                          style: TextStyle(
+                                            color: Colors.red.shade900,
+                                            fontSize: 15,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  content: isLoading
+                                      ? Column(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: const [
+                                            CircularProgressIndicator(),
+                                          ],
+                                        )
+                                      : Column(
+                                          mainAxisSize: MainAxisSize.min,
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            const Text(
+                                              "Parking space id",
+                                              style: TextStyle(
+                                                color: Colors.black54,
+                                              ),
+                                            ),
+                                            const SizedBox(height: 10),
+                                            Text(
+                                              "Space $title",
+                                              style: const TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                            const SizedBox(height: 20),
+                                            const Text(
+                                              "Are you sure you want to delete this space? Please type the space id.",
+                                            ),
+                                            const SizedBox(height: 10),
+                                            Form(
+                                              key: key,
+                                              child: TextFormField(
+                                                controller: controller,
+                                                onChanged: (value) {
+                                                  setState(() {
+                                                    if (value.compareTo(
+                                                            "Space $title") ==
+                                                        0) {
+                                                      disableButton = false;
+                                                    } else {
+                                                      disableButton = true;
+                                                    }
+                                                  });
+                                                },
+                                                decoration: InputDecoration(
+                                                  hintText: "Space $title",
+                                                  border:
+                                                      const OutlineInputBorder(
+                                                    borderRadius:
+                                                        BorderRadius.all(
+                                                      Radius.circular(12),
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                  actions: [
+                                    TextButton(
+                                      style: TextButton.styleFrom(
+                                        primary: Colors.black54,
+                                      ),
+                                      onPressed: () =>
+                                          Navigator.of(context).pop(),
+                                      child: const Text('Cancel'),
+                                    ),
+                                    Padding(
+                                      padding: const EdgeInsets.only(
+                                        right: 10,
+                                      ),
+                                      child: ElevatedButton(
+                                        onPressed: disableButton
+                                            ? null
+                                            : () async {
+                                                setState(() {
+                                                  isLoading = true;
+                                                });
+                                                ParkingSpaceServices
+                                                    .deleteParkingSpace(
+                                                  space.getSpaceId!,
+                                                );
+                                                Navigator.pop(
+                                                  context,
+                                                  "Confirm",
+                                                );
+                                              },
+                                        style: ElevatedButton.styleFrom(
+                                          primary: Colors.red.shade800,
+                                          elevation: 0,
+                                        ),
+                                        child: const Text(
+                                          "Confirm",
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ).then((value) {
+                              if (value!.compareTo("Confirm") == 0) {
+                                if (globals.userData.getOwnedParkingSpaces!
+                                        .length ==
+                                    1) {
+                                  navigatorKey.currentState!
+                                      .popUntil((route) => route.isFirst);
+                                } else {
+                                  Navigator.pop(context);
+                                }
+                              }
+                            });
+                          },
                           child: Text(
                             "Delete space",
                             style: TextStyle(

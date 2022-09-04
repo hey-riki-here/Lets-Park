@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:lets_park/main.dart';
 import 'package:lets_park/models/parking.dart';
 import 'package:lets_park/models/parking_space.dart';
-import 'package:lets_park/globals/globals.dart' as globals;
 
 class SuccessfulBooking extends StatelessWidget {
   final Parking newParking;

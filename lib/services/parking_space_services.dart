@@ -4,6 +4,7 @@ import 'dart:async';
 
 import 'package:android_intent_plus/android_intent.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:lets_park/globals/globals.dart' as globals;
@@ -245,5 +246,36 @@ class ParkingSpaceServices {
         .collection('parking-sessions')
         .where("paymentDate", isEqualTo: globals.today)
         .snapshots();
+  }
+
+  static Stream<QuerySnapshot<Map<String, dynamic>>> getOwnedParkingSpaces() {
+    return FirebaseFirestore.instance
+        .collection("parking-spaces")
+        .where("ownerId", isEqualTo: FirebaseAuth.instance.currentUser!.uid)
+        .snapshots();
+  }
+
+  static Stream<QuerySnapshot<Map<String, dynamic>>> getActiveParkingSpaces() {
+    return FirebaseFirestore.instance
+        .collection("parking-spaces")
+        .where("ownerId", isEqualTo: FirebaseAuth.instance.currentUser!.uid)
+        .where("disabled", isEqualTo: false)
+        .snapshots();
+  }
+
+  static void updateDisableStatus(String spaceId, bool status) async {
+    await FirebaseFirestore.instance
+        .collection('parking-spaces')
+        .doc(spaceId)
+        .update({
+      'disabled': status,
+    });
+  }
+
+  static void deleteParkingSpace(String spaceId) async {
+    await FirebaseFirestore.instance
+        .collection("parking-spaces")
+        .doc(spaceId)
+        .delete();
   }
 }

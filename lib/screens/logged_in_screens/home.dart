@@ -81,6 +81,10 @@ class _HomeState extends State<Home> {
     });
   }
 
+  void refresh() {
+    setState(() {});
+  }
+
   @override
   Widget build(BuildContext context) {
     try {
@@ -103,7 +107,10 @@ class _HomeState extends State<Home> {
             return SafeArea(
               child: Stack(
                 children: [
-                  GoogleMapScreen(key: _gMapKey),
+                  GoogleMapScreen(
+                    key: _gMapKey,
+                    notifyParent: refresh,
+                  ),
                   Padding(
                     padding: const EdgeInsets.all(16.0),
                     child: Column(

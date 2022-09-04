@@ -2,10 +2,8 @@
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:lets_park/models/parking_space.dart';
 import 'package:lets_park/screens/drawer_screens/manage_space/space.dart';
-import 'package:lets_park/screens/drawer_screens/register_screens/register_area.dart';
 import 'package:lets_park/services/parking_space_services.dart';
 import 'package:lets_park/shared/shared_widgets.dart';
 import 'package:lets_park/globals/globals.dart' as globals;
@@ -17,31 +15,35 @@ class YourSpace extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final _sharedWidgets = SharedWidget();
-    List<ParkingSpace>? parkingSpaces = appUser.getOwnedParkingSpaces;
+    List<ParkingSpace>? parkingSpaces = [];
 
     return Scaffold(
       appBar: _sharedWidgets.manageSpaceAppBar("Your spaces"),
       backgroundColor: Colors.grey.shade100,
-      body: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Column(
-          children: [
-            Expanded(
+      body: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+          stream: ParkingSpaceServices.getOwnedParkingSpaces(),
+          builder: (context, snapshot) {
+            if (snapshot.hasData) {
+              parkingSpaces = [];
+              snapshot.data!.docs.forEach((space) {
+                parkingSpaces!.add(ParkingSpace.fromJson(space.data()));
+              });
+            }
+            return Padding(
+              padding: const EdgeInsets.all(8.0),
               child: ListView.builder(
                 scrollDirection: Axis.vertical,
                 itemCount: parkingSpaces!.length,
                 itemBuilder: (context, index) {
                   int title = index + 1;
                   return ParkingCard(
-                    parkingSpace: parkingSpaces[index],
+                    parkingSpace: parkingSpaces![index],
                     title: "$title",
                   );
                 },
               ),
-            ),
-          ],
-        ),
-      ),
+            );
+          }),
     );
   }
 }
@@ -182,7 +184,12 @@ class ParkingCard extends StatelessWidget {
                             Colors.blue,
                           ),
                           const SizedBox(width: 5),
-                          buildTag("Active", Colors.green),
+                          buildTag(
+                            parkingSpace.isDisabled! ? "Disabled" : "Active",
+                            parkingSpace.isDisabled!
+                                ? Colors.red
+                                : Colors.green,
+                          ),
                         ],
                       ),
                     ],

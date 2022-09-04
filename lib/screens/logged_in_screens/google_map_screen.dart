@@ -15,7 +15,11 @@ import 'package:lets_park/services/firebase_api.dart';
 import 'package:location/location.dart' as locationlib;
 
 class GoogleMapScreen extends StatefulWidget {
-  const GoogleMapScreen({Key? key}) : super(key: key);
+  final Function notifyParent;
+  const GoogleMapScreen({
+    Key? key,
+    required this.notifyParent,
+  }) : super(key: key);
 
   @override
   State<GoogleMapScreen> createState() => GoogleMapScreenState();
@@ -25,6 +29,7 @@ class GoogleMapScreenState extends State<GoogleMapScreen> {
   final double mapMinZoom = 15, mapMaxZoom = 18;
   final Completer<GoogleMapController> _controller = Completer();
   final FirebaseServices _firebaseServices = FirebaseServices();
+  Set<Marker> markers = {};
   GoogleMapController? googleMapController;
   geolocator.Position? position;
   bool locationEnabled = false;
@@ -51,10 +56,11 @@ class GoogleMapScreenState extends State<GoogleMapScreen> {
           builder: (context, snapshot) {
             if (snapshot.hasData) {
               FirebaseServices.getOwnedParkingAreas(snapshot);
+              getMarkers();
               return GoogleMap(
                 initialCameraPosition: cameraPosition,
                 myLocationEnabled: locationEnabled,
-                markers: _firebaseServices.getMarkers(context),
+                markers: markers,
                 myLocationButtonEnabled: false,
                 compassEnabled: false,
                 rotateGesturesEnabled: false,
@@ -65,7 +71,7 @@ class GoogleMapScreenState extends State<GoogleMapScreen> {
                   _controller.complete(controller);
                   googleMapController = controller;
                   changeMapMode(googleMapController!);
-                  setState(() {});
+                  widget.notifyParent();
                 },
               );
             } else {
@@ -87,6 +93,12 @@ class GoogleMapScreenState extends State<GoogleMapScreen> {
         },
       ),
     );
+  }
+
+  void getMarkers() async {
+     await _firebaseServices.getMarkers(context).then((value) {
+      markers = value;
+     });
   }
 
   void getLocation(BuildContext context) async {
