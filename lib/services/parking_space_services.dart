@@ -298,6 +298,15 @@ class ParkingSpaceServices {
     });
   }
 
+  static Future<void> updateCaretakerPhotoUrl(String spaceId, String newImageUrl) async {
+    await FirebaseFirestore.instance
+        .collection("parking-spaces")
+        .doc(spaceId)
+        .update({
+      'caretakerPhotoUrl': newImageUrl,
+    });
+  }
+
   static Future<void> deleteImageUrl(String url) async {
     await FirebaseStorage.instance.refFromURL(url).delete();
   }
@@ -326,6 +335,24 @@ class ParkingSpaceServices {
         .doc(spaceId)
         .update({
       'capacity': newCapacity,
+    });
+  }
+
+  static Future<void> updateCaretakerName(String spaceId, String caretakerName) async {
+    await FirebaseFirestore.instance
+        .collection("parking-spaces")
+        .doc(spaceId)
+        .update({
+      'caretakerName': caretakerName,
+    });
+  }
+
+  static Future<void> updateCaretakerPhoneNumber(String spaceId, String caretakerPhoneNumber) async {
+    await FirebaseFirestore.instance
+        .collection("parking-spaces")
+        .doc(spaceId)
+        .update({
+      'caretakerPhoneNumber': caretakerPhoneNumber,
     });
   }
 
@@ -367,4 +394,24 @@ class ParkingSpaceServices {
       'paypalEmail': newPaypalEmail,
     });
   }
+
+  static Future<bool> canModify(String spaceId) async {
+    bool result = true;
+    await FirebaseFirestore.instance
+        .collection("parking-spaces")
+        .doc(spaceId)
+        .collection("parking-sessions")
+        .snapshots()
+        .first
+        .then((sessions) {
+          sessions.docs.forEach((session) { 
+            if (session.data()['inProgress'] || session.data()['upcoming']){
+              result = false;
+            }
+          });
+        });
+
+    return result;
+  }
+
 }

@@ -1,5 +1,7 @@
 // ignore_for_file: unused_catch_clause, empty_catches, avoid_function_literals_in_foreach_calls
 
+import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -7,17 +9,20 @@ import 'package:dotted_border/dotted_border.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
-import 'package:lets_park/main.dart';
+import 'package:lets_park/models/notification.dart';
 import 'package:lets_park/models/parking.dart';
 import 'package:lets_park/models/parking_space.dart';
 import 'package:lets_park/screens/popups/notice_dialog.dart';
 import 'package:lets_park/screens/popups/successful_booking.dart';
 import 'package:lets_park/services/parking_space_services.dart';
+import 'package:lets_park/services/user_services.dart';
 import 'package:lets_park/services/world_time_api.dart';
 import 'package:numberpicker/numberpicker.dart';
 import 'package:lets_park/globals/globals.dart' as globals;
+import 'package:url_launcher/url_launcher.dart' as launcher;
 
 class NonReservableCheckout extends StatefulWidget {
   final ParkingSpace parkingSpace;
@@ -31,6 +36,19 @@ class NonReservableCheckout extends StatefulWidget {
 class _NonReservableCheckoutState extends State<NonReservableCheckout> {
   final GlobalKey<VehicleState> _vehicleState = GlobalKey();
   final GlobalKey<SetUpTimeState> _setupTimeState = GlobalKey();
+  StreamSubscription? checkPayedStream;
+  final Stream checkPayed =
+      Stream.periodic(const Duration(milliseconds: 1000), (int count) {
+    return count;
+  });
+
+  @override
+  void dispose() {
+    if (checkPayedStream != null) {
+      checkPayedStream!.cancel();
+    }
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -57,7 +75,7 @@ class _NonReservableCheckoutState extends State<NonReservableCheckout> {
                         ),
                         Vehicle(key: _vehicleState),
                         //const PhotoPicker(),
-                        //const Payment(),
+                        const Payment(),
                       ],
                     ),
                   ],
@@ -83,7 +101,6 @@ class _NonReservableCheckoutState extends State<NonReservableCheckout> {
                 "$qty";
 
             int paymentDate = 0;
-
             await WorldTimeServices.getDateOnlyNow().then((date) {
               paymentDate = date.millisecondsSinceEpoch;
             });
@@ -115,30 +132,103 @@ class _NonReservableCheckoutState extends State<NonReservableCheckout> {
               false,
             );
 
-            showDialog(
-              context: context,
-              barrierDismissible: false,
-              builder: (context) => WillPopScope(
-                onWillPop: () async => false,
-                child: const NoticeDialog(
-                  imageLink: "assets/logo/lets-park-logo.png",
-                  message: "We are now finishing up your booking...",
-                  forLoading: true,
-                ),
-              ),
+            UserServices.setPaymentParams(
+              FirebaseAuth.instance.currentUser!.uid,
+              "${widget.parkingSpace.getPaypalEmail}/${_setupTimeState.currentState!.getParkingPrice}",
             );
-            await Future.delayed(const Duration(seconds: 2));
+            String url =
+                "https://sample-paypal-payment-sandbox.herokuapp.com/${FirebaseAuth.instance.currentUser!.uid}";
+            if (await launcher.canLaunchUrl(Uri.parse(url))) {
+              await launcher.launchUrl(
+                Uri.parse(url),
+                mode: launcher.LaunchMode.externalApplication,
+              );
+            }
+            showAlertDialogWithLoading("Now paying...");
 
-            navigatorKey.currentState!.popUntil((route) => route.isFirst);
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: ((context) => SuccessfulBooking(
-                      newParking: newParking,
-                      parkingSpace: widget.parkingSpace,
-                    )),
-              ),
-            );
+            checkPayedStream = checkPayed.listen((event) {
+              UserServices.isPayed(FirebaseAuth.instance.currentUser!.uid)
+                  .then((payed) async {
+                if (payed) {
+                  checkPayedStream!.cancel();
+
+                  Navigator.pop(context);
+                  showDialog(
+                    context: context,
+                    barrierDismissible: false,
+                    builder: (context) => WillPopScope(
+                      onWillPop: () async => false,
+                      child: const NoticeDialog(
+                        imageLink: "assets/logo/lets-park-logo.png",
+                        message: "Finalizing your booking. Please wait.",
+                        forLoading: true,
+                      ),
+                    ),
+                  );
+                  var request = http.Request(
+                    'POST',
+                    Uri.parse(
+                      "https://sample-paypal-payment-sandbox.herokuapp.com/write/to/database",
+                    ),
+                  )..headers.addAll({
+                      HttpHeaders.contentTypeHeader: "application/json",
+                    });
+
+                  DateTime now = DateTime(0, 0, 0, 0, 0);
+                  await WorldTimeServices.getDateTimeNow().then((time) {
+                    now = DateTime(
+                      time.year,
+                      time.month,
+                      time.day,
+                      time.hour,
+                      time.minute,
+                    );
+                  });
+
+                  final userNotif = UserNotification(
+                    "NOTIF" +
+                        globals.userData.getUserNotifications!.length
+                            .toString(),
+                    widget.parkingSpace.getSpaceId!,
+                    FirebaseAuth.instance.currentUser!.photoURL!,
+                    FirebaseAuth.instance.currentUser!.displayName!,
+                    "just booked on your parking space. Tap to view details.",
+                    true,
+                    false,
+                    now.millisecondsSinceEpoch,
+                    false,
+                    false,
+                  );
+
+                  var params = {
+                    "parking": newParking.toJson(),
+                    "notification": {
+                      "notificationId": "NOTIF" +
+                          globals.userData.getUserNotifications!.length
+                              .toString(),
+                      "userId": widget.parkingSpace.getOwnerId!,
+                      "userNotification": userNotif.toJson(),
+                    },
+                  };
+
+                  request.body = jsonEncode(params);
+                  await request.send();
+
+                  UserServices.setPayedToFalse(
+                      FirebaseAuth.instance.currentUser!.uid);
+                  Navigator.pop(context);
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: ((context) => SuccessfulBooking(
+                            newParking: newParking,
+                            parkingSpace: widget.parkingSpace,
+                          )),
+                    ),
+                  );
+                }
+              });
+            });
           },
           child: const Text(
             "Pay now",
@@ -175,6 +265,43 @@ class _NonReservableCheckoutState extends State<NonReservableCheckout> {
               Navigator.pop(context);
             },
             child: const Text("Close"),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void showAlertDialogWithLoading(String message) {
+    showDialog(
+      barrierDismissible: false,
+      context: context,
+      builder: (_) => AlertDialog(
+        title: Center(
+          child: Image.asset(
+            "assets/logo/app_icon.png",
+            scale: 20,
+          ),
+        ),
+        content: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(message),
+            const SizedBox(
+              width: 20,
+              height: 20,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              checkPayedStream!.cancel();
+              Navigator.pop(context);
+            },
+            child: const Text("Cancel Payment"),
           ),
         ],
       ),
@@ -984,7 +1111,7 @@ class _PaymentState extends State<Payment> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: const [
                           Text(
-                            "GOOGLE PAY",
+                            "Paypal",
                             style: TextStyle(
                               fontWeight: FontWeight.w500,
                               fontSize: 18,

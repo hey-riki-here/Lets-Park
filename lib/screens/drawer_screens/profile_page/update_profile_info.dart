@@ -24,6 +24,8 @@ class _UpdateProfileState extends State<UpdateProfile> {
   User user = FirebaseAuth.instance.currentUser!;
   final _numberKey = GlobalKey<FormState>();
   late TextEditingController _numberController;
+  String photoUrl =
+      "https://cdn4.iconfinder.com/data/icons/user-people-2/48/5-512.png";
   String originalNumber = "";
   File? image;
   final _textStyle = const TextStyle(
@@ -33,6 +35,9 @@ class _UpdateProfileState extends State<UpdateProfile> {
   @override
   void initState() {
     _numberController = TextEditingController(text: originalNumber);
+    if (user.photoURL != null) {
+      photoUrl = user.photoURL!;
+    }
     super.initState();
   }
 
@@ -65,7 +70,7 @@ class _UpdateProfileState extends State<UpdateProfile> {
                   children: [
                     CircleAvatar(
                       backgroundImage: NetworkImage(
-                        user.photoURL!,
+                       photoUrl,
                       ),
                       radius: 40,
                     ),
@@ -134,7 +139,7 @@ class _UpdateProfileState extends State<UpdateProfile> {
                                 children: [
                                   CircleAvatar(
                                     backgroundImage: NetworkImage(
-                                      user.photoURL!,
+                                      photoUrl,
                                     ),
                                     radius: 30,
                                   ),

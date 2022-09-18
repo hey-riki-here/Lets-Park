@@ -1,3 +1,5 @@
+// ignore_for_file: empty_catches, unused_catch_clause
+
 import 'dart:io';
 
 import 'package:community_material_icon/community_material_icon.dart';
@@ -7,6 +9,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:lets_park/models/parking_space.dart';
 import 'package:lets_park/screens/drawer_screens/manage_space/parking_space_modifier/address_modifier.dart';
 import 'package:lets_park/screens/drawer_screens/manage_space/parking_space_modifier/capacity_modifier.dart';
+import 'package:lets_park/screens/drawer_screens/manage_space/parking_space_modifier/caretaker_name_modifier.dart';
 import 'package:lets_park/screens/drawer_screens/manage_space/parking_space_modifier/features_modifier.dart';
 import 'package:lets_park/screens/drawer_screens/manage_space/parking_space_modifier/info_modifier.dart';
 import 'package:lets_park/screens/drawer_screens/manage_space/parking_space_modifier/paypal_modifier.dart';
@@ -15,6 +18,8 @@ import 'package:lets_park/screens/drawer_screens/manage_space/parking_space_modi
 import 'package:lets_park/screens/popups/notice_dialog.dart';
 import 'package:lets_park/services/firebase_api.dart';
 import 'package:lets_park/services/parking_space_services.dart';
+
+import 'parking_space_modifier/caretaker_number_modifier.dart';
 
 class UpdateParkingSpace extends StatefulWidget {
   final ParkingSpace space;
@@ -176,7 +181,6 @@ class _UpdateParkingSpaceState extends State<UpdateParkingSpace> {
                                 padding: const EdgeInsets.all(5),
                                 child: TextButton(
                                   onPressed: () async {
-                                    print(space.getImageUrl);
                                     try {
                                       final image =
                                           await ImagePicker().pickImage(
@@ -198,7 +202,8 @@ class _UpdateParkingSpaceState extends State<UpdateParkingSpace> {
                                           ),
                                         ),
                                       );
-                                      await ParkingSpaceServices.deleteImageUrl(space.getImageUrl!);
+                                      await ParkingSpaceServices.deleteImageUrl(
+                                          space.getImageUrl!);
                                       String newUrl = "";
                                       await FirebaseServices.uploadImage(
                                         imageTemp,
@@ -313,6 +318,164 @@ class _UpdateParkingSpaceState extends State<UpdateParkingSpace> {
                         onTap: () {
                           goToPage(
                             CapacityModifier(
+                              space: space,
+                            ),
+                          );
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 15),
+              const Text(
+                "Caretaker",
+                style: TextStyle(
+                  fontSize: 18,
+                ),
+              ),
+              const SizedBox(height: 10),
+              Container(
+                decoration: BoxDecoration(
+                  border: Border.all(
+                    width: 1,
+                    color: Colors.black26,
+                  ),
+                  borderRadius: const BorderRadius.all(
+                    Radius.circular(8),
+                  ),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                "DISPLAY PHOTO",
+                                style: _textStyle,
+                              ),
+                              Text(
+                                "Choose a photo for identity purposes.",
+                                style: _textStyle,
+                              ),
+                            ],
+                          ),
+                          Column(
+                            children: [
+                              CircleAvatar(
+                                backgroundColor: Colors.black12,
+                                backgroundImage: NetworkImage(
+                                  space.getCaretakerPhotoUrl!,
+                                ),
+                                radius: 40,
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.all(5),
+                                child: TextButton(
+                                  onPressed: () async {
+                                    try {
+                                      final image =
+                                          await ImagePicker().pickImage(
+                                        source: ImageSource.gallery,
+                                      );
+                                      if (image == null) return;
+                                      final imageTemp = File(image.path);
+                                      showDialog(
+                                        context: context,
+                                        barrierDismissible: false,
+                                        builder: (context) => WillPopScope(
+                                          onWillPop: () async => false,
+                                          child: const NoticeDialog(
+                                            imageLink:
+                                                "assets/logo/lets-park-logo.png",
+                                            message:
+                                                "We are now updating the caretaker info. Please wait.",
+                                            forLoading: true,
+                                          ),
+                                        ),
+                                      );
+                                      await ParkingSpaceServices.deleteImageUrl(
+                                        space.getCaretakerPhotoUrl!,
+                                      );
+                                      String newUrl = "";
+                                      await FirebaseServices.uploadImage(
+                                        imageTemp,
+                                        "avatar/" +
+                                            imageTemp.path.split('/').last,
+                                      ).then((url) {
+                                        newUrl = url;
+                                      });
+                                      await ParkingSpaceServices
+                                          .updateCaretakerPhotoUrl(
+                                        space.getSpaceId!,
+                                        newUrl,
+                                      );
+
+                                      setState(() {
+                                        space.setCaretakerPhotoUrl = newUrl;
+                                      });
+                                      Navigator.pop(context);
+                                    } on Exception catch (e) {}
+                                  },
+                                  child: Row(
+                                    children: const [
+                                      Text(
+                                        "Replace",
+                                        style: TextStyle(
+                                          color: Colors.blue,
+                                        ),
+                                      ),
+                                      SizedBox(width: 5),
+                                      Icon(
+                                        Icons.camera_alt_outlined,
+                                        color: Colors.blue,
+                                        size: 16,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 10),
+                      Row(
+                        children: const [
+                          Text("Name"),
+                        ],
+                      ),
+                      const SizedBox(height: 10),
+                      _buildInfoField(
+                        maxLines: 1,
+                        value: space.getCaretakerName!,
+                        onTap: () {
+                          goToPage(
+                            CaretakerNameModifier(
+                              space: space,
+                            ),
+                          );
+                        },
+                      ),
+                      const SizedBox(height: 10),
+                      Row(
+                        children: const [
+                          Text("Phone number"),
+                        ],
+                      ),
+                      const SizedBox(height: 10),
+                      _buildInfoField(
+                        maxLines: 1,
+                        value: space.getCaretakerPhoneNumber!,
+                        onTap: () {
+                          goToPage(
+                            CaretakerNumberModifier(
                               space: space,
                             ),
                           );
@@ -597,9 +760,11 @@ class _UpdateParkingSpaceState extends State<UpdateParkingSpace> {
         builder: ((context) => page),
       ),
     ).then((returnedSpace) {
-      setState(() {
-        space = returnedSpace!;
-      });
+      if (returnedSpace != null) {
+        setState(() {
+          space = returnedSpace;
+        });
+      }
     });
   }
 

@@ -12,7 +12,7 @@ class Register extends StatefulWidget {
 
 class _RegisterState extends State<Register> {
   final SharedWidget _sharedWidgets = SharedWidget();
-  final nameController = TextEditingController();
+  final firstNameController = TextEditingController();
   final surnameController = TextEditingController();
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
@@ -51,7 +51,7 @@ class _RegisterState extends State<Register> {
           onPressed: () {
             if (_formKey.currentState!.validate()) {
               provider.signUpWithEmailandPassword(
-                name: nameController.text.trim(),
+                name: firstNameController.text.trim() + " " + surnameController.text.trim(),
                 email: emailController.text.trim(),
                 password: passwordController.text.trim(),
                 context: context,
@@ -71,11 +71,11 @@ class _RegisterState extends State<Register> {
           const SizedBox(height: 10),
           _sharedWidgets.textFormField(
             action: TextInputAction.next,
-            controller: nameController,
-            label: 'Name',
+            controller: firstNameController,
+            label: 'First name',
             validator: (value) {
               if (value == null || value.isEmpty) {
-                return "Please enter your name";
+                return "Please enter your first name";
               }
               return null;
             },

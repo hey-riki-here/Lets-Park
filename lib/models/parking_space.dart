@@ -6,6 +6,9 @@ class ParkingSpace {
   String? _ownerName;
   String? _imageUrl;
   String? _address;
+  String? _caretakerPhotoUrl;
+  String? _caretakerName;
+  String? _caretakerPhoneNumber;
   LatLng? _latLng;
   int? _capacity;
   double? _rating;
@@ -27,6 +30,9 @@ class ParkingSpace {
     String? ownerName,
     String? imageUrl,
     String? address,
+    String? caretakerPhotoUrl,
+    String? caretakerName,
+    String? caretakerPhoneNumber,
     List geoposition,
     int? capacity,
     double? rating,
@@ -44,6 +50,9 @@ class ParkingSpace {
     _ownerName = ownerName;
     _imageUrl = imageUrl;
     _address = address;
+    _caretakerPhotoUrl = caretakerPhotoUrl;
+    _caretakerName = caretakerName;
+    _caretakerPhoneNumber = caretakerPhoneNumber;
     _latLng = LatLng(geoposition[0], geoposition[1]);
     _capacity = capacity;
     _rating = rating;
@@ -75,7 +84,6 @@ class ParkingSpace {
     _ownerName = name;
   }
 
-
   String? get getImageUrl => _imageUrl;
 
   set setImageUrl(String? imageUrl) {
@@ -86,6 +94,24 @@ class ParkingSpace {
 
   set setAddress(String? address) {
     _address = address;
+  }
+
+  String? get getCaretakerPhotoUrl => _caretakerPhotoUrl;
+
+  set setCaretakerPhotoUrl(String? photoUrl) {
+    _caretakerPhotoUrl = photoUrl;
+  }
+
+  String? get getCaretakerName => _caretakerName;
+
+  set setCaretakerName(String? caretakerName) {
+    _caretakerName = caretakerName;
+  }
+
+  String? get getCaretakerPhoneNumber => _caretakerPhoneNumber;
+
+  set setCaretakerPhoneNumber(String? caretakerPhoneNumber) {
+    _caretakerPhoneNumber = caretakerPhoneNumber;
   }
 
   LatLng? get getLatLng => _latLng;
@@ -126,7 +152,7 @@ class ParkingSpace {
 
   String? get getDailyOrMonthly => _dailyOrMonthly;
 
-  set setDailyOrMonthly (String? dailyOrMonthly) {
+  set setDailyOrMonthly(String? dailyOrMonthly) {
     _dailyOrMonthly = dailyOrMonthly;
   }
 
@@ -136,7 +162,7 @@ class ParkingSpace {
     _features = features;
   }
 
-   String? get getRules => _rules;
+  String? get getRules => _rules;
 
   set setRules(String? rules) {
     _rules = rules;
@@ -171,13 +197,16 @@ class ParkingSpace {
         'ownerName': _ownerName,
         'imageUrl': _imageUrl,
         'address': _address,
+        'caretakerPhotoUrl': _caretakerPhotoUrl,
+        'caretakerName': _caretakerName,
+        'caretakerPhoneNumber': _caretakerPhoneNumber,
         'geoposition': [_latLng!.latitude, _latLng!.longitude],
         'capacity': _capacity,
         'rating': _rating,
         'info': _info,
         'verticalClearance': _verticalClearance,
         'type': _type,
-        'dailyOrMonthly' : _dailyOrMonthly,
+        'dailyOrMonthly': _dailyOrMonthly,
         'features': _features,
         'rules': _rules,
         'paypalEmail': _paypalEmail,
@@ -195,6 +224,9 @@ class ParkingSpace {
       json['ownerName'],
       json['imageUrl'],
       json['address'],
+      json['caretakerPhotoUrl'],
+      json['caretakerName'],
+      json['caretakerPhoneNumber'],
       json['geoposition'],
       json['capacity'],
       json['rating'],
@@ -204,8 +236,8 @@ class ParkingSpace {
       json['dailyOrMonthly'],
       features,
       json['rules'],
-      json['paypalEmail'], 
-      json['disabled'],   
+      json['paypalEmail'],
+      json['disabled'],
     );
   }
 }

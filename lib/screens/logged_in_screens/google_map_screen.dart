@@ -2,6 +2,7 @@
 
 import 'dart:async';
 import 'dart:convert';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:geocoding/geocoding.dart' as geocoding;
@@ -13,6 +14,8 @@ import 'package:lets_park/models/parking_space.dart';
 import 'package:lets_park/screens/popups/notice_dialog.dart';
 import 'package:lets_park/services/firebase_api.dart';
 import 'package:location/location.dart' as locationlib;
+import 'package:mailer/mailer.dart';
+import 'package:mailer/smtp_server/gmail.dart';
 
 class GoogleMapScreen extends StatefulWidget {
   final Function notifyParent;
@@ -41,10 +44,15 @@ class GoogleMapScreenState extends State<GoogleMapScreen> {
       120.9830,
     ),
   );
+  bool isMapLoading = true;
 
   @override
   void initState() {
-    _firebaseServices.getParkingSpacesFromDatabase();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        setState(() {});
+      }
+    });
     super.initState();
   }
 
@@ -57,22 +65,46 @@ class GoogleMapScreenState extends State<GoogleMapScreen> {
             if (snapshot.hasData) {
               FirebaseServices.getOwnedParkingAreas(snapshot);
               getMarkers();
-              return GoogleMap(
-                initialCameraPosition: cameraPosition,
-                myLocationEnabled: locationEnabled,
-                markers: markers,
-                myLocationButtonEnabled: false,
-                compassEnabled: false,
-                rotateGesturesEnabled: false,
-                zoomControlsEnabled: false,
-                mapToolbarEnabled: false,
-                minMaxZoomPreference: const MinMaxZoomPreference(15, 22),
-                onMapCreated: (GoogleMapController controller) async {
-                  _controller.complete(controller);
-                  googleMapController = controller;
-                  changeMapMode(googleMapController!);
-                  widget.notifyParent();
-                },
+              return Stack(
+                children: [
+                  GoogleMap(
+                    initialCameraPosition: cameraPosition,
+                    myLocationEnabled: locationEnabled,
+                    markers: markers,
+                    myLocationButtonEnabled: false,
+                    compassEnabled: false,
+                    rotateGesturesEnabled: false,
+                    zoomControlsEnabled: false,
+                    mapToolbarEnabled: false,
+                    minMaxZoomPreference: const MinMaxZoomPreference(15, 22),
+                    onMapCreated: (GoogleMapController controller) async {
+                      _controller.complete(controller);
+                      googleMapController = controller;
+                      changeMapMode(googleMapController!);
+                      widget.notifyParent();
+                      setState(() {
+                        isMapLoading = false;
+                      });
+                    },
+                  ),
+                  isMapLoading
+                      ? Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: const [
+                              Text(
+                                "Loading map please wait.",
+                                style: TextStyle(
+                                  fontStyle: FontStyle.italic,
+                                ),
+                              ),
+                              SizedBox(height: 10),
+                              CircularProgressIndicator(),
+                            ],
+                          ),
+                        )
+                      : const SizedBox(),
+                ],
               );
             } else {
               return const Center(
@@ -95,10 +127,15 @@ class GoogleMapScreenState extends State<GoogleMapScreen> {
     );
   }
 
+  
+
   void getMarkers() async {
-     await _firebaseServices.getMarkers(context).then((value) {
+    await _firebaseServices.getMarkers(context).then((value) {
+      // setState(() {
+
+      // });
       markers = value;
-     });
+    });
   }
 
   void getLocation(BuildContext context) async {

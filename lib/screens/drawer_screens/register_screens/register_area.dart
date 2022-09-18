@@ -129,30 +129,57 @@ class _RegisterAreaState extends State<RegisterArea> {
 
                 if (_currentStep < _steps().length - 1) {
                   if (_currentStep == 0) {
-                    if (_addressState.currentState!.getImage == null) {
+                    if (_addressState.currentState!.getSpaceImage == null) {
                       _showDialog(
                         imageLink: "assets/icons/marker.png",
                         message:
                             "Please provide the entrance image of your parking space.",
                       );
+                      return;
+                    }
+
+                    if (_addressState.currentState!.getCaretakerImage == null) {
+                      _showDialog(
+                        imageLink: "assets/icons/marker.png",
+                        message:
+                            "Please provide photo of your parking space's caretaker.",
+                      );
+                      return;
+                    }
+                    bool valid = false;
+
+                    if (_addressState
+                        .currentState!.getAddressFormKey.currentState!
+                        .validate()) {
+                      valid = true;
                     } else {
-                      if (_addressState.currentState!.getFormKey.currentState!
-                          .validate()) {
-                        globals.parkingSpace.setAddress =
-                            globals.globalStreet.text.trim() +
-                                ", " +
-                                globals.globalBarangay +
-                                ", Valenzuela";
-                        getCoordinatesAndRefresh();
-                        _currentStep += 1;
-                      }
+                      return;
+                    }
+
+                    if (_addressState
+                        .currentState!.getCaretakerFormKey.currentState!
+                        .validate()) {
+                      valid = true;
+                    } else {
+                      return;
+                    }
+
+                    if (valid) {
+                      globals.parkingSpace.setAddress =
+                          globals.globalStreet.text.trim() +
+                              ", " +
+                              globals.globalBarangay +
+                              ", Valenzuela";
+                      globals.parkingSpace.setCaretakerName =
+                          _addressState.currentState!.getCaretakerName;
+                      globals.parkingSpace.setCaretakerPhoneNumber =
+                          _addressState.currentState!.getCaretakerPhoneNumber;
+                      getCoordinatesAndRefresh();
+                      _currentStep += 1;
                     }
                   } else {
                     _currentStep += 1;
                   }
-                } else {
-                  // ignore: todo
-                  //TODO
                 }
               });
             },
@@ -302,10 +329,18 @@ class _RegisterAreaState extends State<RegisterArea> {
     );
 
     await FirebaseServices.uploadImage(
-      _addressState.currentState!.getImage!,
+      _addressState.currentState!.getSpaceImage!,
       "parking-area-images/" + generateFilename(),
     ).then((url) {
       globals.parkingSpace.setImageUrl = url;
+    });
+
+    await FirebaseServices.uploadImage(
+      _addressState.currentState!.getCaretakerImage!,
+      "avatar/" +
+          _addressState.currentState!.getCaretakerImage!.path.split('/').last,
+    ).then((url) {
+      globals.parkingSpace.setCaretakerPhotoUrl = url;
     });
 
     await FirebaseServices.uploadParkingSpace();

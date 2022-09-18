@@ -40,7 +40,7 @@ class Checkout extends StatefulWidget {
 class _CheckoutState extends State<Checkout> {
   final GlobalKey<VehicleState> _vehicleState = GlobalKey();
   final GlobalKey<SetUpTimeState> _setupTimeState = GlobalKey();
-  late StreamSubscription checkPayedStream;
+  StreamSubscription? checkPayedStream;
   final Stream checkPayed =
       Stream.periodic(const Duration(milliseconds: 1000), (int count) {
     return count;
@@ -48,7 +48,11 @@ class _CheckoutState extends State<Checkout> {
 
   @override
   void dispose() {
-    checkPayedStream.cancel();
+
+    if (checkPayedStream != null) {
+      checkPayedStream!.cancel();
+    }
+
     super.dispose();
   }
 
@@ -102,6 +106,7 @@ class _CheckoutState extends State<Checkout> {
         ),
         child: ElevatedButton(
           onPressed: () async {
+            
             if (!(_setupTimeState.currentState!.isTimeValid())) {
               return;
             }
@@ -111,26 +116,18 @@ class _CheckoutState extends State<Checkout> {
               return;
             }
 
+            if (FirebaseAuth.instance.currentUser!.emailVerified == false){
+              return;
+            }
+
             int qty = globals.userData.getUserParkings!.length + 1;
             String parkingId = "PARKSESS" +
                 DateTime.now().millisecondsSinceEpoch.toString().toString() +
                 "$qty";
 
             int paymentDate = 0;
-
             await WorldTimeServices.getDateOnlyNow().then((date) {
               paymentDate = date.millisecondsSinceEpoch;
-            });
-
-            DateTime now = DateTime(0, 0, 0, 0, 0);
-            await WorldTimeServices.getDateTimeNow().then((time) {
-              now = DateTime(
-                time.year,
-                time.month,
-                time.day,
-                time.hour,
-                time.minute,
-              );
             });
 
             Parking newParking = Parking(
@@ -157,20 +154,6 @@ class _CheckoutState extends State<Checkout> {
               _setupTimeState.currentState!.getParkingPrice,
               false,
               true,
-              false,
-            );
-
-            final userNotif = UserNotification(
-              "NOTIF" +
-                  globals.userData.getUserNotifications!.length.toString(),
-              widget.parkingSpace.getSpaceId!,
-              FirebaseAuth.instance.currentUser!.photoURL!,
-              FirebaseAuth.instance.currentUser!.displayName!,
-              "just booked on your parking space. Tap to view details.",
-              true,
-              false,
-              now.millisecondsSinceEpoch,
-              false,
               false,
             );
 
@@ -221,7 +204,7 @@ class _CheckoutState extends State<Checkout> {
                 UserServices.isPayed(FirebaseAuth.instance.currentUser!.uid)
                     .then((payed) async {
                   if (payed) {
-                    checkPayedStream.cancel();
+                    checkPayedStream!.cancel();
 
                     Navigator.pop(context);
                     showDialog(
@@ -236,6 +219,7 @@ class _CheckoutState extends State<Checkout> {
                         ),
                       ),
                     );
+
                     var request = http.Request(
                       'POST',
                       Uri.parse(
@@ -245,6 +229,31 @@ class _CheckoutState extends State<Checkout> {
                         HttpHeaders.contentTypeHeader: "application/json",
                       });
 
+                    DateTime now = DateTime(0, 0, 0, 0, 0);
+                    await WorldTimeServices.getDateTimeNow().then((time) {
+                      now = DateTime(
+                        time.year,
+                        time.month,
+                        time.day,
+                        time.hour,
+                        time.minute,
+                      );
+                    });
+
+                    final userNotif = UserNotification(
+                      "NOTIF" +
+                          globals.userData.getUserNotifications!.length
+                              .toString(),
+                      widget.parkingSpace.getSpaceId!,
+                      FirebaseAuth.instance.currentUser!.photoURL!,
+                      FirebaseAuth.instance.currentUser!.displayName!,
+                      "just booked on your parking space. Tap to view details.",
+                      true,
+                      false,
+                      now.millisecondsSinceEpoch,
+                      false,
+                      false,
+                    );
                     var params = {
                       "parking": newParking.toJson(),
                       "notification": {
@@ -355,7 +364,7 @@ class _CheckoutState extends State<Checkout> {
         actions: [
           TextButton(
             onPressed: () {
-              checkPayedStream.cancel();
+              checkPayedStream!.cancel();
               Navigator.pop(context);
             },
             child: const Text("Cancel Payment"),

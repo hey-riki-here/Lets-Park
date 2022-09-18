@@ -32,6 +32,7 @@ class SignInProvider extends ChangeNotifier {
         email: email,
         password: password,
       );
+      
       notifyListeners();
       navigatorKey.currentState!.popUntil((route) => route.isFirst);
     } on FirebaseAuthException catch (e) {
@@ -50,22 +51,22 @@ class SignInProvider extends ChangeNotifier {
     required String password,
     required BuildContext context,
   }) async {
-    // _showLoading(context);
-    // try {
-    //   final UserCredential authResult = await _auth
-    //       .createUserWithEmailAndPassword(email: email, password: password);
-    //   UserServices.registerNewUserData();
-    //   await _auth.currentUser!.updateDisplayName(name);
-    //   notifyListeners();
-    //   navigatorKey.currentState!.popUntil((route) => route.isFirst);
-    // } on FirebaseAuthException catch (e) {
-    //   Navigator.pop(context);
-    //   await _showDialog(
-    //     context,
-    //     "assets/logo/lets-park-logo.png",
-    //     "Looks like the email you entered is already link to another account. Please try different email.",
-    //   );
-    // }
+    _showLoading(context);
+    try {
+      final UserCredential authResult = await _auth
+          .createUserWithEmailAndPassword(email: email, password: password);
+      checkIsNewUser(authResult);
+      await _auth.currentUser!.updateDisplayName(name);
+      notifyListeners();
+      navigatorKey.currentState!.popUntil((route) => route.isFirst);
+    } on FirebaseAuthException catch (e) {
+      Navigator.pop(context);
+      await _showDialog(
+        context,
+        "assets/logo/lets-park-logo.png",
+        "Looks like the email you entered is already link to another account. Please try different email.",
+      );
+    }
   }
 
   Future googleLogin(BuildContext context) async {
@@ -86,8 +87,6 @@ class SignInProvider extends ChangeNotifier {
 
       checkIsNewUser(
         authResult,
-        photoURL: _googleUser!.photoUrl!,
-        token: googleAuth.idToken!,
       );
     } on Exception catch (e) {
     } finally {
@@ -106,9 +105,6 @@ class SignInProvider extends ChangeNotifier {
           await _auth.signInWithCredential(fbUserCredentials);
       checkIsNewUser(
         authResult,
-        fbPhotoURL: authResult.user!.photoURL,
-        fbFirstName: authResult.additionalUserInfo!.profile!["first_name"],
-        fbLastName: authResult.additionalUserInfo!.profile!["last_name"],
       );
     } on Exception catch (e) {
       await _showDialog(
@@ -162,33 +158,10 @@ class SignInProvider extends ChangeNotifier {
     );
   }
 
-  void checkIsNewUser(
-    UserCredential authResult, {
-    String photoURL = "",
-    String token = "",
-    String fbFirstName = "",
-    fbLastName = "",
-    fbPhotoURL = "",
-  }) {
+  void checkIsNewUser(UserCredential authResult) {
     if (authResult.additionalUserInfo!.isNewUser) {
       if (authResult.user != null) {
-        if (token.isNotEmpty) {
-          Map<String, dynamic> idMap = parseJwt(token)!;
-
-          UserServices.registerNewUserData(
-            idMap["given_name"],
-            idMap["family_name"],
-            "09123456789",
-            photoURL,
-          );
-        } else {
-          UserServices.registerNewUserData(
-            fbFirstName,
-            fbLastName,
-            "09123456789",
-            fbPhotoURL,
-          );
-        }
+        UserServices.registerNewUserData();
       }
     }
   }

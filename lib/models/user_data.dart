@@ -6,8 +6,6 @@ import 'package:lets_park/models/parking_space.dart';
 
 class UserData {
   String? _id;
-  String? _firstName = "";
-  String? _lastName;
   String? _phoneNumber;
   String? _imageUrl;
   List<ParkingSpace>? _ownedParkingSpace = [];
@@ -22,8 +20,6 @@ class UserData {
 
   UserData.fromDatabase(
     String? id,
-    String? firstName,
-    String? lastName,
     String? phoneNumber,
     String? imageUrl,
     int? stars,
@@ -32,8 +28,6 @@ class UserData {
     String paymentParams,
   ) {
     _id = id;
-    _firstName = firstName;
-    _lastName = lastName;
     _phoneNumber = phoneNumber;
     _imageUrl = imageUrl;
     _stars = stars;
@@ -45,14 +39,6 @@ class UserData {
   String? get getUserId => _id;
 
   set setUserId(String? id) => _id = id;
-
-  String? get getFirstName => _firstName;
-
-  set setFirstName(String? firstName) => _firstName = firstName;
-
-  String? get getLastName => _lastName;
-
-  set setLastName(String? lastName) => _lastName = lastName;
 
   String? get getPhoneNumber => _phoneNumber;
 
@@ -103,13 +89,11 @@ class UserData {
 
   @override
   String toString() {
-    return "UserData [ $_id , $_stars , $_firstName , $_userParkings]";
+    return "UserData [ $_id , $_stars , $_userParkings]";
   }
 
   Map<String, dynamic> toJson() => {
         'id': _id,
-        'firstName': _firstName,
-        'lastName': _lastName,
         'phoneNumber': _phoneNumber,
         'imageUrl': _imageUrl,
         'stars': _stars,
@@ -125,8 +109,6 @@ class UserData {
 
     return UserData.fromDatabase(
       json['id'],
-      json['firstName'],
-      json['lastName'],
       json['phoneNumber'],
       json['imageUrl'],
       json['stars'],

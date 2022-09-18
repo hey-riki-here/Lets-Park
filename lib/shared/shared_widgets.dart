@@ -56,20 +56,24 @@ class SharedWidget {
   TextFormField textFormField({
     required TextInputAction action,
     required TextEditingController controller,
-    required String label,
+    String? label,
+    String? hintText,
     TextInputType textInputType = TextInputType.text,
     bool obscure = false,
-    Icon? icon,
+    Widget? icon,
+    int? maxLength,
     required String? Function(String?)? validator,
   }) {
     return TextFormField(
       textInputAction: action,
+      maxLength: maxLength,
       controller: controller,
       obscureText: obscure,
       keyboardType: textInputType,
       decoration: InputDecoration(
+        hintText: hintText,
         prefixIcon: icon,
-        label: Text(label),
+        label: Text(label ?? ""),
         border: const OutlineInputBorder(
           borderRadius: BorderRadius.all(Radius.circular(12)),
         ),

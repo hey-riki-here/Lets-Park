@@ -18,6 +18,7 @@ class AddressSectionState extends State<AddressSection> {
   final SharedWidget _sharedWidget = SharedWidget();
   final GlobalKey<AreaAdressState> _addressState = GlobalKey();
   final GlobalKey<PhotoPickerState> _photoPickerState = GlobalKey();
+  final GlobalKey<CaretakerState> _caretakerState = GlobalKey();
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -35,13 +36,23 @@ class AddressSectionState extends State<AddressSection> {
           ),
         ),
         AreaAdress(key: _addressState),
+        const SizedBox(height: 15),
+        _sharedWidget.stepHeader("Caretaker"),
         const SizedBox(height: 10),
+        Caretaker(key: _caretakerState),
       ],
     );
   }
 
-  GlobalKey<FormState> get getFormKey => _addressState.currentState!.getFormKey;
-  File? get getImage => _photoPickerState.currentState!.getImage;
+  GlobalKey<FormState> get getAddressFormKey =>
+      _addressState.currentState!.getFormKey;
+  GlobalKey<FormState> get getCaretakerFormKey =>
+      _caretakerState.currentState!.getFormKey;
+  File? get getSpaceImage => _photoPickerState.currentState!.getImage;
+  File? get getCaretakerImage => _caretakerState.currentState!.getImage;
+  String get getCaretakerName => _caretakerState.currentState!.getName;
+  String get getCaretakerPhoneNumber =>
+      _caretakerState.currentState!.getPhoneNumber;
 }
 
 class PhotoPicker extends StatefulWidget {
@@ -285,4 +296,161 @@ class AreaAdressState extends State<AreaAdress> {
   }
 
   GlobalKey<FormState> get getFormKey => _formKey;
+}
+
+class Caretaker extends StatefulWidget {
+  const Caretaker({Key? key}) : super(key: key);
+
+  @override
+  State<Caretaker> createState() => CaretakerState();
+}
+
+class CaretakerState extends State<Caretaker> {
+  final SharedWidget _sharedWidget = SharedWidget();
+  final TextEditingController nameController = TextEditingController();
+  final TextEditingController numberController = TextEditingController();
+  File? image;
+  final _formKey = GlobalKey<FormState>();
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          "Please provide a photo of the space's caretaker.",
+          style: TextStyle(
+            fontSize: 16,
+            color: Colors.black45,
+          ),
+        ),
+        const SizedBox(height: 15),
+        Center(
+          child: image != null
+              ? CircleAvatar(
+                  backgroundColor: Colors.black12,
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(59),
+                    child: Image.file(
+                      image!,
+                      height: 118,
+                      width: 118,
+                      fit: BoxFit.fill,
+                    ),
+                  ),
+                  radius: 60,
+                )
+              : const CircleAvatar(
+                  backgroundColor: Colors.black12,
+                  backgroundImage: NetworkImage(
+                    "https://cdn4.iconfinder.com/data/icons/user-people-2/48/5-512.png",
+                  ),
+                  radius: 40,
+                ),
+        ),
+        Padding(
+          padding: const EdgeInsets.all(5),
+          child: TextButton(
+            onPressed: () async {
+              try {
+                final chooseImage = await ImagePicker().pickImage(
+                  source: ImageSource.gallery,
+                );
+                if (chooseImage == null) return;
+                final imageTemp = File(chooseImage.path);
+                setState(() => image = imageTemp);
+              } on Exception catch (e) {}
+            },
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: const [
+                Text(
+                  "Choose a photo",
+                  style: TextStyle(
+                    color: Colors.blue,
+                  ),
+                ),
+                SizedBox(width: 5),
+                Icon(
+                  Icons.camera_alt_outlined,
+                  color: Colors.blue,
+                  size: 16,
+                ),
+              ],
+            ),
+          ),
+        ),
+        Form(
+          key: _formKey,
+          child: Column(
+            children: [
+              const Text(
+                "Caretaker's name",
+                style: TextStyle(
+                  color: Colors.grey,
+                ),
+              ),
+              const SizedBox(height: 10),
+              TextFormField(
+                textInputAction: TextInputAction.done,
+                controller: nameController,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return "Please enter caretaker's name";
+                  }
+                  return null;
+                },
+                decoration: const InputDecoration(
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(12)),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 10),
+              const Text(
+                "Caretaker's phone number",
+                style: TextStyle(
+                  color: Colors.grey,
+                ),
+              ),
+              const SizedBox(height: 10),
+              _sharedWidget.textFormField(
+                action: TextInputAction.done,
+                controller: numberController,
+                hintText: "182083028",
+                obscure: false,
+                icon: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.min,
+                  children: const [
+                    Text(
+                      "+639",
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: Colors.grey,
+                      ),
+                    ),
+                  ],
+                ),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return "Enter phone number";
+                  } else if (value.length < 9) {
+                    return "Invalid phone number";
+                  }
+                  return null;
+                },
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 20),
+      ],
+    );
+  }
+
+  GlobalKey<FormState> get getFormKey => _formKey;
+  File? get getImage => image;
+  String get getName => nameController.text.trim();
+  String get getPhoneNumber => numberController.text.trim();
 }

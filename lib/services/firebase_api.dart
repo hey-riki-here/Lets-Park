@@ -14,6 +14,7 @@ import 'package:lets_park/screens/popups/parking_area_info.dart';
 
 class FirebaseServices {
   late Stream<List<ParkingSpace>> _spaces;
+  Set<Marker> markers = {};
 
   static Future uploadParkingSpace() async {
     int id = globals.parkinSpaceQuantity + 1;
@@ -69,18 +70,18 @@ class FirebaseServices {
   }
 
   Future<Set<Marker>> getMarkers(BuildContext context) async {
-    Set<Marker> markers = {};
+    markers = {};
     late BitmapDescriptor reservableMarker, nonReservableMarker, monthlyMarker;
 
-    _getReservableIcon().then((BitmapDescriptor value) {
+    await _getReservableIcon().then((BitmapDescriptor value) {
       reservableMarker = value;
     });
 
-    _getNonReservableIcon().then((BitmapDescriptor value) {
+    await _getNonReservableIcon().then((BitmapDescriptor value) {
       nonReservableMarker = value;
     });
 
-    _getMonthlyIcon().then((BitmapDescriptor value) {
+    await _getMonthlyIcon().then((BitmapDescriptor value) {
       monthlyMarker = value;
     });
 
@@ -118,7 +119,6 @@ class FirebaseServices {
         }
       });
     });
-
     return markers;
   }
 

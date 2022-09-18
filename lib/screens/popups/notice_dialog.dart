@@ -10,6 +10,7 @@ class NoticeDialog extends StatelessWidget {
   final bool forConfirmation;
   final bool forNonreservableConfirmation;
   final String parkingAreaAddress;
+  final bool forWarning;
   const NoticeDialog({
     Key? key,
     required this.imageLink,
@@ -19,6 +20,7 @@ class NoticeDialog extends StatelessWidget {
     this.forConfirmation = false,
     this.forNonreservableConfirmation = false,
     this.parkingAreaAddress = "",
+    this.forWarning = false,
   }) : super(key: key);
 
   @override
@@ -41,10 +43,28 @@ class NoticeDialog extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Image.asset(
-            image,
-            width: 40,
-          ),
+          forWarning
+              ? Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: const [
+                    Icon(
+                      Icons.warning_rounded,
+                      color: Colors.amber,
+                      size: 50,
+                    ),
+                    Text(
+                      "Warning",
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                )
+              : Image.asset(
+                  image,
+                  width: 40,
+                ),
           const SizedBox(height: 15),
           Text(
             header,

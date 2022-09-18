@@ -8,6 +8,7 @@ import 'package:lets_park/models/parking_space.dart';
 import 'package:lets_park/models/review.dart';
 import 'package:lets_park/screens/popups/checkout.dart';
 import 'package:lets_park/screens/popups/checkout_monthly.dart';
+import 'package:lets_park/screens/popups/email_verification.dart';
 import 'package:lets_park/screens/popups/notice_dialog.dart';
 import 'package:lets_park/services/firebase_api.dart';
 import 'package:lets_park/services/parking_space_services.dart';
@@ -40,7 +41,7 @@ class _ParkingAreaInfoState extends State<ParkingAreaInfo> {
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
-      length: 2,
+      length: 3,
       child: Scaffold(
         appBar: AppBar(
           title: const Text("Parking Area Info"),
@@ -77,6 +78,7 @@ class _ParkingAreaInfoState extends State<ParkingAreaInfo> {
                   PriceAndDistance(
                     distance: destinationDistance,
                     isLocationEnabled: isLocationEnabled,
+                    dailyOrMonthly: widget.parkingSpace.getDailyOrMonthly!,
                   ),
                   const TabBar(
                     labelColor: Colors.black,
@@ -86,6 +88,14 @@ class _ParkingAreaInfoState extends State<ParkingAreaInfo> {
                       Tab(
                         child: Text(
                           "Information",
+                          style: TextStyle(
+                            fontSize: 17,
+                          ),
+                        ),
+                      ),
+                      Tab(
+                        child: Text(
+                          "Caretaker",
                           style: TextStyle(
                             fontSize: 17,
                           ),
@@ -107,7 +117,7 @@ class _ParkingAreaInfoState extends State<ParkingAreaInfo> {
             preferredSize: const Size.fromHeight(375),
           ),
         ),
-        body: InfoAndReviews(
+        body: InfoReviewsCaretaker(
           spaceId: widget.parkingSpace.getSpaceId!,
           info: widget.parkingSpace.getInfo!,
           rules: widget.parkingSpace.getRules!,
@@ -115,6 +125,9 @@ class _ParkingAreaInfoState extends State<ParkingAreaInfo> {
           capacity: widget.parkingSpace.getCapacity!,
           verticalClearance: widget.parkingSpace.getVerticalClearance!,
           type: widget.parkingSpace.getType!,
+          caretakerPhotoUrl: widget.parkingSpace.getCaretakerPhotoUrl!,
+          caretakerName: widget.parkingSpace.getCaretakerName!,
+          caretakerPhoneNumber: widget.parkingSpace.getCaretakerPhoneNumber!,
         ),
         bottomNavigationBar: Padding(
           padding: const EdgeInsets.symmetric(
@@ -122,7 +135,13 @@ class _ParkingAreaInfoState extends State<ParkingAreaInfo> {
             horizontal: 80,
           ),
           child: ElevatedButton(
-            onPressed: () {
+            onPressed: () async {
+              if (FirebaseAuth.instance.currentUser!.emailVerified == false) {
+                showAlertDialog(
+                  "Looks like your email is not yet verified. Please verify the email to continue renting the parking space.",
+                );
+                return;
+              }
               globals.nonReservable = widget.parkingSpace;
               widget.parkingSpace.getDailyOrMonthly!.compareTo("Monthly") == 0
                   ? Navigator.push(
@@ -173,6 +192,81 @@ class _ParkingAreaInfoState extends State<ParkingAreaInfo> {
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  void showAlertDialog(String message) {
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: Center(
+          child: Image.asset(
+            "assets/logo/app_icon.png",
+            scale: 20,
+          ),
+        ),
+        content: Column(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text(
+              "Verify Email Address",
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: Colors.blue,
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 10),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.blue[50],
+                borderRadius: const BorderRadius.all(Radius.circular(8)),
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.info,
+                    color: Colors.blue.shade700,
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      message,
+                      style: const TextStyle(
+                        fontSize: 15,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+            },
+            child: const Text("MAYBE LATER"),
+          ),
+          TextButton(
+            onPressed: () async {
+              Navigator.pop(context);
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  fullscreenDialog: true,
+                  builder: (context) => const EmailVerification(),
+                ),
+              );
+            },
+            child: const Text("VERIFY EMAIL NOW"),
+          ),
+        ],
       ),
     );
   }
@@ -258,9 +352,7 @@ class _HeaderState extends State<Header> {
       color: Colors.amber[300],
     );
 
-    _added = globals.favorites.contains(widget.spaceId)
-        ? true
-        : false;
+    _added = globals.favorites.contains(widget.spaceId) ? true : false;
 
     _label = globals.favorites.contains(widget.spaceId)
         ? "Added to Favorites"
@@ -438,15 +530,22 @@ class _HeaderState extends State<Header> {
   }
 }
 
-class PriceAndDistance extends StatelessWidget {
+class PriceAndDistance extends StatefulWidget {
+  final String dailyOrMonthly;
   final String distance;
   final bool isLocationEnabled;
   const PriceAndDistance({
     Key? key,
     required this.distance,
     required this.isLocationEnabled,
+    required this.dailyOrMonthly,
   }) : super(key: key);
 
+  @override
+  State<PriceAndDistance> createState() => _PriceAndDistanceState();
+}
+
+class _PriceAndDistanceState extends State<PriceAndDistance> {
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -459,17 +558,38 @@ class PriceAndDistance extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: const [
-                  Text(
-                    "50.00",
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Text(
+                        widget.dailyOrMonthly.compareTo("Daily") == 0
+                            ? "50.00"
+                            : "1500.00",
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const Text("Price"),
+                    ],
+                  ),
+                  const SizedBox(width: 8),
+                  GestureDetector(
+                    onTap: () {
+                      showAlertDialog(
+                        widget.dailyOrMonthly.compareTo("Daily") == 0
+                            ? "The flat rate for parking is 50.00 and an additional 10.00 for each succeeding hour."
+                            : "The fee for monthly parking is 1500.00 for each month.",
+                      );
+                    },
+                    child: const Icon(
+                      Icons.info_outline_rounded,
+                      size: 18,
                     ),
                   ),
-                  Text("Price"),
                 ],
               ),
               Container(
@@ -477,7 +597,7 @@ class PriceAndDistance extends StatelessWidget {
                 width: 1,
                 height: 30,
               ),
-              !isLocationEnabled
+              !widget.isLocationEnabled
                   ? Column(
                       children: [
                         Icon(
@@ -487,11 +607,11 @@ class PriceAndDistance extends StatelessWidget {
                         const Text("Location service disabled."),
                       ],
                     )
-                  : distance.isNotEmpty
+                  : widget.distance.isNotEmpty
                       ? Column(
                           children: [
                             Text(
-                              "About $distance",
+                              "About ${widget.distance}",
                               style: const TextStyle(
                                 fontSize: 18,
                                 fontWeight: FontWeight.bold,
@@ -519,9 +639,68 @@ class PriceAndDistance extends StatelessWidget {
       ),
     );
   }
+
+  void showAlertDialog(String message) {
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: Center(
+          child: Image.asset(
+            "assets/logo/app_icon.png",
+            scale: 20,
+          ),
+        ),
+        content: Column(
+          children: [
+            const Text(
+              "Verify Email Address",
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: Colors.blue,
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.blue[50],
+                borderRadius: const BorderRadius.all(Radius.circular(8)),
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.info,
+                    color: Colors.blue.shade700,
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      message,
+                      style: const TextStyle(
+                        fontSize: 15,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+            },
+            child: const Text("Close"),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
-class InfoAndReviews extends StatelessWidget {
+class InfoReviewsCaretaker extends StatelessWidget {
   final String spaceId;
   final String info;
   final String rules;
@@ -529,7 +708,10 @@ class InfoAndReviews extends StatelessWidget {
   final int capacity;
   final double verticalClearance;
   final String type;
-  const InfoAndReviews({
+  final String caretakerPhotoUrl;
+  final String caretakerName;
+  final String caretakerPhoneNumber;
+  const InfoReviewsCaretaker({
     Key? key,
     required this.spaceId,
     required this.info,
@@ -538,6 +720,9 @@ class InfoAndReviews extends StatelessWidget {
     required this.capacity,
     required this.verticalClearance,
     required this.type,
+    required this.caretakerPhotoUrl,
+    required this.caretakerName,
+    required this.caretakerPhoneNumber,
   }) : super(key: key);
 
   @override
@@ -554,12 +739,12 @@ class InfoAndReviews extends StatelessWidget {
     final List<Review> reviews = [];
     return TabBarView(
       children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: 12,
-            vertical: 30,
-          ),
-          child: SingleChildScrollView(
+        SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: 12,
+              vertical: 30,
+            ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -645,6 +830,87 @@ class InfoAndReviews extends StatelessWidget {
                       style: valueStyle,
                     ),
                   ],
+                ),
+              ],
+            ),
+          ),
+        ),
+        SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: 12,
+              vertical: 30,
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.green[50],
+                    borderRadius: const BorderRadius.all(Radius.circular(8)),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.info,
+                            color: Colors.green.shade700,
+                          ),
+                          const SizedBox(width: 10),
+                          const Expanded(
+                            child: Text(
+                              "Have queries about parking? You can always call the parking space's caretaker.",
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 10),
+                      ElevatedButton.icon(
+                        style: ElevatedButton.styleFrom(
+                          elevation: 0,
+                          primary: Colors.green,
+                        ),
+                        onPressed: () {},
+                        icon: const Icon(Icons.phone_in_talk_rounded),
+                        label: const Text("Call caretaker"),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 20),
+                CircleAvatar(
+                  backgroundColor: Colors.black12,
+                  backgroundImage: NetworkImage(
+                    caretakerPhotoUrl,
+                  ),
+                  radius: 40,
+                ),
+                const SizedBox(height: 20),
+                const Text(
+                  "Name",
+                  style: labelStyle,
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  caretakerName,
+                  style: const TextStyle(
+                    fontSize: 16,
+                  ),
+                ),
+                const SizedBox(height: 20),
+                const Text(
+                  "Phone number",
+                  style: labelStyle,
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  caretakerPhoneNumber,
+                  style: const TextStyle(
+                    fontSize: 16,
+                  ),
                 ),
               ],
             ),

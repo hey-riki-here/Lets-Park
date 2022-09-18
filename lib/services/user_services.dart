@@ -57,23 +57,12 @@ class UserServices {
     });
   }
 
-  void startCheckPayedStream() {}
-
-  static Future registerNewUserData(
-    String firstName,
-    String lastName,
-    String phoneNumber,
-    String imageURL,
-  ) async {
+  static Future registerNewUserData() async {
     String id = FirebaseAuth.instance.currentUser!.uid;
     final docUser = FirebaseFirestore.instance.collection('user-data').doc(id);
 
     globals.userData.setUserId = id;
-    globals.userData.setFirstName = firstName;
-    globals.userData.setLastName = lastName;
-    globals.userData.setPhoneNumber = phoneNumber;
-    globals.userData.setImageURL = imageURL;
-    globals.userData.setUserFavories = [];
+    globals.userData.setImageURL = FirebaseAuth.instance.currentUser!.photoURL;
 
     await docUser.set(globals.userData.toJson());
   }
@@ -209,7 +198,7 @@ class UserServices {
                 "finished parking in your parking space. Give him a rate now.",
                 false,
                 true,
-                now.millisecondsSinceEpoch,
+                parking.getDeparture!,
                 false,
                 false,
               ),
@@ -228,7 +217,7 @@ class UserServices {
                 "How did the parking went? Share your thoughts now.",
                 false,
                 false,
-                now.millisecondsSinceEpoch,
+                parking.getDeparture!,
                 false,
                 false,
               ),
@@ -499,21 +488,6 @@ class UserServices {
       'paymentParams': params,
     });
   }
-
-
-  // void showNotice(BuildContext context, String message) {
-  //   ScaffoldMessenger.of(context).showSnackBar(
-  //     SnackBar(
-  //       content: Text(message),
-  //       behavior: SnackBarBehavior.floating,
-  //       shape: RoundedRectangleBorder(
-  //         borderRadius: BorderRadius.circular(12),
-  //       ),
-  //       backgroundColor: Colors.blue,
-  //       duration: const Duration(seconds: 5),
-  //     ),
-  //   );
-  // }
 
   StreamSubscription get getParkingSessionsStream => parkingSessionsStreams;
 
