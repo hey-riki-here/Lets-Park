@@ -171,12 +171,17 @@ class _EmailVerificationState extends State<EmailVerification> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text(
-                isEmailVerified ? "Close" : "Cancel verification",
-                style: const TextStyle(
-                  color: Colors.blue,
-                  fontSize: 17,
-                  decoration: TextDecoration.underline,
+              GestureDetector(
+                onTap: (){
+                  Navigator.pop(context);
+                },
+                child: Text(
+                  isEmailVerified ? "Close" : "Cancel verification",
+                  style: const TextStyle(
+                    color: Colors.blue,
+                    fontSize: 17,
+                    decoration: TextDecoration.underline,
+                  ),
                 ),
               ),
             ],

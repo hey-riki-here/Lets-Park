@@ -240,7 +240,7 @@ class _CheckoutMonthlyState extends State<CheckoutMonthly> {
                           globals.userData.getUserNotifications!.length
                               .toString(),
                       widget.parkingSpace.getSpaceId!,
-                      FirebaseAuth.instance.currentUser!.photoURL!,
+                      FirebaseAuth.instance.currentUser!.photoURL ?? "https://cdn4.iconfinder.com/data/icons/user-people-2/48/5-512.png",
                       FirebaseAuth.instance.currentUser!.displayName!,
                       "just booked on your parking space. Tap to view details.",
                       true,
@@ -270,8 +270,29 @@ class _CheckoutMonthlyState extends State<CheckoutMonthly> {
                       context,
                       MaterialPageRoute(
                         builder: ((context) => SuccessfulBooking(
-                              newParking: newParking,
-                              parkingSpace: widget.parkingSpace,
+                              owner: widget.parkingSpace.getOwnerName!,
+                              parkee: FirebaseAuth
+                                  .instance.currentUser!.displayName!,
+                              transactioDate: DateFormat('MMMM dd, yyyy')
+                                  .format(DateTime.now()),
+                              arrivalDate: DateFormat('MMMM dd, yyyy - h:mm a')
+                                  .format(DateTime.fromMillisecondsSinceEpoch(
+                                      _setupTimeState.currentState!.getArrival!
+                                          .millisecondsSinceEpoch)),
+                              departureDate:
+                                  DateFormat('MMMM dd, yyyy - h:mm a').format(
+                                      DateTime.fromMillisecondsSinceEpoch(
+                                          _setupTimeState
+                                              .currentState!
+                                              .getDeparture!
+                                              .millisecondsSinceEpoch)),
+                              duration:
+                                  _setupTimeState.currentState!.getDuration!,
+                              parkingFee:
+                                  _setupTimeState.currentState!.getParkingPrice,
+                              spaceAddress: widget.parkingSpace.getAddress!,
+                              sendTo: FirebaseAuth.instance.currentUser!.email!,
+                              replyTo: "chuarex55@gmail.com",
                             )),
                       ),
                     );

@@ -640,6 +640,10 @@ class _PriceAndDistanceState extends State<PriceAndDistance> {
     );
   }
 
+  void showPriceInfoDialog(){
+
+  }
+
   void showAlertDialog(String message) {
     showDialog(
       context: context,
@@ -651,9 +655,10 @@ class _PriceAndDistanceState extends State<PriceAndDistance> {
           ),
         ),
         content: Column(
+          mainAxisSize: MainAxisSize.min,
           children: [
             const Text(
-              "Verify Email Address",
+              "Price info",
               textAlign: TextAlign.center,
               style: TextStyle(
                 color: Colors.blue,
@@ -661,6 +666,7 @@ class _PriceAndDistanceState extends State<PriceAndDistance> {
                 fontWeight: FontWeight.bold,
               ),
             ),
+            const SizedBox(height: 10),
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(

@@ -1,15 +1,33 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'package:lets_park/html_strings/html_string.dart';
 import 'package:lets_park/main.dart';
-import 'package:lets_park/models/parking.dart';
-import 'package:lets_park/models/parking_space.dart';
 
 class SuccessfulBooking extends StatelessWidget {
-  final Parking newParking;
-  final ParkingSpace parkingSpace;
+  final String owner;
+  final String parkee;
+  final String transactioDate;
+  final String arrivalDate;
+  final String departureDate;
+  final String duration;
+  final double parkingFee;
+  final String spaceAddress;
+  final String sendTo;
+  final String replyTo;
   const SuccessfulBooking({
     Key? key,
-    required this.newParking,
-    required this.parkingSpace,
+    required this.owner,
+    required this.parkee,
+    required this.transactioDate,
+    required this.arrivalDate,
+    required this.departureDate,
+    required this.duration,
+    required this.parkingFee,
+    required this.spaceAddress,
+    required this.sendTo,
+    required this.replyTo,
   }) : super(key: key);
 
   @override
@@ -56,8 +74,10 @@ class SuccessfulBooking extends StatelessWidget {
           padding: const EdgeInsets.all(8.0),
           child: ElevatedButton(
             onPressed: () async {
-              
+              sendEmail();
               navigatorKey.currentState!.popUntil((route) => route.isFirst);
+              // await 
+              // print("Email sent!");
             },
             child: const Text(
               "Confirm",
@@ -78,5 +98,33 @@ class SuccessfulBooking extends StatelessWidget {
     );
   }
 
-  
+  Future sendEmail() async {
+    final url = Uri.parse("https://api.emailjs.com/api/v1.0/email/send");
+    await http.post(
+      url,
+      headers: {
+        'origin': 'http://localhost',
+        'Content-Type': 'application/json',
+      },
+      body: json.encode({
+        'service_id': 'service_rxauo5a',
+        'template_id': 'template_534vxos',
+        'user_id': 'HzDnP1qQtGYpkD7DY',
+        'template_params': {
+          'send_to' : sendTo,
+          'reply_to' : replyTo,
+          'my_html': HTMLString.getHTMLReceipt(
+            owner: owner,
+            parkee: parkee,
+            transactioDate: transactioDate,
+            arrivalDate: arrivalDate,
+            departureDate: departureDate,
+            duration: duration,
+            parkingFee: parkingFee,
+            spaceAddress: spaceAddress,
+          ),
+        },
+      }),
+    );
+  }
 }
