@@ -9,7 +9,6 @@ class NotificationServices {
 
   static void initChannel() {
     AwesomeNotifications().initialize('resource://drawable/ic_icon', [
-      // notification icon
       NotificationChannel(
         channelGroupKey: 'basic_test',
         channelKey: 'basic',
@@ -32,6 +31,7 @@ class NotificationServices {
     AwesomeNotifications().createNotification(
       content: NotificationContent(
         id: 123,
+        wakeUpScreen: true,
         channelKey: 'basic',
         title: notificationTitle,
         body: message,

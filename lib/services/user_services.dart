@@ -5,12 +5,15 @@ import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:lets_park/models/car.dart';
 import 'package:lets_park/models/notification.dart';
 import 'package:lets_park/models/parking.dart';
 import 'package:lets_park/globals/globals.dart' as globals;
 import 'package:lets_park/models/parking_space.dart';
+import 'package:lets_park/screens/popups/notice_dialog.dart';
 import 'package:lets_park/services/notif_services.dart';
+import 'package:lets_park/services/parking_space_services.dart';
 import 'package:lets_park/services/world_time_api.dart';
 
 class UserServices {
@@ -102,6 +105,20 @@ class UserServices {
         .snapshots();
   }
 
+  static Future<int> getUserNotificationLength(String uid) async {
+    int notifLength = 0;
+    await FirebaseFirestore.instance
+        .collection('user-data')
+        .doc(uid)
+        .collection('notifications')
+        .snapshots()
+        .first
+        .then((docs) {
+      notifLength = docs.size;
+    });
+    return notifLength;
+  }
+
   void distributeParkingSessions(BuildContext context) async {
     parkings = globals.userData.getUserParkings!;
 
@@ -126,7 +143,7 @@ class UserServices {
                     .compareTo(now) ==
                 1) &&
             parking.isInProgress == false) {
-          parkingSessionsStreams.pause();
+          // parkingSessionsStreams.pause();
           await userParkings.doc(parking.getParkingId).update({
             'inProgress': true,
             'upcoming': false,
@@ -147,12 +164,12 @@ class UserServices {
             "Parking session started",
             "Your parking session has started. Click View Parking to view parking session details.",
           );
-          parkingSessionsStreams.resume();
+          // parkingSessionsStreams.resume();
         } else if (_getDateTimeFromMillisecondEpoch(parking.getArrival!)
                     .compareTo(now) ==
                 1 &&
             parking.isUpcoming == false) {
-          parkingSessionsStreams.pause();
+          // parkingSessionsStreams.pause();
           await userParkings.doc(parking.getParkingId).update({
             'inProgress': false,
             'upcoming': true,
@@ -168,7 +185,7 @@ class UserServices {
             'upcoming': true,
             'inHistory': false,
           });
-          parkingSessionsStreams.resume();
+          // parkingSessionsStreams.resume();
         } else if ((_getDateTimeFromMillisecondEpoch(parking.getArrival!)
                         .compareTo(now) ==
                     -1 &&
@@ -179,19 +196,20 @@ class UserServices {
                             .compareTo(now) ==
                         -1)) &&
             parking.isInHistory == false) {
-          parkingSessionsStreams.pause();
+          // parkingSessionsStreams.pause();
           await userParkings.doc(parking.getParkingId).update({
             'inProgress': false,
             'upcoming': false,
             'inHistory': true,
-          }).then((_) {
+          }).then((_) async {
+            int notifLength = await UserServices.getUserNotificationLength(
+              parking.getParkingOwner!,
+            );
             UserServices.notifyUser(
-              "NOTIF" +
-                  globals.userData.getUserNotifications!.length.toString(),
+              "NOTIF" + notifLength.toString(),
               parking.getParkingOwner!,
               UserNotification(
-                "NOTIF" +
-                    globals.userData.getUserNotifications!.length.toString(),
+                "NOTIF" + notifLength.toString(),
                 parking.getParkingSpaceId!,
                 FirebaseAuth.instance.currentUser!.photoURL!,
                 FirebaseAuth.instance.currentUser!.displayName!,
@@ -204,13 +222,14 @@ class UserServices {
               ),
             );
 
+            notifLength = await UserServices.getUserNotificationLength(
+              FirebaseAuth.instance.currentUser!.uid,
+            );
             UserServices.notifyUser(
-              "NOTIF" +
-                  globals.userData.getUserNotifications!.length.toString(),
+              "NOTIF" + notifLength.toString(),
               FirebaseAuth.instance.currentUser!.uid,
               UserNotification(
-                "NOTIF" +
-                    globals.userData.getUserNotifications!.length.toString(),
+                "NOTIF" + notifLength.toString(),
                 parking.getParkingSpaceId!,
                 FirebaseAuth.instance.currentUser!.photoURL!,
                 FirebaseAuth.instance.currentUser!.displayName!,
@@ -238,7 +257,7 @@ class UserServices {
             "Parking session ended",
             "Your parking session has ended. Click View Parking to view parking session details.",
           );
-          parkingSessionsStreams.resume();
+          // parkingSessionsStreams.resume();
         }
       }
     } on Exception catch (e) {}
@@ -277,7 +296,7 @@ class UserServices {
                       .compareTo(now) ==
                   1) &&
               parking.isInProgress == false) {
-            ownedParkingSessionsStreams.pause();
+            // ownedParkingSessionsStreams.pause();
             await parkingSpacesDb
                 .doc(parking.getParkingSpaceId)
                 .collection("parking-sessions")
@@ -287,7 +306,7 @@ class UserServices {
               'upcoming': false,
               'inHistory': false,
             });
-            ownedParkingSessionsStreams.resume();
+            // ownedParkingSessionsStreams.resume();
           } else if ((_getDateTimeFromMillisecondEpoch(parking.getArrival!)
                           .compareTo(now) ==
                       -1 &&
@@ -298,7 +317,7 @@ class UserServices {
                               .compareTo(now) ==
                           -1)) &&
               parking.isInHistory == false) {
-            ownedParkingSessionsStreams.pause();
+            // ownedParkingSessionsStreams.pause();
             await parkingSpacesDb
                 .doc(parking.getParkingSpaceId)
                 .collection("parking-sessions")
@@ -308,14 +327,17 @@ class UserServices {
               'upcoming': false,
               'inHistory': true,
             });
-            ownedParkingSessionsStreams.resume();
+            // ownedParkingSessionsStreams.resume();
+
+            int notifLength = await UserServices.getUserNotificationLength(
+              FirebaseAuth.instance.currentUser!.uid,
+            );
+
             UserServices.notifyUser(
-              "NOTIF" +
-                  globals.userData.getUserNotifications!.length.toString(),
+              "NOTIF" + notifLength.toString(),
               parking.getParkingOwner!,
               UserNotification(
-                "NOTIF" +
-                    globals.userData.getUserNotifications!.length.toString(),
+                "NOTIF" + notifLength.toString(),
                 parking.getParkingSpaceId!,
                 parking.getDriverImage!,
                 parking.getDriver!,
@@ -487,6 +509,157 @@ class UserServices {
         .update({
       'paymentParams': params,
     });
+  }
+
+  static Future<void> stopParkingSession(Parking session) async {
+    String duration = "";
+    DateTime now = DateTime(0, 0, 0, 0, 0);
+    await WorldTimeServices.getDateTimeNow().then((time) {
+      now = DateTime(
+        time.year,
+        time.month,
+        time.day,
+        time.hour,
+        time.minute,
+      );
+    });
+
+    DateTime arrival = DateTime.fromMillisecondsSinceEpoch(session.getArrival!);
+    DateTime newDeparture =
+        DateTime.fromMillisecondsSinceEpoch(now.millisecondsSinceEpoch);
+
+    final Duration newDuration = newDeparture.difference(arrival);
+
+    if (newDuration.inHours > 0) {
+      duration = newDuration.inHours > 1
+          ? newDuration.inHours.toString() + " hours"
+          : newDuration.inHours.toString() + " hour";
+
+      int minutes = newDuration.inMinutes % 60;
+      duration = duration +
+          " " +
+          (minutes > 1
+              ? minutes.toString() + " minutes"
+              : minutes.toString() + " minute");
+    } else {
+      int minutes = newDuration.inMinutes % 60;
+      duration = duration +
+          " " +
+          (minutes > 1
+              ? minutes.toString() + " minutes"
+              : minutes.toString() + " minute");
+    }
+
+    session.setDeparture = newDeparture.millisecondsSinceEpoch;
+    session.setDuration = duration;
+    session.setIsInProgress = false;
+    session.setIsInHistoryg = true;
+
+    await FirebaseFirestore.instance
+        .collection('user-data')
+        .doc(FirebaseAuth.instance.currentUser!.uid)
+        .collection("user-parkings")
+        .doc(session.getParkingId)
+        .update(session.toJson());
+
+    await FirebaseFirestore.instance
+        .doc(session.getParkingSpaceId!)
+        .collection("parking-sessions")
+        .doc(session.getParkingId!)
+        .update(session.toJson());
+
+    int notifLength = await UserServices.getUserNotificationLength(
+      session.getParkingOwner!,
+    );
+
+    UserServices.notifyUser(
+      "NOTIF" + notifLength.toString(),
+      session.getParkingOwner!,
+      UserNotification(
+        "NOTIF" + notifLength.toString(),
+        session.getParkingSpaceId!,
+        FirebaseAuth.instance.currentUser!.photoURL ??
+            "https://cdn4.iconfinder.com/data/icons/user-people-2/48/5-512.png",
+        FirebaseAuth.instance.currentUser!.displayName!,
+        "finished parking in your parking space. Give him a rate now.",
+        false,
+        true,
+        session.getDeparture!,
+        false,
+        false,
+      ),
+    );
+
+    notifLength = await UserServices.getUserNotificationLength(
+      FirebaseAuth.instance.currentUser!.uid,
+    );
+
+    UserServices.notifyUser(
+      "NOTIF" + notifLength.toString(),
+      FirebaseAuth.instance.currentUser!.uid,
+      UserNotification(
+        "NOTIF" + notifLength.toString(),
+        session.getParkingSpaceId!,
+        FirebaseAuth.instance.currentUser!.photoURL ??
+            "https://cdn4.iconfinder.com/data/icons/user-people-2/48/5-512.png",
+        FirebaseAuth.instance.currentUser!.displayName!,
+        "How did the parking went? Share your thoughts now.",
+        false,
+        false,
+        session.getDeparture!,
+        false,
+        false,
+      ),
+    );
+  }
+
+  static Future<void> extendParking(
+    int hour,
+    int minute,
+    Parking session,
+    BuildContext context,
+  ) async {
+    DateTime newDeparture =
+        DateTime.fromMillisecondsSinceEpoch(session.getDeparture!);
+
+    if (hour != 0) {
+      newDeparture = newDeparture.add(Duration(hours: hour));
+    }
+
+    newDeparture = newDeparture.add(Duration(minutes: minute));
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => WillPopScope(
+        onWillPop: () async => false,
+        child: const NoticeDialog(
+          imageLink: "assets/logo/lets-park-logo.png",
+          message: "Checking and verifying your extension...",
+          forLoading: true,
+        ),
+      ),
+    );
+
+    int availableSlot =
+        await ParkingSpaceServices.getAvailableSlots(session.getParkingSpaceId!)
+            .then((slots) => slots);
+
+    bool isAvailable = true;
+    if (availableSlot > 0) {
+      isAvailable = true;
+    } else {
+      isAvailable = await ParkingSpaceServices.canExtend(
+        session.getParkingSpaceId!,
+        session.getParkingId!,
+        session.getArrival!,
+      ).then((isAvailable) {
+        return isAvailable;
+      });
+    }
+    Navigator.pop(
+      context,
+    );
+    print(isAvailable);
   }
 
   StreamSubscription get getParkingSessionsStream => parkingSessionsStreams;

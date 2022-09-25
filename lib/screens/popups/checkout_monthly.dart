@@ -235,12 +235,16 @@ class _CheckoutMonthlyState extends State<CheckoutMonthly> {
                       );
                     });
 
+                    int notifLength =
+                        await UserServices.getUserNotificationLength(
+                      FirebaseAuth.instance.currentUser!.uid,
+                    );
+
                     final userNotif = UserNotification(
-                      "NOTIF" +
-                          globals.userData.getUserNotifications!.length
-                              .toString(),
+                      "NOTIF" + notifLength.toString(),
                       widget.parkingSpace.getSpaceId!,
-                      FirebaseAuth.instance.currentUser!.photoURL ?? "https://cdn4.iconfinder.com/data/icons/user-people-2/48/5-512.png",
+                      FirebaseAuth.instance.currentUser!.photoURL ??
+                          "https://cdn4.iconfinder.com/data/icons/user-people-2/48/5-512.png",
                       FirebaseAuth.instance.currentUser!.displayName!,
                       "just booked on your parking space. Tap to view details.",
                       true,

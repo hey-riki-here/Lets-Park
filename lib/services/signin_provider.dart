@@ -55,8 +55,9 @@ class SignInProvider extends ChangeNotifier {
     try {
       final UserCredential authResult = await _auth
           .createUserWithEmailAndPassword(email: email, password: password);
-      checkIsNewUser(authResult);
       await _auth.currentUser!.updateDisplayName(name);
+      await _auth.currentUser!.updatePhotoURL("https://cdn4.iconfinder.com/data/icons/user-people-2/48/5-512.png");
+      checkIsNewUser(authResult);
       notifyListeners();
       navigatorKey.currentState!.popUntil((route) => route.isFirst);
     } on FirebaseAuthException catch (e) {

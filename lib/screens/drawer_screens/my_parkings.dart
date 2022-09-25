@@ -7,9 +7,11 @@ import 'package:intl/intl.dart';
 import 'package:lets_park/globals/globals.dart' as globals;
 import 'package:lets_park/models/parking.dart';
 import 'package:lets_park/models/user_data.dart';
+import 'package:lets_park/screens/logged_in_screens/google_map_screen.dart';
 import 'package:lets_park/services/parking_space_services.dart';
 import 'package:lets_park/services/user_services.dart';
 import 'package:lets_park/shared/navigation_drawer.dart';
+import 'package:numberpicker/numberpicker.dart';
 
 class MyParkings extends StatefulWidget {
   final int _pageId = 3;
@@ -189,6 +191,9 @@ class InProgressState extends State<InProgress> {
     fontSize: 16,
   );
   final UserData userData = globals.userData;
+  bool isLoading = false;
+  int _selectedHour = 0;
+  int _selectedMinute = 15;
 
   @override
   Widget build(BuildContext context) {
@@ -323,8 +328,8 @@ class InProgressState extends State<InProgress> {
                                   Row(
                                     mainAxisAlignment:
                                         MainAxisAlignment.spaceBetween,
-                                    children: const [
-                                      Text(
+                                    children: [
+                                      const Text(
                                         "Parking space owner",
                                         style: TextStyle(
                                           color: Colors.black54,
@@ -332,8 +337,8 @@ class InProgressState extends State<InProgress> {
                                         ),
                                       ),
                                       Text(
-                                        "Ricky Eredillas Jr.",
-                                        style: TextStyle(
+                                        parkings[index].getParkingOwnerName!,
+                                        style: const TextStyle(
                                           color: Colors.black54,
                                           fontSize: 16,
                                           fontWeight: FontWeight.w500,
@@ -358,7 +363,167 @@ class InProgressState extends State<InProgress> {
                                           Column(
                                             children: [
                                               IconButton(
-                                                onPressed: () {},
+                                                onPressed: () async {
+                                                  showDialog<String>(
+                                                    context: context,
+                                                    barrierDismissible: false,
+                                                    builder: (BuildContext
+                                                            context) =>
+                                                        StatefulBuilder(
+                                                      builder:
+                                                          (context, setState) =>
+                                                              AlertDialog(
+                                                        title: Container(
+                                                          padding:
+                                                              const EdgeInsets
+                                                                  .all(16),
+                                                          decoration:
+                                                              BoxDecoration(
+                                                            color: Colors
+                                                                .red.shade50,
+                                                            borderRadius:
+                                                                BorderRadius
+                                                                    .circular(
+                                                              5,
+                                                            ),
+                                                          ),
+                                                          child: Column(
+                                                            children: [
+                                                              Row(
+                                                                children: [
+                                                                  Icon(
+                                                                    Icons
+                                                                        .warning_rounded,
+                                                                    color: Colors
+                                                                        .red
+                                                                        .shade800,
+                                                                  ),
+                                                                  const SizedBox(
+                                                                      width:
+                                                                          10),
+                                                                  Expanded(
+                                                                    child: Text(
+                                                                      isLoading
+                                                                          ? "Stopping parking session"
+                                                                          : "Stop parking session?",
+                                                                      style:
+                                                                          TextStyle(
+                                                                        color: Colors
+                                                                            .red
+                                                                            .shade800,
+                                                                        fontWeight:
+                                                                            FontWeight.bold,
+                                                                      ),
+                                                                    ),
+                                                                  ),
+                                                                ],
+                                                              ),
+                                                            ],
+                                                          ),
+                                                        ),
+                                                        content: isLoading
+                                                            ? Column(
+                                                                mainAxisSize:
+                                                                    MainAxisSize
+                                                                        .min,
+                                                                children: const [
+                                                                  CircularProgressIndicator(),
+                                                                ],
+                                                              )
+                                                            : Column(
+                                                                mainAxisSize:
+                                                                    MainAxisSize
+                                                                        .min,
+                                                                crossAxisAlignment:
+                                                                    CrossAxisAlignment
+                                                                        .start,
+                                                                children: [
+                                                                  const Text(
+                                                                    "Parking session #",
+                                                                    style:
+                                                                        TextStyle(
+                                                                      color: Colors
+                                                                          .black54,
+                                                                    ),
+                                                                  ),
+                                                                  const SizedBox(
+                                                                      height:
+                                                                          10),
+                                                                  Text(
+                                                                    "${parkings[index].getParkingId}",
+                                                                    style:
+                                                                        const TextStyle(
+                                                                      fontWeight:
+                                                                          FontWeight
+                                                                              .bold,
+                                                                    ),
+                                                                  ),
+                                                                  const SizedBox(
+                                                                      height:
+                                                                          20),
+                                                                  const Text(
+                                                                    "Are you sure you want to stop the parking session?",
+                                                                  ),
+                                                                ],
+                                                              ),
+                                                        actions: [
+                                                          TextButton(
+                                                            style: TextButton
+                                                                .styleFrom(
+                                                              primary: Colors
+                                                                  .black54,
+                                                            ),
+                                                            onPressed: () =>
+                                                                Navigator.pop(
+                                                                    context,
+                                                                    'Cancel'),
+                                                            child: const Text(
+                                                                'Cancel'),
+                                                          ),
+                                                          Padding(
+                                                            padding:
+                                                                const EdgeInsets
+                                                                    .only(
+                                                              right: 10,
+                                                            ),
+                                                            child:
+                                                                ElevatedButton(
+                                                              onPressed:
+                                                                  () async {
+                                                                setState(() {
+                                                                  isLoading =
+                                                                      true;
+                                                                });
+                                                                await UserServices
+                                                                    .stopParkingSession(
+                                                                        parkings[
+                                                                            index]);
+                                                                Navigator.pop(
+                                                                  context,
+                                                                  "Confirm",
+                                                                );
+
+                                                                isLoading =
+                                                                    false;
+                                                              },
+                                                              style:
+                                                                  ElevatedButton
+                                                                      .styleFrom(
+                                                                primary: Colors
+                                                                    .red
+                                                                    .shade800,
+                                                                elevation: 0,
+                                                              ),
+                                                              child: const Text(
+                                                                "Confirm",
+                                                              ),
+                                                            ),
+                                                          ),
+                                                        ],
+                                                      ),
+                                                    ),
+                                                  );
+                                                },
                                                 icon: Icon(
                                                   Icons.stop_circle_outlined,
                                                   color: Colors.red.shade300,
@@ -375,14 +540,120 @@ class InProgressState extends State<InProgress> {
                                           Column(
                                             children: [
                                               IconButton(
-                                                onPressed: () {},
+                                                onPressed: () {
+                                                  showDialog<int>(
+                                                    context: context,
+                                                    builder:
+                                                        (BuildContext context) {
+                                                      return AlertDialog(
+                                                        title: Center(
+                                                          child: Text(
+                                                            "Select parking duration (HH:MM)",
+                                                            style: TextStyle(
+                                                              fontSize: 15,
+                                                              color: Colors.blue
+                                                                  .shade900,
+                                                            ),
+                                                          ),
+                                                        ),
+                                                        content:
+                                                            StatefulBuilder(
+                                                          builder: (context,
+                                                              sbSetState) {
+                                                            return Row(
+                                                              mainAxisAlignment:
+                                                                  MainAxisAlignment
+                                                                      .center,
+                                                              children: [
+                                                                NumberPicker(
+                                                                  textStyle:
+                                                                      const TextStyle(
+                                                                    color: Colors
+                                                                        .grey,
+                                                                  ),
+                                                                  value:
+                                                                      _selectedHour,
+                                                                  minValue: 0,
+                                                                  maxValue: 23,
+                                                                  onChanged:
+                                                                      (value) {
+                                                                    setState(
+                                                                      () {
+                                                                        _selectedHour =
+                                                                            value;
+                                                                      },
+                                                                    );
+                                                                    sbSetState(
+                                                                      () {
+                                                                        _selectedHour =
+                                                                            value;
+                                                                      },
+                                                                    );
+                                                                  },
+                                                                ),
+                                                                NumberPicker(
+                                                                  textStyle:
+                                                                      const TextStyle(
+                                                                    color: Colors
+                                                                        .grey,
+                                                                  ),
+                                                                  value:
+                                                                      _selectedMinute,
+                                                                  minValue: 0,
+                                                                  maxValue: 59,
+                                                                  onChanged:
+                                                                      (value) {
+                                                                    setState(
+                                                                      () => _selectedMinute =
+                                                                          value,
+                                                                    );
+                                                                    sbSetState(
+                                                                      () => _selectedMinute =
+                                                                          value,
+                                                                    );
+                                                                  },
+                                                                ),
+                                                              ],
+                                                            );
+                                                          },
+                                                        ),
+                                                        actions: [
+                                                          TextButton(
+                                                            onPressed: () {
+                                                              Navigator.pop(
+                                                                context,
+                                                              );
+                                                            },
+                                                            child: const Text(
+                                                                "Cancel"),
+                                                          ),
+                                                          TextButton(
+                                                            onPressed: () {
+                                                              UserServices
+                                                                  .extendParking(
+                                                                _selectedHour,
+                                                                _selectedMinute,
+                                                                parkings[index],
+                                                                context,
+                                                              );
+                                                              
+                                                            },
+                                                            child: const Text(
+                                                              "Confirm",
+                                                            ),
+                                                          ),
+                                                        ],
+                                                      );
+                                                    },
+                                                  );
+                                                },
                                                 icon: Icon(
-                                                  Icons.message_outlined,
-                                                  color: Colors.blue.shade300,
+                                                  Icons.more_time_rounded,
+                                                  color: Colors.green.shade300,
                                                 ),
                                               ),
                                               const Text(
-                                                "Message",
+                                                "Extend",
                                                 style: TextStyle(
                                                   color: Colors.black54,
                                                 ),
@@ -392,14 +663,14 @@ class InProgressState extends State<InProgress> {
                                           Column(
                                             children: [
                                               IconButton(
-                                                onPressed: () {},
+                                                onPressed: () async {},
                                                 icon: Icon(
-                                                  Icons.more_time_rounded,
-                                                  color: Colors.green.shade300,
+                                                  Icons.message_outlined,
+                                                  color: Colors.blue.shade300,
                                                 ),
                                               ),
                                               const Text(
-                                                "Extend",
+                                                "Message",
                                                 style: TextStyle(
                                                   color: Colors.black54,
                                                 ),
@@ -568,6 +839,7 @@ class Upcoming extends StatefulWidget {
 }
 
 class _UpcomingState extends State<Upcoming> {
+  final GlobalKey<GoogleMapScreenState> gMapKey = GlobalKey();
   final textStyle = const TextStyle(
     fontSize: 16,
   );
@@ -713,46 +985,12 @@ class _UpcomingState extends State<Upcoming> {
                                               IconButton(
                                                 onPressed: () {},
                                                 icon: Icon(
-                                                  Icons.stop_circle_outlined,
-                                                  color: Colors.red.shade300,
-                                                ),
-                                              ),
-                                              const Text(
-                                                "Stop",
-                                                style: TextStyle(
-                                                  color: Colors.black54,
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                          Column(
-                                            children: [
-                                              IconButton(
-                                                onPressed: () {},
-                                                icon: Icon(
                                                   Icons.message_outlined,
                                                   color: Colors.blue.shade300,
                                                 ),
                                               ),
                                               const Text(
                                                 "Message",
-                                                style: TextStyle(
-                                                  color: Colors.black54,
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                          Column(
-                                            children: [
-                                              IconButton(
-                                                onPressed: () {},
-                                                icon: Icon(
-                                                  Icons.more_time_rounded,
-                                                  color: Colors.green.shade300,
-                                                ),
-                                              ),
-                                              const Text(
-                                                "Extend",
                                                 style: TextStyle(
                                                   color: Colors.black54,
                                                 ),
@@ -771,13 +1009,30 @@ class _UpcomingState extends State<Upcoming> {
                                                     parkings[index].getLatLng!,
                                                   );
                                                 },
-                                                icon: const Icon(
+                                                icon: Icon(
                                                   Icons.directions_outlined,
-                                                  color: Colors.blue,
+                                                  color: Colors.green.shade300,
                                                 ),
                                               ),
                                               const Text(
                                                 "Direction",
+                                                style: TextStyle(
+                                                  color: Colors.black54,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                          Column(
+                                            children: [
+                                              IconButton(
+                                                onPressed: () {},
+                                                icon: Icon(
+                                                  Icons.cancel_outlined,
+                                                  color: Colors.red.shade300,
+                                                ),
+                                              ),
+                                              const Text(
+                                                "Cancel booking",
                                                 style: TextStyle(
                                                   color: Colors.black54,
                                                 ),

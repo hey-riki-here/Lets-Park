@@ -123,6 +123,19 @@ class _CheckoutState extends State<Checkout> {
                 DateTime.now().millisecondsSinceEpoch.toString().toString() +
                 "$qty";
 
+            showDialog(
+              context: context,
+              barrierDismissible: false,
+              builder: (context) => WillPopScope(
+                onWillPop: () async => false,
+                child: const NoticeDialog(
+                  imageLink: "assets/logo/lets-park-logo.png",
+                  message: "Checking and verifying your booking...",
+                  forLoading: true,
+                ),
+              ),
+            );
+
             int paymentDate = 0;
             await WorldTimeServices.getDateOnlyNow().then((date) {
               paymentDate = date.millisecondsSinceEpoch;
@@ -153,18 +166,6 @@ class _CheckoutState extends State<Checkout> {
               false,
               true,
               false,
-            );
-            showDialog(
-              context: context,
-              barrierDismissible: false,
-              builder: (context) => WillPopScope(
-                onWillPop: () async => false,
-                child: const NoticeDialog(
-                  imageLink: "assets/logo/lets-park-logo.png",
-                  message: "Checking and verifying your booking...",
-                  forLoading: true,
-                ),
-              ),
             );
             bool isAvailable = true;
             if (availableSlot > 0) {
@@ -237,12 +238,16 @@ class _CheckoutState extends State<Checkout> {
                       );
                     });
 
+                    int notifLength =
+                        await UserServices.getUserNotificationLength(
+                      FirebaseAuth.instance.currentUser!.uid,
+                    );
+
                     final userNotif = UserNotification(
-                      "NOTIF" +
-                          globals.userData.getUserNotifications!.length
-                              .toString(),
+                      "NOTIF" + notifLength.toString(),
                       widget.parkingSpace.getSpaceId!,
-                      FirebaseAuth.instance.currentUser!.photoURL ?? "https://cdn4.iconfinder.com/data/icons/user-people-2/48/5-512.png",
+                      FirebaseAuth.instance.currentUser!.photoURL ??
+                          "https://cdn4.iconfinder.com/data/icons/user-people-2/48/5-512.png",
                       FirebaseAuth.instance.currentUser!.displayName!,
                       "just booked on your parking space. Tap to view details.",
                       true,
@@ -254,9 +259,7 @@ class _CheckoutState extends State<Checkout> {
                     var params = {
                       "parking": newParking.toJson(),
                       "notification": {
-                        "notificationId": "NOTIF" +
-                            globals.userData.getUserNotifications!.length
-                                .toString(),
+                        "notificationId": "NOTIF" + notifLength.toString(),
                         "userId": widget.parkingSpace.getOwnerId!,
                         "userNotification": userNotif.toJson(),
                       },
@@ -275,8 +278,8 @@ class _CheckoutState extends State<Checkout> {
                               owner: widget.parkingSpace.getOwnerName!,
                               parkee: FirebaseAuth
                                   .instance.currentUser!.displayName!,
-                              transactioDate: DateFormat('MMMM dd, yyyy')
-                                  .format(now),
+                              transactioDate:
+                                  DateFormat('MMMM dd, yyyy').format(now),
                               arrivalDate: DateFormat('MMMM dd, yyyy - h:mm a')
                                   .format(DateTime.fromMillisecondsSinceEpoch(
                                       _setupTimeState.currentState!.getArrival!

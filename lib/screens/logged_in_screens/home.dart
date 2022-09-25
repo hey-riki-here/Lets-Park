@@ -98,6 +98,7 @@ class _HomeState extends State<Home> {
           stream: _userServices.getUserParkingData()!,
           builder: (context, snapshot) {
             if (snapshot.hasData) {
+              print('Rebuilt');
               List<Parking> parkings = [];
               snapshot.data!.docs.forEach((element) {
                 parkings.add(Parking.fromJson(element.data()));
@@ -138,6 +139,10 @@ class _HomeState extends State<Home> {
             );
           }),
     );
+  }
+
+  void focusMapOnLocation(){
+    
   }
 
   void grantPermission() async {

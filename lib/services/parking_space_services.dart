@@ -89,6 +89,51 @@ class ParkingSpaceServices {
     return isAvailable;
   }
 
+  static Future<bool> canExtend(
+    String? id,
+    String? parkingId,
+    int? departure,
+  ) async {
+    bool isAvailable = true;
+    DateTime selectedDeparture =
+        _getDateTimeFromMillisecondsFromEpoch(departure!);
+    List<Parking> sessions = [];
+    await FirebaseFirestore.instance
+        .collection('parking-spaces')
+        .doc(id)
+        .collection("parking-sessions")
+        .get()
+        .then((value) => value.docs.forEach((element) {
+              if (element.data()["upcoming"] == true) {
+                sessions.add(Parking.fromJson(element.data()));
+              }
+            }));
+    if (sessions.isNotEmpty) {
+      sessions.sort((sessionA, sessionB) {
+        int sessionTimeA = sessionA.getArrival! + sessionA.getDeparture!;
+        int sessionTimeB = sessionB.getArrival! + sessionB.getDeparture!;
+
+        var r = sessionTimeA.compareTo(sessionTimeB);
+        if (r != 0) return r;
+        return sessionTimeA.compareTo(sessionTimeB);
+      });
+
+      for (int i = 0; i < sessions.length; i++) {
+        DateTime arrival =
+            _getDateTimeFromMillisecondsFromEpoch(sessions[i].getArrival!);
+        if (sessions[i].getParkingId!.compareTo(parkingId!) != 0) {
+          if (selectedDeparture.compareTo(arrival) == 1) {
+            isAvailable = false;
+            break;
+          }
+        }
+      }
+    } else {
+      isAvailable = true;
+    }
+    return isAvailable;
+  }
+
   static Stream<QuerySnapshot<Map<String, dynamic>>> getParkingSessionsDocs(
       String spaceId) {
     return FirebaseFirestore.instance
@@ -264,6 +309,37 @@ class ParkingSpaceServices {
         .snapshots();
   }
 
+  static Future<int> getAvailableSlots(String spaceId) async {
+    int availableSlot = 0;
+    int capacity = 0;
+    await FirebaseFirestore.instance
+        .collection('parking-spaces')
+        .doc(spaceId)
+        .get()
+        .then((value) {
+      capacity = value.data()!["capacity"];
+    });
+
+    int occupied = 0;
+    await FirebaseFirestore.instance
+        .collection('parking-spaces')
+        .doc(spaceId)
+        .collection('parking-sessions')
+        .snapshots()
+        .first
+        .then((value) {
+      value.docs.forEach((parking) {
+        if (parking.data()["inProgress"] == true ||
+            parking.data()["upcoming"] == true) {
+          occupied++;
+        }
+      });
+      availableSlot = capacity - occupied;
+    });
+
+    return availableSlot;
+  }
+
   static void updateDisableStatus(String spaceId, bool status) async {
     await FirebaseFirestore.instance
         .collection('parking-spaces')
@@ -298,7 +374,8 @@ class ParkingSpaceServices {
     });
   }
 
-  static Future<void> updateCaretakerPhotoUrl(String spaceId, String newImageUrl) async {
+  static Future<void> updateCaretakerPhotoUrl(
+      String spaceId, String newImageUrl) async {
     await FirebaseFirestore.instance
         .collection("parking-spaces")
         .doc(spaceId)
@@ -338,7 +415,8 @@ class ParkingSpaceServices {
     });
   }
 
-  static Future<void> updateCaretakerName(String spaceId, String caretakerName) async {
+  static Future<void> updateCaretakerName(
+      String spaceId, String caretakerName) async {
     await FirebaseFirestore.instance
         .collection("parking-spaces")
         .doc(spaceId)
@@ -347,7 +425,8 @@ class ParkingSpaceServices {
     });
   }
 
-  static Future<void> updateCaretakerPhoneNumber(String spaceId, String caretakerPhoneNumber) async {
+  static Future<void> updateCaretakerPhoneNumber(
+      String spaceId, String caretakerPhoneNumber) async {
     await FirebaseFirestore.instance
         .collection("parking-spaces")
         .doc(spaceId)
@@ -404,14 +483,13 @@ class ParkingSpaceServices {
         .snapshots()
         .first
         .then((sessions) {
-          sessions.docs.forEach((session) { 
-            if (session.data()['inProgress'] || session.data()['upcoming']){
-              result = false;
-            }
-          });
-        });
+      sessions.docs.forEach((session) {
+        if (session.data()['inProgress'] || session.data()['upcoming']) {
+          result = false;
+        }
+      });
+    });
 
     return result;
   }
-
 }
