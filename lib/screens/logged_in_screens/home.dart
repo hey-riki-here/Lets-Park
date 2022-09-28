@@ -137,7 +137,6 @@ class _HomeState extends State<Home> {
                           FilterButtons(gMapKey: _gMapKey),
                         ],
                       ),
-                      //const MarkerLegends(),
                     ],
                   ),
                 ),
@@ -1061,7 +1060,7 @@ class _NearbySpacesViewState extends State<NearbySpacesView> {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(
-        right: 16,
+        right: 10,
       ),
       child: loading
           ? Shimmer.fromColors(
@@ -1114,9 +1113,11 @@ class _NearbySpacesViewState extends State<NearbySpacesView> {
           position.longitude,
         ),
       );
-      setState(() {
-        loading = false;
-      });
+      if (mounted) {
+        setState(() {
+          loading = false;
+        });
+      }
     }
   }
 }
@@ -1288,7 +1289,7 @@ class NearbySpaces extends StatelessWidget {
                                 ),
                                 const SizedBox(width: 7),
                                 Text(
-                                  "${space.getRating} • ${getDistance(distance)} • ${space.getType}",
+                                  "${space.getRating!.toInt()} • ${getDistance(distance)} • ${space.getType}",
                                   style: const TextStyle(
                                     fontSize: 15,
                                     fontWeight: FontWeight.w400,
@@ -1473,7 +1474,7 @@ class CustomFeaturedItem extends StatelessWidget {
               ),
               const SizedBox(width: 5),
               Text(
-                "${space.getRating!}",
+                "${space.getRating!.toInt()}",
                 style: const TextStyle(
                   color: Colors.white,
                   fontSize: 22,

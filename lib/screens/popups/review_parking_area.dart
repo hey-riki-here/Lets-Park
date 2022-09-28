@@ -27,6 +27,9 @@ class _ReviewParkingAreaState extends State<ReviewParkingArea> {
   String imageUrl = "";
   double spaceRating = 0;
   double rate = 0;
+  int reviewsQty = 0;
+  bool tagSelected = false;
+  List<String> selectedTags = [];
 
   @override
   void initState() {
@@ -41,6 +44,8 @@ class _ReviewParkingAreaState extends State<ReviewParkingArea> {
         spaceRating = value.data()!["rating"];
       });
     });
+
+    getParkingReviews();
 
     super.initState();
   }
@@ -96,7 +101,13 @@ class _ReviewParkingAreaState extends State<ReviewParkingArea> {
                               ),
                             ),
                       const SizedBox(height: 5),
-                      ParkingSpaceServices.getStars(spaceRating),
+                      Row(
+                        children: [
+                          ParkingSpaceServices.getStars(spaceRating),
+                          const SizedBox(width: 5),
+                          Text("($reviewsQty)"),
+                        ],
+                      ),
                       const Text(
                         "Reservable",
                         style: TextStyle(
@@ -161,6 +172,34 @@ class _ReviewParkingAreaState extends State<ReviewParkingArea> {
                 ),
               ),
               const SizedBox(height: 20),
+              Center(
+                child: Wrap(
+                  alignment: WrapAlignment.center,
+                  direction: Axis.horizontal,
+                  runSpacing: 10,
+                  children: [
+                    "Safe and Secure",
+                    "Will park again!",
+                    "Accomodating",
+                    "Clean Parking",
+                    "Easy to find",
+                  ]
+                      .map(
+                        (tag) => QuickReviewTile(
+                          label: tag,
+                          onTagSelected: (tagSelected) {
+                            if (tagSelected) {
+                              selectedTags.add(tag);
+                            } else {
+                              selectedTags.remove(tag);
+                            }
+                          },
+                        ),
+                      )
+                      .toList(),
+                ),
+              ),
+              const SizedBox(height: 20),
               TextFormField(
                 controller: _infoController,
                 maxLines: 5,
@@ -196,6 +235,7 @@ class _ReviewParkingAreaState extends State<ReviewParkingArea> {
                         FirebaseAuth.instance.currentUser!.displayName,
                         rate,
                         _infoController.text.trim(),
+                        selectedTags,
                       ),
                     );
                     ParkingSpaceServices.updateParkingSpaceRating(
@@ -237,6 +277,70 @@ class _ReviewParkingAreaState extends State<ReviewParkingArea> {
           forConfirmation: forConfirmation!,
         );
       },
+    );
+  }
+
+  void getParkingReviews() async {
+    int qty =
+        await ParkingSpaceServices.getParkingReviewsQuantity(widget.spaceId)
+            .then((value) => value);
+    setState(() {
+      reviewsQty = qty;
+    });
+  }
+}
+
+typedef void OnTagSelected(bool selected);
+
+class QuickReviewTile extends StatefulWidget {
+  final String label;
+  final OnTagSelected onTagSelected;
+  const QuickReviewTile(
+      {Key? key, required this.label, required this.onTagSelected})
+      : super(key: key);
+
+  @override
+  State<QuickReviewTile> createState() => _QuickReviewTileState();
+}
+
+class _QuickReviewTileState extends State<QuickReviewTile> {
+  bool tagSelected = false;
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        GestureDetector(
+          onTap: () {
+            setState(() {
+              tagSelected = !tagSelected;
+              widget.onTagSelected(tagSelected);
+            });
+          },
+          child: Container(
+            height: 35,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(50),
+              color: tagSelected ? Colors.blue[400] : Colors.white,
+              border: Border.all(
+                color: tagSelected ? Colors.white : Colors.black26,
+                width: 1,
+              ),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Text(
+                widget.label,
+                style: TextStyle(
+                  color: tagSelected ? Colors.white : Colors.black,
+                ),
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(width: 10),
+      ],
     );
   }
 }

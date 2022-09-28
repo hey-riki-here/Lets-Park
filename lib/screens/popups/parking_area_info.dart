@@ -16,6 +16,7 @@ import 'package:geolocator/geolocator.dart' as geolocator;
 import 'package:lets_park/services/user_services.dart';
 import 'package:location/location.dart';
 import 'package:lets_park/globals/globals.dart' as globals;
+import 'package:url_launcher/url_launcher.dart' as launcher;
 
 class ParkingAreaInfo extends StatefulWidget {
   final ParkingSpace parkingSpace;
@@ -57,7 +58,7 @@ class _ParkingAreaInfoState extends State<ParkingAreaInfo> {
           bottom: PreferredSize(
             child: Container(
               color: Colors.white,
-              height: 375,
+              height: 351,
               width: double.infinity,
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -95,7 +96,7 @@ class _ParkingAreaInfoState extends State<ParkingAreaInfo> {
                       ),
                       Tab(
                         child: Text(
-                          "Caretaker",
+                          "Attendant",
                           style: TextStyle(
                             fontSize: 17,
                           ),
@@ -114,7 +115,7 @@ class _ParkingAreaInfoState extends State<ParkingAreaInfo> {
                 ],
               ),
             ),
-            preferredSize: const Size.fromHeight(375),
+            preferredSize: const Size.fromHeight(351),
           ),
         ),
         body: InfoReviewsCaretaker(
@@ -342,6 +343,7 @@ class _HeaderState extends State<Header> {
   );
   bool _added = false;
   String _label = "Add to Favorites";
+  int sessionsQty = 0, reviewsQty = 0;
 
   @override
   void initState() {
@@ -357,6 +359,10 @@ class _HeaderState extends State<Header> {
     _label = globals.favorites.contains(widget.spaceId)
         ? "Added to Favorites"
         : "Add to Favorites";
+
+    getParkingReviews();
+    getParkingSessions();
+
     super.initState();
   }
 
@@ -379,7 +385,19 @@ class _HeaderState extends State<Header> {
                   ),
                 ),
                 const SizedBox(height: 2),
-                ParkingSpaceServices.getStars(widget.stars),
+                Row(
+                  children: [
+                    ParkingSpaceServices.getStars(widget.stars),
+                    const SizedBox(width: 5),
+                    Text(
+                      "($reviewsQty)",
+                      style: const TextStyle(
+                        color: Colors.black54,
+                        fontWeight: FontWeight.w400,
+                      ),
+                    ),
+                  ],
+                ),
                 const SizedBox(height: 5),
                 Row(
                   children: [
@@ -408,6 +426,22 @@ class _HeaderState extends State<Header> {
                       padding: const EdgeInsets.all(3),
                       child: Text(
                         widget.dailyOrMonthly,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 5),
+                    Container(
+                      decoration: BoxDecoration(
+                        color: Colors.green[400],
+                        borderRadius:
+                            const BorderRadius.all(Radius.circular(3)),
+                      ),
+                      padding: const EdgeInsets.all(3),
+                      child: Text(
+                        "($sessionsQty Parkings)",
                         style: const TextStyle(
                           color: Colors.white,
                           fontWeight: FontWeight.w500,
@@ -492,25 +526,6 @@ class _HeaderState extends State<Header> {
             ),
           ),
         ),
-        const SizedBox(height: 10),
-        !widget.isLocationEnabled
-            ? Row(
-                children: [
-                  Icon(
-                    Icons.warning_rounded,
-                    size: 20,
-                    color: Colors.amber[700],
-                  ),
-                  const SizedBox(width: 10),
-                  const Text(
-                    "Please turn on location service to calculate estimated distance",
-                    style: TextStyle(
-                      color: Colors.black54,
-                    ),
-                  ),
-                ],
-              )
-            : const Text(""),
       ],
     );
   }
@@ -527,6 +542,24 @@ class _HeaderState extends State<Header> {
         duration: const Duration(seconds: 5),
       ),
     );
+  }
+
+  void getParkingSessions() async {
+    int qty =
+        await ParkingSpaceServices.getParkingSessionQuantity(widget.spaceId)
+            .then((value) => value);
+    setState(() {
+      sessionsQty = qty;
+    });
+  }
+
+  void getParkingReviews() async {
+    int qty =
+        await ParkingSpaceServices.getParkingReviewsQuantity(widget.spaceId)
+            .then((value) => value);
+    setState(() {
+      reviewsQty = qty;
+    });
   }
 }
 
@@ -640,9 +673,7 @@ class _PriceAndDistanceState extends State<PriceAndDistance> {
     );
   }
 
-  void showPriceInfoDialog(){
-
-  }
+  void showPriceInfoDialog() {}
 
   void showAlertDialog(String message) {
     showDialog(
@@ -868,7 +899,7 @@ class InfoReviewsCaretaker extends StatelessWidget {
                           const SizedBox(width: 10),
                           const Expanded(
                             child: Text(
-                              "Have queries about parking? You can always call the parking space's caretaker.",
+                              "Have queries about parking? You can always call the parking space's attendant.",
                             ),
                           ),
                         ],
@@ -879,9 +910,16 @@ class InfoReviewsCaretaker extends StatelessWidget {
                           elevation: 0,
                           primary: Colors.green,
                         ),
-                        onPressed: () {},
+                        onPressed: () async {
+                          final url = "tel:09$caretakerPhoneNumber";
+                          if (await launcher.canLaunchUrl(Uri.parse(url))) {
+                            await launcher.launchUrl(Uri.parse(url));
+                          } else {
+                            throw 'Could not launch $url';
+                          }
+                        },
                         icon: const Icon(Icons.phone_in_talk_rounded),
-                        label: const Text("Call caretaker"),
+                        label: const Text("Call attendant"),
                       ),
                     ],
                   ),
@@ -913,7 +951,7 @@ class InfoReviewsCaretaker extends StatelessWidget {
                 ),
                 const SizedBox(height: 12),
                 Text(
-                  caretakerPhoneNumber,
+                  "09$caretakerPhoneNumber",
                   style: const TextStyle(
                     fontSize: 16,
                   ),
@@ -932,6 +970,26 @@ class InfoReviewsCaretaker extends StatelessWidget {
                   reviews.add(Review.fromJson(review.data()));
                 });
               }
+              int tag1Qty = 0,
+                  tag2Qty = 0,
+                  tag3Qty = 0,
+                  tag4Qty = 0,
+                  tag5Qty = 0;
+              reviews.forEach((review) {
+                review.getQuickReviews!.forEach((tag) {
+                  if (tag.compareTo("Safe and Secure") == 0) {
+                    tag1Qty += 1;
+                  } else if (tag.compareTo("Will park again!") == 0) {
+                    tag2Qty += 1;
+                  } else if (tag.compareTo("Accomodating") == 0) {
+                    tag3Qty += 1;
+                  } else if (tag.compareTo("Clean Parking") == 0) {
+                    tag4Qty += 1;
+                  } else {
+                    tag5Qty += 1;
+                  }
+                });
+              });
 
               return reviews.isEmpty
                   ? Center(
@@ -960,6 +1018,31 @@ class InfoReviewsCaretaker extends StatelessWidget {
                         return Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
+                            index == 0
+                                ? Center(
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(10.0),
+                                      child: Wrap(
+                                        alignment: WrapAlignment.center,
+                                        direction: Axis.horizontal,
+                                        runSpacing: 10,
+                                        children: [
+                                          "Safe and Secure ($tag1Qty)",
+                                          "Will park again! ($tag2Qty)",
+                                          "Accomodating ($tag3Qty)",
+                                          "Clean Parking ($tag4Qty)",
+                                          "Easy to find ($tag5Qty)",
+                                        ]
+                                            .map(
+                                              (tag) => QuickReviewTile(
+                                                label: tag,
+                                              ),
+                                            )
+                                            .toList(),
+                                      ),
+                                    ),
+                                  )
+                                : const SizedBox(),
                             Row(
                               children: [
                                 CircleAvatar(
@@ -994,7 +1077,26 @@ class InfoReviewsCaretaker extends StatelessWidget {
                               reviews[index].getRating!,
                             ),
                             const SizedBox(height: 10),
-                            Text(reviews[index].getReview!),
+                            Wrap(
+                              alignment: WrapAlignment.start,
+                              direction: Axis.horizontal,
+                              runSpacing: 10,
+                              children: reviews[index]
+                                  .getQuickReviews!
+                                  .map(
+                                    (tag) => QuickReviewTile(
+                                      label: tag,
+                                    ),
+                                  )
+                                  .toList(),
+                            ),
+                            const SizedBox(height: 10),
+                            Text(
+                              reviews[index].getReview!,
+                              style: const TextStyle(
+                                fontSize: 15,
+                              ),
+                            ),
                             const Center(
                               child: SizedBox(
                                 height: 30,
@@ -1108,6 +1210,46 @@ class InfoReviewsCaretaker extends StatelessWidget {
       direction: Axis.horizontal,
       runSpacing: 10,
       children: newChildren,
+    );
+  }
+}
+
+class QuickReviewTile extends StatelessWidget {
+  final String label;
+  const QuickReviewTile({
+    Key? key,
+    required this.label,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          height: 30,
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(50),
+            color: Colors.white,
+            border: Border.all(
+              color: Colors.black26,
+              width: 1,
+            ),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(6),
+            child: Text(
+              label,
+              style: const TextStyle(
+                color: Colors.black,
+                fontSize: 12,
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(width: 10),
+      ],
     );
   }
 }
