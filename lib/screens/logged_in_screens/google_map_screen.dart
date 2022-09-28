@@ -57,74 +57,61 @@ class GoogleMapScreenState extends State<GoogleMapScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: StreamBuilder<List<ParkingSpace>>(
-          stream: _firebaseServices.getParkingSpacesFromDatabase(),
-          builder: (context, snapshot) {
-            if (snapshot.hasData) {
-              FirebaseServices.getOwnedParkingAreas(snapshot);
-              getMarkers();
-              return Stack(
-                children: [
-                  GoogleMap(
-                    initialCameraPosition: cameraPosition,
-                    myLocationEnabled: locationEnabled,
-                    markers: markers,
-                    myLocationButtonEnabled: false,
-                    compassEnabled: false,
-                    rotateGesturesEnabled: false,
-                    zoomControlsEnabled: false,
-                    mapToolbarEnabled: false,
-                    minMaxZoomPreference: const MinMaxZoomPreference(15, 22),
-                    onMapCreated: (GoogleMapController controller) async {
-                      _controller.complete(controller);
-                      googleMapController = controller;
-                      changeMapMode(googleMapController!);
-                      widget.notifyParent();
-                      setState(() {
-                        isMapLoading = false;
-                      });
-                    },
-                  ),
-                  isMapLoading
-                      ? Center(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: const [
-                              Text(
-                                "Loading map please wait.",
-                                style: TextStyle(
-                                  fontStyle: FontStyle.italic,
-                                ),
+        stream: _firebaseServices.getParkingSpacesFromDatabase(),
+        builder: (context, snapshot) {
+          if (snapshot.hasData) {
+            FirebaseServices.getOwnedParkingAreas(snapshot);
+            getMarkers();
+            return Stack(
+              children: [
+                GoogleMap(
+                  initialCameraPosition: cameraPosition,
+                  myLocationEnabled: locationEnabled,
+                  markers: markers,
+                  myLocationButtonEnabled: false,
+                  compassEnabled: false,
+                  rotateGesturesEnabled: false,
+                  zoomControlsEnabled: false,
+                  mapToolbarEnabled: false,
+                  minMaxZoomPreference: const MinMaxZoomPreference(15, 22),
+                  onMapCreated: (GoogleMapController controller) async {
+                    _controller.complete(controller);
+                    googleMapController = controller;
+                    changeMapMode(googleMapController!);
+                    widget.notifyParent();
+                    setState(() {
+                      isMapLoading = false;
+                    });
+                  },
+                ),
+                isMapLoading
+                    ? Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: const [
+                            Text(
+                              "Loading map please wait.",
+                              style: TextStyle(
+                                fontStyle: FontStyle.italic,
                               ),
-                              SizedBox(height: 10),
-                              CircularProgressIndicator(),
-                            ],
-                          ),
-                        )
-                      : const SizedBox(),
-                ],
-              );
-            } else {
-              return const Center(
-                child: CircularProgressIndicator(),
-              );
-            }
-          }),
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: Colors.white,
-        child: const Icon(
-          Icons.location_searching,
-          color: Colors.black,
-        ),
-        onPressed: () async {
-          try {
-            getLocation(context);
-          } on Exception catch (e) {}
+                            ),
+                            SizedBox(height: 10),
+                            CircularProgressIndicator(),
+                          ],
+                        ),
+                      )
+                    : const SizedBox(),
+              ],
+            );
+          } else {
+            return const Center(
+              child: CircularProgressIndicator(),
+            );
+          }
         },
       ),
     );
   }
-
-  
 
   void getMarkers() async {
     await _firebaseServices.getMarkers(context).then((value) {

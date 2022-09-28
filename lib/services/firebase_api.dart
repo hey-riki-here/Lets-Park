@@ -151,12 +151,16 @@ class FirebaseServices {
     Map<ParkingSpace, double> _map = {};
 
     globals.currentParkingSpaces.forEach((parkingSpace) {
-      _map[parkingSpace] = calculateDistance(
+      double distance = calculateDistance(
         userLocation.latitude,
         userLocation.longitude,
         parkingSpace.getLatLng!.latitude,
         parkingSpace.getLatLng!.longitude,
       );
+
+      if (distance <= 10) {
+        _map[parkingSpace] = distance;
+      }
     });
 
     var sortedMap = Map.fromEntries(
@@ -173,15 +177,23 @@ class FirebaseServices {
   }
 
   static List<ParkingSpace> getHighestRatedParkings() {
-    List<ParkingSpace> firstFiveHighestRating = globals.currentParkingSpaces;
+    List<ParkingSpace> highRatedSpaces = [];
 
-    firstFiveHighestRating.sort((spaceA, spaceB) {
-      double timeA = spaceA.getRating!;
-      double timeB = spaceB.getRating!;
-      return timeB.compareTo(timeA);
+    globals.currentParkingSpaces.forEach((space) {
+      if (space.getRating! >= 0) {
+        highRatedSpaces.add(space);
+      }
     });
 
-    return firstFiveHighestRating;
+    if (highRatedSpaces.isNotEmpty) {
+      highRatedSpaces.sort((spaceA, spaceB) {
+        double timeA = spaceA.getRating!;
+        double timeB = spaceB.getRating!;
+        return timeB.compareTo(timeA);
+      });
+    }
+
+    return highRatedSpaces;
   }
 
   static List<ParkingSpace> getSecuredParkingSpaces() {

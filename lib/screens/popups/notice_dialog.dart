@@ -190,7 +190,7 @@ class NoticeDialog extends StatelessWidget {
             ),
             TextButton(
               child: Text(
-                "Yes, I'm at the parking location".toUpperCase(),
+                "Confirm".toUpperCase(),
                 style:
                     const TextStyle(fontSize: 14, fontWeight: FontWeight.w400),
               ),

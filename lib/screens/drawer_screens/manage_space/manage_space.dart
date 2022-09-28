@@ -36,7 +36,6 @@ class ManageSpace extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: const [
             Header(),
-            //SizedBox(height: 10),
             Padding(
               padding: EdgeInsets.symmetric(horizontal: 9.0, vertical: 1.0),
               child: Text(

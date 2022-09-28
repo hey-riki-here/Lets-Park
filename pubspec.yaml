@@ -61,6 +61,8 @@ dependencies:
   url_launcher: ^6.1.5
   http: ^0.13.5
   mailer: ^5.2.0
+  shimmer: ^2.0.0
+  galleryimage: ^1.2.0
   
 dev_dependencies:
   flutter_test:

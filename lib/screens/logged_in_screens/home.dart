@@ -10,6 +10,10 @@ import 'package:lets_park/models/notification.dart';
 import 'package:lets_park/models/parking.dart';
 import 'package:lets_park/models/parking_space.dart';
 import 'package:lets_park/screens/logged_in_screens/google_map_screen.dart';
+import 'package:lets_park/screens/popups/checkout.dart';
+import 'package:lets_park/screens/popups/checkout_monthly.dart';
+import 'package:lets_park/screens/popups/notice_dialog.dart';
+import 'package:lets_park/screens/popups/parking_area_info.dart';
 import 'package:lets_park/services/firebase_api.dart';
 import 'package:lets_park/services/notif_services.dart';
 import 'package:lets_park/services/user_services.dart';
@@ -18,6 +22,7 @@ import 'package:lets_park/services/world_time_api.dart';
 import 'package:lets_park/shared/navigation_drawer.dart';
 import 'package:location/location.dart';
 import 'package:geolocator/geolocator.dart' as geolocator;
+import 'package:shimmer/shimmer.dart';
 
 class Home extends StatefulWidget {
   final int _pageId = 2;
@@ -32,6 +37,9 @@ class _HomeState extends State<Home> {
   final user = FirebaseAuth.instance.currentUser;
   final GlobalKey<GoogleMapScreenState> _gMapKey = GlobalKey();
   final UserServices _userServices = UserServices();
+  bool mapSelected = true, feedSelected = false;
+  final controller = DraggableScrollableController();
+  double initialChildSize = 0.55;
 
   @override
   void initState() {
@@ -95,55 +103,157 @@ class _HomeState extends State<Home> {
       key: _scaffoldKey,
       drawer: NavigationDrawer(currentPage: widget._pageId),
       body: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-          stream: _userServices.getUserParkingData()!,
-          builder: (context, snapshot) {
-            if (snapshot.hasData) {
-              print('Rebuilt');
-              List<Parking> parkings = [];
-              snapshot.data!.docs.forEach((element) {
-                parkings.add(Parking.fromJson(element.data()));
-              });
-              globals.userData.setParkings = parkings;
-            }
-            return SafeArea(
-              child: Stack(
-                children: [
-                  GoogleMapScreen(
-                    key: _gMapKey,
-                    notifyParent: refresh,
+        stream: _userServices.getUserParkingData()!,
+        builder: (context, snapshot) {
+          if (snapshot.hasData) {
+            List<Parking> parkings = [];
+            snapshot.data!.docs.forEach((element) {
+              parkings.add(Parking.fromJson(element.data()));
+            });
+            globals.userData.setParkings = parkings;
+          }
+          return SafeArea(
+            child: Stack(
+              children: [
+                GoogleMapScreen(
+                  key: _gMapKey,
+                  notifyParent: refresh,
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Column(
+                        children: [
+                          Row(
+                            children: [
+                              DrawerButton(scaffoldKey: _scaffoldKey),
+                              const SizedBox(width: 10),
+                              SearchBox(gMapKey: _gMapKey),
+                            ],
+                          ),
+                          const SizedBox(height: 10),
+                          FilterButtons(gMapKey: _gMapKey),
+                        ],
+                      ),
+                      //const MarkerLegends(),
+                    ],
                   ),
-                  Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Column(
-                          children: [
-                            Row(
-                              children: [
-                                DrawerButton(scaffoldKey: _scaffoldKey),
-                                const SizedBox(width: 10),
-                                SearchBox(gMapKey: _gMapKey),
-                              ],
-                            ),
-                            const SizedBox(height: 10),
-                            FilterButtons(gMapKey: _gMapKey),
-                          ],
-                        ),
-                        const MarkerLegends(),
-                      ],
+                ),
+                ScrollConfiguration(
+                  behavior: ScrollWithoutGlowBehavior(),
+                  child: NotificationListener<DraggableScrollableNotification>(
+                    onNotification:
+                        (DraggableScrollableNotification notification) {
+                      initialChildSize = notification.extent;
+                      return true;
+                    },
+                    child: DraggableScrollableSheet(
+                      initialChildSize: initialChildSize,
+                      controller: controller,
+                      minChildSize: 0,
+                      builder: (
+                        BuildContext context,
+                        ScrollController scrollController,
+                      ) {
+                        return SingleChildScrollView(
+                          controller: scrollController,
+                          child: const CustomScrollViewContent(),
+                        );
+                      },
                     ),
                   ),
-                ],
-              ),
-            );
-          }),
+                ),
+              ],
+            ),
+          );
+        },
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+      floatingActionButton: FloatingActionButton(
+        backgroundColor: Colors.blue,
+        child: const Icon(
+          Icons.location_searching,
+          color: Colors.white,
+        ),
+        onPressed: () async {
+          try {
+            _gMapKey.currentState!.getLocation(context);
+          } on Exception catch (e) {}
+        },
+      ),
+      bottomNavigationBar: BottomAppBar(
+        shape: const CircularNotchedRectangle(),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: [
+            Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                IconButton(
+                  onPressed: () {
+                    setState(() {
+                      mapSelected = true;
+                      feedSelected = false;
+                    });
+                    controller.animateTo(
+                      initialChildSize >= 0.55 ? 0 : 0.55,
+                      duration: const Duration(milliseconds: 500),
+                      curve: Curves.easeOutBack,
+                    );
+                  },
+                  padding: const EdgeInsets.all(5),
+                  constraints: const BoxConstraints(),
+                  splashRadius: 18,
+                  icon: Icon(
+                    mapSelected ? Icons.map : Icons.map_outlined,
+                    color: mapSelected ? Colors.blue : Colors.black26,
+                  ),
+                ),
+                Text(
+                  "Map",
+                  style: TextStyle(
+                    color: mapSelected ? Colors.blue : Colors.black26,
+                  ),
+                ),
+                const SizedBox(height: 5),
+              ],
+            ),
+            Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                IconButton(
+                  onPressed: () {
+                    setState(() {
+                      feedSelected = true;
+                      mapSelected = false;
+                    });
+                  },
+                  padding: const EdgeInsets.all(5),
+                  constraints: const BoxConstraints(),
+                  splashRadius: 18,
+                  icon: Icon(
+                    feedSelected ? Icons.star : Icons.star_outline,
+                    color: feedSelected ? Colors.blue : Colors.black26,
+                  ),
+                ),
+                Text(
+                  "Feed",
+                  style: TextStyle(
+                    color: feedSelected ? Colors.blue : Colors.black26,
+                  ),
+                ),
+                const SizedBox(height: 5),
+              ],
+            ),
+          ],
+        ),
+      ),
     );
   }
 
-  void focusMapOnLocation(){
-    
-  }
+  void focusMapOnLocation() {}
 
   void grantPermission() async {
     Location location = Location();
@@ -824,5 +934,597 @@ class MarkerLegends extends StatelessWidget {
         const SizedBox(height: 10),
       ],
     );
+  }
+}
+
+class CustomScrollViewContent extends StatelessWidget {
+  const CustomScrollViewContent({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      elevation: 30,
+      child: Card(
+        elevation: 30,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(24),
+            topRight: Radius.circular(24),
+          ),
+        ),
+        margin: const EdgeInsets.all(0),
+        child: Container(
+          decoration: const BoxDecoration(
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(24),
+              topRight: Radius.circular(24),
+            ),
+          ),
+          child: const SheetContent(),
+        ),
+      ),
+    );
+  }
+}
+
+class SheetContent extends StatelessWidget {
+  const SheetContent({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: const [
+        SizedBox(height: 12),
+        CustomDraggingHandle(),
+        SizedBox(height: 16),
+        GreetingsWidget(),
+        SizedBox(height: 16),
+        NearbySpacesView(),
+        SizedBox(height: 24),
+        TopRatedParkings(),
+        SizedBox(height: 16),
+        CustomFeaturedItemsGrid(),
+      ],
+    );
+  }
+}
+
+class CustomDraggingHandle extends StatelessWidget {
+  const CustomDraggingHandle({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 5,
+      width: 30,
+      decoration: BoxDecoration(
+        color: Colors.grey[200],
+        borderRadius: BorderRadius.circular(16),
+      ),
+    );
+  }
+}
+
+class GreetingsWidget extends StatelessWidget {
+  const GreetingsWidget({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.start,
+      children: <Widget>[
+        Text(
+          "Good day, ${FirebaseAuth.instance.currentUser!.displayName!.split(" ")[0]}!",
+          style: const TextStyle(
+            fontSize: 20,
+          ),
+        ),
+        const SizedBox(width: 8),
+        RichText(
+          text: const TextSpan(
+            text: 'These are the parking spaces ',
+            style: TextStyle(fontSize: 14, color: Colors.black45),
+            children: <TextSpan>[
+              TextSpan(
+                text: 'Near you.',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black,
+                ),
+              ),
+            ],
+          ),
+        )
+      ],
+    );
+  }
+}
+
+class NearbySpacesView extends StatefulWidget {
+  const NearbySpacesView({Key? key}) : super(key: key);
+
+  @override
+  State<NearbySpacesView> createState() => _NearbySpacesViewState();
+}
+
+class _NearbySpacesViewState extends State<NearbySpacesView> {
+  Map<ParkingSpace, double> nearbySpaces = {};
+  bool loading = true;
+
+  @override
+  void initState() {
+    getNearbySpaces();
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(
+        right: 16,
+      ),
+      child: loading
+          ? Shimmer.fromColors(
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  children: const [
+                    ShimmerItem(),
+                    ShimmerItem(),
+                    ShimmerItem(),
+                  ],
+                ),
+              ),
+              baseColor: Colors.grey.shade300,
+              highlightColor: Colors.grey.shade100,
+            )
+          : SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: nearbySpaces.entries.map((entry) {
+                  return NearbySpaces(
+                    space: entry.key,
+                    distance: entry.value,
+                  );
+                }).toList(),
+              ),
+            ),
+    );
+  }
+
+  void getNearbySpaces() async {
+    FirebaseServices _firebaseServices = FirebaseServices();
+    Location location = Location();
+
+    bool _serviceEnabled;
+
+    _serviceEnabled = await location.serviceEnabled();
+    if (!_serviceEnabled) {
+      _serviceEnabled = await location.requestService();
+      if (!_serviceEnabled) {
+        return;
+      }
+    } else {
+      var position = await geolocator.Geolocator().getCurrentPosition(
+          desiredAccuracy: geolocator.LocationAccuracy.high);
+      nearbySpaces = _firebaseServices.getNearbyParkingSpaces(
+        LatLng(
+          position.latitude,
+          position.longitude,
+        ),
+      );
+      setState(() {
+        loading = false;
+      });
+    }
+  }
+}
+
+class ShimmerItem extends StatelessWidget {
+  const ShimmerItem({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(
+        bottom: 16,
+        top: 16,
+        left: 10,
+      ),
+      child: Column(
+        children: [
+          Container(
+            height: 180,
+            width: 250,
+            decoration: BoxDecoration(
+              color: Colors.grey.shade300,
+              borderRadius: BorderRadius.circular(8),
+            ),
+          ),
+          const SizedBox(height: 10),
+          Container(
+            width: 250,
+            height: 50,
+            decoration: BoxDecoration(
+              color: Colors.grey.shade300,
+              border: Border.all(
+                color: Colors.black26,
+                width: 1,
+              ),
+              borderRadius: BorderRadius.circular(8),
+            ),
+          ),
+          const SizedBox(height: 7),
+          Container(
+            width: 250,
+            height: 45,
+            decoration: BoxDecoration(
+              color: Colors.grey.shade300,
+              border: Border.all(
+                color: Colors.black26,
+                width: 1,
+              ),
+              borderRadius: BorderRadius.circular(8),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class NearbySpaces extends StatelessWidget {
+  final ParkingSpace space;
+  final double distance;
+  const NearbySpaces({
+    Key? key,
+    required this.space,
+    required this.distance,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(
+        bottom: 16,
+        top: 16,
+        left: 10,
+      ),
+      child: Column(
+        children: [
+          Container(
+            height: 180,
+            width: 250,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: GestureDetector(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    fullscreenDialog: true,
+                    builder: (context) => ParkingAreaInfo(
+                      parkingSpace: space,
+                    ),
+                  ),
+                );
+              },
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: Image.network(
+                  space.getImageUrl!,
+                  fit: BoxFit.cover,
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 10),
+          Container(
+            width: 250,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              border: Border.all(
+                color: Colors.black26,
+                width: 1,
+              ),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Material(
+              borderRadius: const BorderRadius.all(Radius.circular(8)),
+              child: InkWell(
+                borderRadius: const BorderRadius.all(Radius.circular(8)),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      fullscreenDialog: true,
+                      builder: (context) => ParkingAreaInfo(
+                        parkingSpace: space,
+                      ),
+                    ),
+                  );
+                },
+                child: Ink(
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Image.asset(
+                                  "assets/icons/marker.png",
+                                  width: 12,
+                                ),
+                                const SizedBox(width: 7),
+                                space.getAddress!.length <= 25
+                                    ? Text(
+                                        space.getAddress!,
+                                        style: const TextStyle(
+                                          fontSize: 15,
+                                        ),
+                                      )
+                                    : Text(
+                                        space.getAddress!.substring(0, 24) +
+                                            "...",
+                                        style: const TextStyle(
+                                          fontSize: 15,
+                                        ),
+                                      ),
+                              ],
+                            ),
+                            const SizedBox(height: 7),
+                            Row(
+                              children: [
+                                const Icon(
+                                  Icons.star_rounded,
+                                  size: 15,
+                                  color: Colors.amber,
+                                ),
+                                const SizedBox(width: 7),
+                                Text(
+                                  "${space.getRating} • ${getDistance(distance)} • ${space.getType}",
+                                  style: const TextStyle(
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w400,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+          OutlinedButton.icon(
+            onPressed: () {
+              globals.nonReservable = space;
+              space.getDailyOrMonthly!.compareTo("Monthly") == 0
+                  ? Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        fullscreenDialog: true,
+                        builder: (context) => CheckoutMonthly(
+                          parkingSpace: space,
+                        ),
+                      ),
+                    )
+                  : space.getType!.compareTo("Reservable") == 0
+                      ? Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            fullscreenDialog: true,
+                            builder: (context) => Checkout(
+                              parkingSpace: space,
+                            ),
+                          ),
+                        )
+                      : showDialog(
+                          context: context,
+                          barrierDismissible: true,
+                          builder: (context) => NoticeDialog(
+                            imageLink: "assets/logo/lets-park-logo.png",
+                            header:
+                                "You're about to rent a non-reservable space...",
+                            parkingAreaAddress: space.getAddress!,
+                            message:
+                                "Please confirm that you are currently at the parking location.",
+                            forNonreservableConfirmation: true,
+                          ),
+                        );
+            },
+            icon: const Icon(Icons.book),
+            label: const Text("Book now"),
+            style: ElevatedButton.styleFrom(
+              fixedSize: const Size(
+                250,
+                20,
+              ),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8.0),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  String getDistance(double distance) {
+    int newDistance = 0;
+    if (distance < 1) {
+      newDistance = (distance * 1000).toInt();
+      return "$newDistance m";
+    } else {
+      newDistance = distance.toInt();
+      return "$newDistance km";
+    }
+  }
+}
+
+class TopRatedParkings extends StatelessWidget {
+  const TopRatedParkings({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(left: 16),
+      child: Row(
+        children: const [
+          Text(
+            "Top parking spaces",
+            style: TextStyle(fontSize: 14),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class CustomFeaturedItemsGrid extends StatelessWidget {
+  const CustomFeaturedItemsGrid({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    List<ParkingSpace> topFive = FirebaseServices.getHighestRatedParkings();
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: GridView.count(
+        physics: const NeverScrollableScrollPhysics(),
+        padding: const EdgeInsets.all(0),
+        crossAxisCount: 2,
+        mainAxisSpacing: 12,
+        crossAxisSpacing: 12,
+        shrinkWrap: true,
+        children: topFive
+            .map((space) => CustomFeaturedItem(
+                  space: space,
+                ))
+            .toList(),
+      ),
+    );
+  }
+}
+
+class CustomRecentPhotosText extends StatelessWidget {
+  const CustomRecentPhotosText({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(left: 16),
+      child: Row(
+        children: const [
+          Text(
+            "Recent Photos",
+            style: TextStyle(fontSize: 14),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class CustomFeaturedItem extends StatelessWidget {
+  final ParkingSpace space;
+  const CustomFeaturedItem({
+    Key? key,
+    required this.space,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      children: [
+        Container(
+          height: 200,
+          decoration: BoxDecoration(
+            borderRadius: const BorderRadius.all(Radius.circular(8)),
+            color: Colors.black54,
+            image: DecorationImage(
+              fit: BoxFit.cover,
+              colorFilter: ColorFilter.mode(
+                Colors.black.withOpacity(0.5),
+                BlendMode.srcOver,
+              ),
+              image: NetworkImage(
+                space.getImageUrl!,
+              ),
+            ),
+          ),
+        ),
+        Center(
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(
+                Icons.star_rounded,
+                color: Colors.amber,
+                size: 25,
+              ),
+              const SizedBox(width: 5),
+              Text(
+                "${space.getRating!}",
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 22,
+                ),
+              ),
+            ],
+          ),
+        ),
+        Align(
+          alignment: Alignment.bottomCenter,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 5),
+            child: OutlinedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    fullscreenDialog: true,
+                    builder: (context) => ParkingAreaInfo(
+                      parkingSpace: space,
+                    ),
+                  ),
+                );
+              },
+              child: const Text("View space"),
+              style: OutlinedButton.styleFrom(
+                fixedSize: Size(
+                  MediaQuery.of(context).size.width,
+                  20,
+                ),
+                side: const BorderSide(color: Colors.grey),
+                primary: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8.0),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class ScrollWithoutGlowBehavior extends ScrollBehavior {
+  @override
+  Widget buildOverscrollIndicator(
+    BuildContext context,
+    Widget child,
+    ScrollableDetails details,
+  ) {
+    return child;
   }
 }
