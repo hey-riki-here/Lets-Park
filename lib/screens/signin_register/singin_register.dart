@@ -13,21 +13,18 @@ class SignInOrRegister extends StatelessWidget {
   Widget build(BuildContext context) {
     final SharedWidget _sharedWidgets = SharedWidget();
     final provider = Provider.of<SignInProvider>(context, listen: false);
-    return WillPopScope(
-      onWillPop: () async => false,
-      child: Scaffold(
-        body: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                _sharedWidgets.headerWithLogo(),
-                _sharedWidgets
-                    .note("Sign in or create account to enjoy our app!"),
-                _buttons(context, provider),
-              ],
-            ),
+    return Scaffold(
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              _sharedWidgets.headerWithLogo(),
+              _sharedWidgets
+                  .note("Sign in or create account to enjoy our app!"),
+              _buttons(context, provider),
+            ],
           ),
         ),
       ),

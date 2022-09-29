@@ -43,7 +43,6 @@ class _HomeState extends State<Home> {
 
   @override
   void initState() {
-    grantPermission();
     initDateNow();
     UserServices.getFavorites(user!.uid);
 
@@ -251,22 +250,6 @@ class _HomeState extends State<Home> {
       ),
     );
   }
-
-  void focusMapOnLocation() {}
-
-  void grantPermission() async {
-    Location location = Location();
-
-    PermissionStatus _permissionGranted;
-
-    _permissionGranted = await location.hasPermission();
-    if (_permissionGranted == PermissionStatus.denied) {
-      _permissionGranted = await location.requestPermission();
-      if (_permissionGranted != PermissionStatus.granted) {
-        return;
-      }
-    }
-  }
 }
 
 class DrawerButton extends StatelessWidget {
@@ -334,10 +317,6 @@ class SearchBox extends StatelessWidget {
                   decoration: InputDecoration(
                     suffixIcon: IconButton(
                         onPressed: () {
-                          NotificationServices.showNotification(
-                            "Parking session started",
-                            "Your parking session has started. Click View Parking to view parking\n session details.",
-                          );
                           //gMapKey.currentState!.goToLocation(query + ", Valenzuela");
                         },
                         icon: const Icon(
@@ -843,95 +822,6 @@ class NearbyParkingCard extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: newChildren,
-    );
-  }
-}
-
-class MarkerLegends extends StatelessWidget {
-  const MarkerLegends({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      //crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisAlignment: MainAxisAlignment.start,
-      children: [
-        Card(
-          shape: const RoundedRectangleBorder(
-            borderRadius: BorderRadius.all(
-              Radius.circular(12),
-            ),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 10,
-              vertical: 2,
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  Icons.location_on,
-                  color: Colors.blue[400],
-                ),
-                const SizedBox(width: 10),
-                const Text("Reservable"),
-              ],
-            ),
-          ),
-        ),
-        const SizedBox(width: 5),
-        Card(
-          shape: const RoundedRectangleBorder(
-            borderRadius: BorderRadius.all(
-              Radius.circular(12),
-            ),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 10,
-              vertical: 2,
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  Icons.location_on,
-                  color: Colors.green[400],
-                ),
-                const SizedBox(width: 10),
-                const Text("Non-Reservable"),
-              ],
-            ),
-          ),
-        ),
-        const SizedBox(height: 5),
-        Card(
-          shape: const RoundedRectangleBorder(
-            borderRadius: BorderRadius.all(
-              Radius.circular(12),
-            ),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 10,
-              vertical: 2,
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  Icons.location_on,
-                  color: Colors.orange[400],
-                ),
-                const SizedBox(width: 10),
-                const Text("Monthly"),
-              ],
-            ),
-          ),
-        ),
-        const SizedBox(height: 10),
-      ],
     );
   }
 }

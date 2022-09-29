@@ -5,7 +5,6 @@ import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:lets_park/models/car.dart';
 import 'package:lets_park/models/notification.dart';
 import 'package:lets_park/models/parking.dart';
@@ -659,7 +658,6 @@ class UserServices {
     Navigator.pop(
       context,
     );
-    print(isAvailable);
   }
 
   StreamSubscription get getParkingSessionsStream => parkingSessionsStreams;

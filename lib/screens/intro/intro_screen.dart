@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:introduction_screen/introduction_screen.dart';
-import 'package:lets_park/screens/signin_register/singin_register.dart';
+import 'package:lets_park/screens/intro/allow_location.dart';
 import 'package:lets_park/shared/shared_widgets.dart';
 
 class Introduction extends StatelessWidget {
@@ -36,7 +36,7 @@ class Introduction extends StatelessWidget {
               padding: const EdgeInsets.only(top: 100),
               child: _sharedWidgets.button(
                 label: 'Continue',
-                onPressed: ()  => _navigateToSignInRegPage(context),
+                onPressed: () => navigateToAllowLocationPermission(context),
               ),
             ),
           ),
@@ -62,12 +62,13 @@ class Introduction extends StatelessWidget {
           ),
         ),
         dotsDecorator: DotsDecorator(
-            activeSize: const Size(22, 10),
-            activeShape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(24),
-            )),
-        onSkip: () => _navigateToSignInRegPage(context),
-        onDone: () => _navigateToSignInRegPage(context),
+          activeSize: const Size(22, 10),
+          activeShape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(24),
+          ),
+        ),
+        onSkip: () => navigateToAllowLocationPermission(context),
+        onDone: () => navigateToAllowLocationPermission(context),
       ),
     );
   }
@@ -81,11 +82,12 @@ class Introduction extends StatelessWidget {
     );
   }
 
-  void _navigateToSignInRegPage(BuildContext context) {
+  void navigateToAllowLocationPermission(BuildContext context) {
+    Navigator.pop(context);
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => const SignInOrRegister(),
+        builder: (context) => const AllowLocationPermission(),
       ),
     );
   }
