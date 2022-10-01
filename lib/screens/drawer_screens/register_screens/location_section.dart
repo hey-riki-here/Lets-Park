@@ -1,9 +1,13 @@
 // ignore_for_file: unused_catch_clause, empty_catches
 
+import 'dart:io';
+
+import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:lets_park/globals/globals.dart' as globals;
 import 'package:lets_park/shared/shared_widgets.dart';
 
@@ -27,6 +31,9 @@ class LocationSectionState extends State<LocationSection> {
       120.9830,
     ),
   );
+  final ImagePicker imagePicker = ImagePicker();
+
+  List<XFile>? imageFileList = [];
 
   @override
   Widget build(BuildContext context) {
@@ -133,8 +140,100 @@ class LocationSectionState extends State<LocationSection> {
           ),
         ),
         const SizedBox(height: 30),
+        _sharedWidget.stepHeader("Business Certificates"),
+        const SizedBox(height: 30),
+        const Text(
+          "Please provide the business certificates (Valenzuela Business Permit and BIR) of your space",
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.w300,
+          ),
+        ),
+        const SizedBox(height: 20),
+        const Text(
+          "(This will let the user know that your parking space is legal and follows parking guidelines.)",
+          style: TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w300,
+          ),
+        ),
+        const SizedBox(height: 15),
+        Wrap(
+          children: imageFileList!
+              .map(
+                (image) => Padding(
+                  padding: const EdgeInsets.only(
+                    top: 8.0,
+                    bottom: 8.0,
+                    right: 12,
+                  ),
+                  child: Stack(
+                    children: [
+                      SizedBox(
+                        width: 150,
+                        height: 150,
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(8),
+                          child: Image.file(
+                            File(image.path),
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+                      ),
+                      Positioned(
+                        top: 5,
+                        right: 5,
+                        child: GestureDetector(
+                          onTap: (){
+                            setState(() {
+                              imageFileList!.remove(image);
+                            });
+                          },
+                          child: Container(
+                            alignment: Alignment.center,
+                            width: 30,
+                            height: 30,
+                            decoration: BoxDecoration(
+                              color: Colors.grey.shade300,
+                              borderRadius: BorderRadius.circular(50),
+                            ),
+                            child: const Text(
+                              "✕",
+                              style: TextStyle(
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              )
+              .toList(),
+        ),
+        OutlinedButton.icon(
+          onPressed: () {
+            selectImages();
+          },
+          icon: const Icon(Icons.add_photo_alternate_outlined),
+          label: const Text("Add photos"),
+          style: ElevatedButton.styleFrom(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8.0),
+            ),
+          ),
+        ),
       ],
     );
+  }
+
+  void selectImages() async {
+    final List<XFile>? selectedImages = await imagePicker.pickMultiImage();
+    if (selectedImages!.isNotEmpty) {
+      imageFileList!.addAll(selectedImages);
+    }
+    setState(() {});
   }
 
   void refreshPage() {
@@ -145,4 +244,5 @@ class LocationSectionState extends State<LocationSection> {
     );
   }
 
+  List<XFile>? get getImageFiles => imageFileList;
 }

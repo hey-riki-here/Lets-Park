@@ -1,4 +1,6 @@
-// ignore_for_file: unused_catch_clause, empty_catches
+// ignore_for_file: unused_catch_clause, empty_catches, avoid_function_literals_in_foreach_calls
+
+import 'dart:io';
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -29,6 +31,8 @@ class _RegisterAreaState extends State<RegisterArea> {
   final GlobalKey<LocationSectionState> _locationState = GlobalKey();
   final GlobalKey<AddressSectionState> _addressState = GlobalKey();
   final GlobalKey<InfoAndFeaturesState> _informationState = GlobalKey();
+  bool isAgreed = false;
+
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
@@ -87,16 +91,14 @@ class _RegisterAreaState extends State<RegisterArea> {
                     valid = false;
                   }
                   if (valid) {
-                    globals.parkingSpace.setCapacity =
-                        _informationState.currentState!.getCapacity;
+                    globals.parkingSpace.setCapacity = 10;
 
                     globals.parkingSpace.setRating = 0;
 
                     globals.parkingSpace.setInfo =
                         _informationState.currentState!.getInfo;
 
-                    globals.parkingSpace.setVerticalClearance =
-                        _informationState.currentState!.getVerticalClearance;
+                    globals.parkingSpace.setVerticalClearance = 0;
 
                     globals.parkingSpace.setDailyOrMonthly =
                         _informationState.currentState!.getDailyOrMonthly;
@@ -119,7 +121,184 @@ class _RegisterAreaState extends State<RegisterArea> {
                     globals.parkingSpace.setOwnerName =
                         FirebaseAuth.instance.currentUser!.displayName;
 
-                    uploadParkingSpace(context);
+                    showDialog<bool>(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return StatefulBuilder(
+                          builder: (context, setState) => AlertDialog(
+                            title: const Text(
+                              "Parking Guidelines",
+                              style: TextStyle(fontSize: 24.0),
+                            ),
+                            shape: const RoundedRectangleBorder(
+                              borderRadius: BorderRadius.all(
+                                Radius.circular(20),
+                              ),
+                            ),
+                            contentPadding: const EdgeInsets.only(top: 10.0),
+                            content: Stack(
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.only(
+                                    top: 16,
+                                    bottom: 50,
+                                    right: 16,
+                                    left: 16,
+                                  ),
+                                  child: SingleChildScrollView(
+                                    child: Column(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.stretch,
+                                      children: const [
+                                        Text(
+                                          "Title here",
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 20,
+                                          ),
+                                        ),
+                                        Text(
+                                          "Lorem ipsum dolor sit amet, consectetur adipiscing elit. In suscipit vel augue eget varius. Integer sit amet porta augue. Vestibulum lacinia hendrerit mi. Quisque ac elementum enim, quis scelerisque orci. Donec non quam mauris. Suspendisse potenti. Vestibulum dignissim tempor lobortis. Ut est lectus, dictum vitae pharetra et, vestibulum scelerisque ligula. Nulla pretium, dolor vel auctor iaculis, est augue ornare ex, in cursus tellus risus ut nisl. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos.",
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.w300,
+                                            fontSize: 15,
+                                          ),
+                                        ),
+                                        Text(
+                                          "Title here",
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 20,
+                                          ),
+                                        ),
+                                        Text(
+                                          "Lorem ipsum dolor sit amet, consectetur adipiscing elit. In suscipit vel augue eget varius. Integer sit amet porta augue. Vestibulum lacinia hendrerit mi. Quisque ac elementum enim, quis scelerisque orci. Donec non quam mauris. Suspendisse potenti. Vestibulum dignissim tempor lobortis. Ut est lectus, dictum vitae pharetra et, vestibulum scelerisque ligula. Nulla pretium, dolor vel auctor iaculis, est augue ornare ex, in cursus tellus risus ut nisl. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos.",
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.w300,
+                                            fontSize: 15,
+                                          ),
+                                        ),
+                                        Text(
+                                          "Title here",
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 20,
+                                          ),
+                                        ),
+                                        Text(
+                                          "Lorem ipsum dolor sit amet, consectetur adipiscing elit. In suscipit vel augue eget varius. Integer sit amet porta augue. Vestibulum lacinia hendrerit mi. Quisque ac elementum enim, quis scelerisque orci. Donec non quam mauris. Suspendisse potenti. Vestibulum dignissim tempor lobortis. Ut est lectus, dictum vitae pharetra et, vestibulum scelerisque ligula. Nulla pretium, dolor vel auctor iaculis, est augue ornare ex, in cursus tellus risus ut nisl. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos.",
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.w300,
+                                            fontSize: 15,
+                                          ),
+                                        ),
+                                        Text(
+                                          "Title here",
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 20,
+                                          ),
+                                        ),
+                                        Text(
+                                          "Lorem ipsum dolor sit amet, consectetur adipiscing elit. In suscipit vel augue eget varius. Integer sit amet porta augue. Vestibulum lacinia hendrerit mi. Quisque ac elementum enim, quis scelerisque orci. Donec non quam mauris. Suspendisse potenti. Vestibulum dignissim tempor lobortis. Ut est lectus, dictum vitae pharetra et, vestibulum scelerisque ligula. Nulla pretium, dolor vel auctor iaculis, est augue ornare ex, in cursus tellus risus ut nisl. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos.",
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.w300,
+                                            fontSize: 15,
+                                          ),
+                                        ),
+                                        Text(
+                                          "Title here",
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 20,
+                                          ),
+                                        ),
+                                        Text(
+                                          "Lorem ipsum dolor sit amet, consectetur adipiscing elit. In suscipit vel augue eget varius. Integer sit amet porta augue. Vestibulum lacinia hendrerit mi. Quisque ac elementum enim, quis scelerisque orci. Donec non quam mauris. Suspendisse potenti. Vestibulum dignissim tempor lobortis. Ut est lectus, dictum vitae pharetra et, vestibulum scelerisque ligula. Nulla pretium, dolor vel auctor iaculis, est augue ornare ex, in cursus tellus risus ut nisl. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos.",
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.w300,
+                                            fontSize: 15,
+                                          ),
+                                        ),
+                                        Text(
+                                          "Title here",
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 20,
+                                          ),
+                                        ),
+                                        Text(
+                                          "Lorem ipsum dolor sit amet, consectetur adipiscing elit. In suscipit vel augue eget varius. Integer sit amet porta augue. Vestibulum lacinia hendrerit mi. Quisque ac elementum enim, quis scelerisque orci. Donec non quam mauris. Suspendisse potenti. Vestibulum dignissim tempor lobortis. Ut est lectus, dictum vitae pharetra et, vestibulum scelerisque ligula. Nulla pretium, dolor vel auctor iaculis, est augue ornare ex, in cursus tellus risus ut nisl. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos.",
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.w300,
+                                            fontSize: 15,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                                Positioned(
+                                  bottom: 0,
+                                  child: Row(
+                                    children: [
+                                      Checkbox(
+                                        value: isAgreed,
+                                        onChanged: (value) {
+                                          setState(() {
+                                            isAgreed = value!;
+                                          });
+                                        },
+                                      ),
+                                      const Text(
+                                        "I have read the Parking Guidelines thoroughly.",
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                            actions: [
+                              TextButton(
+                                style: TextButton.styleFrom(
+                                  primary: Colors.black54,
+                                ),
+                                onPressed: () {
+                                  Navigator.pop(context, false);
+                                  isAgreed = false;
+                                },
+                                child: const Text('Cancel'),
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.only(
+                                  right: 10,
+                                ),
+                                child: ElevatedButton(
+                                  onPressed: isAgreed
+                                      ? () {
+                                          Navigator.pop(context, true);
+                                        }
+                                      : null,
+                                  style: ElevatedButton.styleFrom(
+                                    primary: Colors.blue.shade800,
+                                    elevation: 0,
+                                  ),
+                                  child: const Text(
+                                    "Proceed",
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                    ).then((proceed) {
+                      if (proceed != null && proceed) {
+                        uploadParkingSpace(context);
+                      }
+                    });
                   }
                 }
 
@@ -146,6 +325,7 @@ class _RegisterAreaState extends State<RegisterArea> {
                       );
                       return;
                     }
+
                     bool valid = false;
 
                     if (_addressState
@@ -177,6 +357,26 @@ class _RegisterAreaState extends State<RegisterArea> {
                       getCoordinatesAndRefresh();
                       _currentStep += 1;
                     }
+                  } else if (_currentStep == 1) {
+                    if (_locationState.currentState!.getImageFiles!.length ==
+                        1) {
+                      _showDialog(
+                        imageLink: "assets/icons/marker.png",
+                        message:
+                            "Please provide the required business certificates.",
+                      );
+                      return;
+                    }
+
+                    if (_locationState.currentState!.getImageFiles!.isEmpty) {
+                      _showDialog(
+                        imageLink: "assets/icons/marker.png",
+                        message: "Please provide business certificates.",
+                      );
+                      return;
+                    }
+
+                    _currentStep += 1;
                   } else {
                     _currentStep += 1;
                   }
@@ -341,6 +541,12 @@ class _RegisterAreaState extends State<RegisterArea> {
           _addressState.currentState!.getCaretakerImage!.path.split('/').last,
     ).then((url) {
       globals.parkingSpace.setCaretakerPhotoUrl = url;
+    });
+
+    await FirebaseServices.uploadFiles(
+      _locationState.currentState!.getImageFiles!,
+    ).then((urls) {
+      globals.parkingSpace.setCertificates = urls;
     });
 
     await FirebaseServices.uploadParkingSpace();

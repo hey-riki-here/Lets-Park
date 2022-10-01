@@ -7,7 +7,6 @@ class AllowLocationPermission extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    print("Hello there");
     return Scaffold(
       appBar: AppBar(
         elevation: 0,

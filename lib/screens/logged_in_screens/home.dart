@@ -45,26 +45,26 @@ class _HomeState extends State<Home> {
   void initState() {
     initDateNow();
     UserServices.getFavorites(user!.uid);
-
-    Location().onLocationChanged.listen((currentLocation) {
-      if (globals.parkingLoc.latitude != 0 &&
-          globals.parkingLoc.longitude != 0) {
-        if ((FirebaseServices.calculateDistance(
-                  currentLocation.latitude,
-                  currentLocation.longitude,
-                  globals.parkingLoc.latitude,
-                  globals.parkingLoc.longitude,
-                ) *
-                1000) <
-            5) {
-          NotificationServices.showNotification(
-            "You have arrived at the parking space",
-            "You have succesfully at the parking space location.",
-          );
-          globals.parkingLoc = const LatLng(0, 0);
-        }
-      }
-    });
+    
+    // Location().onLocationChanged.listen((currentLocation) {
+    //   if (globals.parkingLoc.latitude != 0 &&
+    //       globals.parkingLoc.longitude != 0) {
+    //     if ((FirebaseServices.calculateDistance(
+    //               currentLocation.latitude,
+    //               currentLocation.longitude,
+    //               globals.parkingLoc.latitude,
+    //               globals.parkingLoc.longitude,
+    //             ) *
+    //             1000) <
+    //         5) {
+    //       NotificationServices.showNotification(
+    //         "You have arrived at the parking space",
+    //         "You have succesfully at the parking space location.",
+    //       );
+    //       globals.parkingLoc = const LatLng(0, 0);
+    //     }
+    //   }
+    // });
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
@@ -196,7 +196,7 @@ class _HomeState extends State<Home> {
                       feedSelected = false;
                     });
                     controller.animateTo(
-                      initialChildSize >= 0.55 ? 0 : 0.55,
+                      initialChildSize > 0 ? 0 : 0.55,
                       duration: const Duration(milliseconds: 500),
                       curve: Curves.easeOutBack,
                     );
@@ -232,12 +232,12 @@ class _HomeState extends State<Home> {
                   constraints: const BoxConstraints(),
                   splashRadius: 18,
                   icon: Icon(
-                    feedSelected ? Icons.star : Icons.star_outline,
+                    Icons.settings,
                     color: feedSelected ? Colors.blue : Colors.black26,
                   ),
                 ),
                 Text(
-                  "Feed",
+                  "Settings",
                   style: TextStyle(
                     color: feedSelected ? Colors.blue : Colors.black26,
                   ),
@@ -831,26 +831,23 @@ class CustomScrollViewContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      elevation: 30,
-      child: Card(
-        elevation: 30,
-        shape: const RoundedRectangleBorder(
+    return Card(
+      elevation: 10,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(24),
+          topRight: Radius.circular(24),
+        ),
+      ),
+      margin: const EdgeInsets.all(0),
+      child: Container(
+        decoration: const BoxDecoration(
           borderRadius: BorderRadius.only(
             topLeft: Radius.circular(24),
             topRight: Radius.circular(24),
           ),
         ),
-        margin: const EdgeInsets.all(0),
-        child: Container(
-          decoration: const BoxDecoration(
-            borderRadius: BorderRadius.only(
-              topLeft: Radius.circular(24),
-              topRight: Radius.circular(24),
-            ),
-          ),
-          child: const SheetContent(),
-        ),
+        child: const SheetContent(),
       ),
     );
   }
@@ -872,7 +869,11 @@ class SheetContent extends StatelessWidget {
         SizedBox(height: 24),
         TopRatedParkings(),
         SizedBox(height: 16),
-        CustomFeaturedItemsGrid(),
+        TopSpacesGrid(),
+        SizedBox(height: 24),
+        MonthlyParkings(),
+        SizedBox(height: 16),
+        MonthlyParkingsView(),
       ],
     );
   }
@@ -938,7 +939,7 @@ class NearbySpacesView extends StatefulWidget {
 
 class _NearbySpacesViewState extends State<NearbySpacesView> {
   Map<ParkingSpace, double> nearbySpaces = {};
-  bool loading = true;
+  bool loading = true, locationEnabled = true;
 
   @override
   void initState() {
@@ -952,32 +953,36 @@ class _NearbySpacesViewState extends State<NearbySpacesView> {
       padding: const EdgeInsets.only(
         right: 10,
       ),
-      child: loading
-          ? Shimmer.fromColors(
-              child: SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Row(
-                  children: const [
-                    ShimmerItem(),
-                    ShimmerItem(),
-                    ShimmerItem(),
-                  ],
-                ),
-              ),
-              baseColor: Colors.grey.shade300,
-              highlightColor: Colors.grey.shade100,
-            )
-          : SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: nearbySpaces.entries.map((entry) {
-                  return NearbySpaces(
-                    space: entry.key,
-                    distance: entry.value,
-                  );
-                }).toList(),
-              ),
+      child: locationEnabled
+          ? loading
+              ? Shimmer.fromColors(
+                  child: SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      children: const [
+                        ShimmerItem(),
+                        ShimmerItem(),
+                        ShimmerItem(),
+                      ],
+                    ),
+                  ),
+                  baseColor: Colors.grey.shade300,
+                  highlightColor: Colors.grey.shade100,
+                )
+              : SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: nearbySpaces.entries.map((entry) {
+                      return NearbySpaces(
+                        space: entry.key,
+                        distance: entry.value,
+                      );
+                    }).toList(),
+                  ),
+                )
+          : EnableLocationService(
+              getNearbySpaces: getNearbySpaces,
             ),
     );
   }
@@ -990,11 +995,24 @@ class _NearbySpacesViewState extends State<NearbySpacesView> {
 
     _serviceEnabled = await location.serviceEnabled();
     if (!_serviceEnabled) {
+      setState(() {
+        locationEnabled = false;
+      });
+
       _serviceEnabled = await location.requestService();
       if (!_serviceEnabled) {
         return;
+      } else {
+        setState(() {
+          locationEnabled = true;
+          getNearbySpaces();
+        });
       }
     } else {
+      setState(() {
+        locationEnabled = true;
+      });
+
       var position = await geolocator.Geolocator().getCurrentPosition(
           desiredAccuracy: geolocator.LocationAccuracy.high);
       nearbySpaces = _firebaseServices.getNearbyParkingSpaces(
@@ -1003,11 +1021,10 @@ class _NearbySpacesViewState extends State<NearbySpacesView> {
           position.longitude,
         ),
       );
-      if (mounted) {
-        setState(() {
-          loading = false;
-        });
-      }
+
+      setState(() {
+        loading = false;
+      });
     }
   }
 }
@@ -1053,13 +1070,94 @@ class ShimmerItem extends StatelessWidget {
             decoration: BoxDecoration(
               color: Colors.grey.shade300,
               border: Border.all(
-                color: Colors.black26,
+                color: const Color.fromARGB(66, 26, 18, 18),
                 width: 1,
               ),
               borderRadius: BorderRadius.circular(8),
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class EnableLocationService extends StatelessWidget {
+  final Function getNearbySpaces;
+  const EnableLocationService({
+    Key? key,
+    required this.getNearbySpaces,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Container(
+        decoration: BoxDecoration(
+          border: Border.all(
+            color: const Color.fromARGB(66, 26, 18, 18),
+            width: 1,
+          ),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Image.asset(
+                "assets/icons/map-type-2.png",
+                width: 40,
+              ),
+              const SizedBox(height: 20),
+              const Text(
+                "Enable GPS",
+                style: TextStyle(
+                  color: Colors.black45,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 20,
+                ),
+              ),
+              const SizedBox(height: 10),
+              const Text(
+                "Please enable your GPS Location to see nearby parking spaces.",
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: Colors.black45,
+                  fontSize: 15,
+                ),
+              ),
+              const SizedBox(height: 15),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 40),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: () async {
+                          getNearbySpaces();
+                        },
+                        child: const Text(
+                          "Turn on GPS",
+                          style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20.0),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -1281,53 +1379,106 @@ class TopRatedParkings extends StatelessWidget {
   }
 }
 
-class CustomFeaturedItemsGrid extends StatelessWidget {
-  const CustomFeaturedItemsGrid({Key? key}) : super(key: key);
+class TopSpacesGrid extends StatefulWidget {
+  const TopSpacesGrid({Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
-    List<ParkingSpace> topFive = FirebaseServices.getHighestRatedParkings();
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: GridView.count(
-        physics: const NeverScrollableScrollPhysics(),
-        padding: const EdgeInsets.all(0),
-        crossAxisCount: 2,
-        mainAxisSpacing: 12,
-        crossAxisSpacing: 12,
-        shrinkWrap: true,
-        children: topFive
-            .map((space) => CustomFeaturedItem(
-                  space: space,
-                ))
-            .toList(),
-      ),
-    );
-  }
+  State<TopSpacesGrid> createState() => _TopSpacesGridState();
 }
 
-class CustomRecentPhotosText extends StatelessWidget {
-  const CustomRecentPhotosText({Key? key}) : super(key: key);
+class _TopSpacesGridState extends State<TopSpacesGrid> {
+  List<ParkingSpace> spaces = [];
+  bool loading = true;
+
+  @override
+  void initState() {
+    getTopParkingSpaces();
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(left: 16),
-      child: Row(
-        children: const [
-          Text(
-            "Recent Photos",
-            style: TextStyle(fontSize: 14),
-          ),
-        ],
-      ),
+      padding: const EdgeInsets.all(16),
+      child: loading
+          ? Shimmer.fromColors(
+              child: GridView.count(
+                physics: const NeverScrollableScrollPhysics(),
+                padding: const EdgeInsets.all(0),
+                crossAxisCount: 2,
+                mainAxisSpacing: 12,
+                crossAxisSpacing: 12,
+                shrinkWrap: true,
+                children: [
+                  Container(
+                    height: 200,
+                    width: 100,
+                    decoration: BoxDecoration(
+                      borderRadius: const BorderRadius.all(Radius.circular(8)),
+                      color: Colors.grey.shade300,
+                    ),
+                  ),
+                  Container(
+                    height: 200,
+                    width: 100,
+                    decoration: BoxDecoration(
+                      borderRadius: const BorderRadius.all(Radius.circular(8)),
+                      color: Colors.grey.shade300,
+                    ),
+                  ),
+                  Container(
+                    height: 200,
+                    width: 100,
+                    decoration: BoxDecoration(
+                      borderRadius: const BorderRadius.all(Radius.circular(8)),
+                      color: Colors.grey.shade300,
+                    ),
+                  ),
+                  Container(
+                    height: 200,
+                    width: 100,
+                    decoration: BoxDecoration(
+                      borderRadius: const BorderRadius.all(Radius.circular(8)),
+                      color: Colors.grey.shade300,
+                    ),
+                  ),
+                ],
+              ),
+              baseColor: Colors.grey.shade300,
+              highlightColor: Colors.grey.shade100,
+            )
+          : GridView.count(
+              physics: const NeverScrollableScrollPhysics(),
+              padding: const EdgeInsets.all(0),
+              crossAxisCount: 2,
+              mainAxisSpacing: 12,
+              crossAxisSpacing: 12,
+              shrinkWrap: true,
+              children: spaces
+                  .map((space) => TopSpace(
+                        space: space,
+                      ))
+                  .toList(),
+            ),
     );
+  }
+
+  void getTopParkingSpaces() async {
+    await Future.delayed(const Duration(seconds: 5));
+    await FirebaseServices.getTop5ParkingSpace().then((value) {
+      value.docs.forEach((space) {
+        spaces.add(ParkingSpace.fromJson(space.data()));
+      });
+      setState(() {
+        loading = false;
+      });
+    });
   }
 }
 
-class CustomFeaturedItem extends StatelessWidget {
+class TopSpace extends StatelessWidget {
   final ParkingSpace space;
-  const CustomFeaturedItem({
+  const TopSpace({
     Key? key,
     required this.space,
   }) : super(key: key);
@@ -1405,6 +1556,77 @@ class CustomFeaturedItem extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+class MonthlyParkings extends StatelessWidget {
+  const MonthlyParkings({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(left: 16),
+      child: Row(
+        children: const [
+          Text(
+            "Monthly parkings",
+            style: TextStyle(fontSize: 14),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class MonthlyParkingsView extends StatelessWidget {
+  const MonthlyParkingsView({
+    Key? key,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Container(
+        decoration: BoxDecoration(
+          border: Border.all(
+            color: const Color.fromARGB(66, 26, 18, 18),
+            width: 1,
+          ),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Image.asset(
+                "assets/icons/parking-marker-monthly.png",
+                width: 40,
+              ),
+              const SizedBox(height: 20),
+              const Text(
+                "No monthly parking spaces found",
+                style: TextStyle(
+                  color: Colors.black45,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 20,
+                ),
+              ),
+              const SizedBox(height: 10),
+              const Text(
+                "We are sorry but there are no currently registered parkings spaces with monthly payment.",
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: Colors.black45,
+                  fontSize: 15,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

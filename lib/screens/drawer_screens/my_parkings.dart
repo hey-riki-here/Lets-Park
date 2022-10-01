@@ -625,7 +625,8 @@ class InProgressState extends State<InProgress> {
                                                               );
                                                             },
                                                             child: const Text(
-                                                                "Cancel"),
+                                                              "Cancel",
+                                                            ),
                                                           ),
                                                           TextButton(
                                                             onPressed: () {
@@ -636,7 +637,6 @@ class InProgressState extends State<InProgress> {
                                                                 parkings[index],
                                                                 context,
                                                               );
-                                                              
                                                             },
                                                             child: const Text(
                                                               "Confirm",

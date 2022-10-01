@@ -20,6 +20,7 @@ class ParkingSpace {
   String? _rules;
   bool? _isFull;
   String? _paypalEmail;
+  List<String>? _certificates = [];
   bool? _disabled = false;
 
   ParkingSpace();
@@ -44,6 +45,7 @@ class ParkingSpace {
     String? rules,
     String? paypalEmail,
     bool? disabled,
+    List<String>? certificates,
   ) {
     _id = id;
     _ownerId = ownerId;
@@ -64,6 +66,7 @@ class ParkingSpace {
     _rules = rules;
     _paypalEmail = paypalEmail;
     _disabled = disabled;
+    _certificates = certificates;
   }
 
   String? get getSpaceId => _id;
@@ -186,6 +189,12 @@ class ParkingSpace {
     _disabled = disabled;
   }
 
+  List<String>? get getCertificates => _certificates;
+
+  set setCertificates(List<String>? certificates) {
+    _certificates = certificates;
+  }
+
   @override
   String toString() {
     return "ParkingSpace [ $_ownerId , $_imageUrl , $_address, $_latLng , $_capacity , $_rating , $_info , $_verticalClearance, $_type , $_features, $_isFull]";
@@ -211,12 +220,17 @@ class ParkingSpace {
         'rules': _rules,
         'paypalEmail': _paypalEmail,
         'disabled': _disabled,
+        'certificates' : _certificates,
       };
 
   static ParkingSpace fromJson(Map<String, dynamic> json) {
     List fromDatabaseFeatures = json['features'];
     List<String>? features = [];
     features = fromDatabaseFeatures.cast<String>();
+
+    List fromDatabaseCertificates = json['certificates'];
+    List<String>? certificates = [];
+    certificates = fromDatabaseCertificates.cast<String>();
 
     return ParkingSpace.fromDatabase(
       json['id'],
@@ -238,6 +252,7 @@ class ParkingSpace {
       json['rules'],
       json['paypalEmail'],
       json['disabled'],
+      certificates,
     );
   }
 }

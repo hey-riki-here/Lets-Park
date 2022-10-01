@@ -32,7 +32,7 @@ class GoogleMapScreenState extends State<GoogleMapScreen> {
   Set<Marker> markers = {};
   GoogleMapController? googleMapController;
   geolocator.Position? position;
-  bool locationEnabled = false;
+  bool locationEnabled = true;
   CameraPosition cameraPosition = const CameraPosition(
     zoom: 15,
     bearing: 0,

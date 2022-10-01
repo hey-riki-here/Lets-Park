@@ -30,3 +30,4 @@ String selectedType = "Daily";
 List<String> favorites = [];
 LatLng parkingLoc = const LatLng(0, 0);
 int today = 0;
+List<String> certificates = [];

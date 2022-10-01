@@ -16,20 +16,45 @@ class InfoAndFeaturesState extends State<InfoAndFeatures> {
   final GlobalKey<FeaturesState> _featuresState = GlobalKey();
   final GlobalKey<PaypalState> _paypalState = GlobalKey();
   final featuresItems = <FeaturesItem>[
-    FeaturesItem(title: "With gate"),
     FeaturesItem(title: "CCTV"),
     FeaturesItem(title: "Covered Parking"),
-    FeaturesItem(title: "Lighting"),
   ];
   @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: Colors.blue[50],
+            borderRadius: const BorderRadius.all(Radius.circular(8)),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Icon(
+                    Icons.info,
+                    color: Colors.blue.shade700,
+                  ),
+                  const SizedBox(width: 10),
+                  const Expanded(
+                    child: Text(
+                      "Parking capacity and pricing should follow the city's ordinance. See Terms and Conditions and Parking Guidelines to learn more.",
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 20),
         _sharedWidget.stepHeader("Information"),
         const SizedBox(height: 10),
-        Capacity(key: _capacityState),
-        const SizedBox(height: 20),
+        //Capacity(key: _capacityState),
+        // const SizedBox(height: 20),
         Information(key: _informationState),
         const SizedBox(height: 20),
         Reservability(
@@ -48,7 +73,7 @@ class InfoAndFeaturesState extends State<InfoAndFeatures> {
     );
   }
 
-  int get getCapacity => _capacityState.currentState!.getCapacity;
+  //int get getCapacity => _capacityState.currentState!.getCapacity;
 
   GlobalKey<FormState> get getFormKey =>
       _informationState.currentState!._infoKey;
@@ -60,8 +85,8 @@ class InfoAndFeaturesState extends State<InfoAndFeatures> {
 
   String get getRules => _informationState.currentState!.getRules;
 
-  double get getVerticalClearance =>
-      _informationState.currentState!.getVerticalClearance;
+  // double get getVerticalClearance =>
+  //     _informationState.currentState!.getVerticalClearance;
 
   String? get getReservability =>
       _reservabilityState.currentState!.getSelectedReservability;
@@ -205,7 +230,7 @@ class InformationState extends State<Information> {
   final _infoKey = GlobalKey<FormState>();
   final _infoController = TextEditingController();
   final _rulesController = TextEditingController();
-  final _vertClearanceController = TextEditingController();
+  // final _vertClearanceController = TextEditingController();
   @override
   Widget build(BuildContext context) {
     return Form(
@@ -231,14 +256,14 @@ class InformationState extends State<Information> {
           const SizedBox(height: 10),
           _buildRulesField(),
           const SizedBox(height: 10),
-          const Text(
-            "Vertical clerance (in meters)",
-            style: TextStyle(
-              fontSize: 18,
-            ),
-          ),
-          const SizedBox(height: 10),
-          _buildVerticalClearanceField(),
+          // const Text(
+          //   "Vertical clerance (in meters)",
+          //   style: TextStyle(
+          //     fontSize: 18,
+          //   ),
+          // ),
+          // const SizedBox(height: 10),
+          //_buildVerticalClearanceField(),
         ],
       ),
     );
@@ -265,30 +290,30 @@ class InformationState extends State<Information> {
     );
   }
 
-  SizedBox _buildVerticalClearanceField() {
-    return SizedBox(
-      width: 100,
-      child: TextFormField(
-        controller: _vertClearanceController,
-        style: const TextStyle(
-          fontSize: 16,
-        ),
-        keyboardType: TextInputType.number,
-        textInputAction: TextInputAction.done,
-        decoration: const InputDecoration(
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.all(Radius.circular(12)),
-          ),
-        ),
-        validator: (value) {
-          if (value == null || value.isEmpty) {
-            return "Field is required.";
-          }
-          return null;
-        },
-      ),
-    );
-  }
+  // SizedBox _buildVerticalClearanceField() {
+  //   return SizedBox(
+  //     width: 100,
+  //     child: TextFormField(
+  //       controller: _vertClearanceController,
+  //       style: const TextStyle(
+  //         fontSize: 16,
+  //       ),
+  //       keyboardType: TextInputType.number,
+  //       textInputAction: TextInputAction.done,
+  //       decoration: const InputDecoration(
+  //         border: OutlineInputBorder(
+  //           borderRadius: BorderRadius.all(Radius.circular(12)),
+  //         ),
+  //       ),
+  //       validator: (value) {
+  //         if (value == null || value.isEmpty) {
+  //           return "Field is required.";
+  //         }
+  //         return null;
+  //       },
+  //     ),
+  //   );
+  // }
 
   TextFormField _buildInfoField() {
     return TextFormField(
@@ -317,8 +342,8 @@ class InformationState extends State<Information> {
 
   String get getRules => _rulesController.text.trim();
 
-  double get getVerticalClearance =>
-      double.parse(_vertClearanceController.text.trim());
+  // double get getVerticalClearance =>
+  //     double.parse(_vertClearanceController.text.trim());
 }
 
 class Reservability extends StatefulWidget {
@@ -614,7 +639,6 @@ class FeaturesItem {
 
   @override
   String toString() {
-    
     return "FeaturesITem[title: $title isChecked: $isChecked]";
   }
 }

@@ -8,6 +8,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:lets_park/globals/globals.dart' as globals;
 import 'package:lets_park/models/parking_space.dart';
 import 'package:lets_park/screens/popups/parking_area_info.dart';
@@ -33,6 +34,18 @@ class FirebaseServices {
         .doc('PS$time$id');
 
     await docUser.set(globals.parkingSpace.toJson());
+  }
+
+  static Future<List<String>> uploadFiles(List<XFile> _images) async {
+    var imageUrls = await Future.wait(
+      _images.map(
+        (_image) => uploadImage(
+          File(_image.path),
+          "certificates/" + _image.path.split('/').last,
+        ),
+      ),
+    );
+    return imageUrls;
   }
 
   static Future<String> uploadImage(File file, String destination) async {
@@ -194,6 +207,16 @@ class FirebaseServices {
     }
 
     return highRatedSpaces;
+  }
+
+  static Future<QuerySnapshot<Map<String, dynamic>>>
+      getTop5ParkingSpace() async {
+    return FirebaseFirestore.instance
+        .collection('parking-spaces')
+        .where("rating", isGreaterThanOrEqualTo: 0)
+        .snapshots()
+        .first
+        .then((snapshot) => snapshot);
   }
 
   static List<ParkingSpace> getSecuredParkingSpaces() {

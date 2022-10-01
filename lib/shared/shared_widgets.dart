@@ -48,7 +48,7 @@ class SharedWidget {
   Text stepHeader(String label) => Text(
         label,
         style: const TextStyle(
-          fontSize: 32,
+          fontSize: 25,
           color: Colors.blue,
         ),
       );

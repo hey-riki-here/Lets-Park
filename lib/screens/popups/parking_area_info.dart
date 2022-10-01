@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:community_material_icon/community_material_icon.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:galleryimage/galleryimage.dart';
 import 'package:lets_park/models/parking_space.dart';
 import 'package:lets_park/models/review.dart';
 import 'package:lets_park/screens/popups/checkout.dart';
@@ -42,7 +43,7 @@ class _ParkingAreaInfoState extends State<ParkingAreaInfo> {
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
-      length: 3,
+      length: 4,
       child: Scaffold(
         appBar: AppBar(
           title: const Text("Parking Area Info"),
@@ -90,7 +91,15 @@ class _ParkingAreaInfoState extends State<ParkingAreaInfo> {
                         child: Text(
                           "Information",
                           style: TextStyle(
-                            fontSize: 17,
+                            fontSize: 15,
+                          ),
+                        ),
+                      ),
+                      Tab(
+                        child: Text(
+                          "Certificates",
+                          style: TextStyle(
+                            fontSize: 15,
                           ),
                         ),
                       ),
@@ -98,7 +107,7 @@ class _ParkingAreaInfoState extends State<ParkingAreaInfo> {
                         child: Text(
                           "Attendant",
                           style: TextStyle(
-                            fontSize: 17,
+                            fontSize: 15,
                           ),
                         ),
                       ),
@@ -106,7 +115,7 @@ class _ParkingAreaInfoState extends State<ParkingAreaInfo> {
                         child: Text(
                           "Reviews",
                           style: TextStyle(
-                            fontSize: 17,
+                            fontSize: 15,
                           ),
                         ),
                       ),
@@ -129,6 +138,7 @@ class _ParkingAreaInfoState extends State<ParkingAreaInfo> {
           caretakerPhotoUrl: widget.parkingSpace.getCaretakerPhotoUrl!,
           caretakerName: widget.parkingSpace.getCaretakerName!,
           caretakerPhoneNumber: widget.parkingSpace.getCaretakerPhoneNumber!,
+          certificatesUrl: widget.parkingSpace.getCertificates!,
         ),
         bottomNavigationBar: Padding(
           padding: const EdgeInsets.symmetric(
@@ -748,6 +758,7 @@ class InfoReviewsCaretaker extends StatelessWidget {
   final String caretakerPhotoUrl;
   final String caretakerName;
   final String caretakerPhoneNumber;
+  final List<String> certificatesUrl;
   const InfoReviewsCaretaker({
     Key? key,
     required this.spaceId,
@@ -760,6 +771,7 @@ class InfoReviewsCaretaker extends StatelessWidget {
     required this.caretakerPhotoUrl,
     required this.caretakerName,
     required this.caretakerPhoneNumber,
+    required this.certificatesUrl,
   }) : super(key: key);
 
   @override
@@ -867,6 +879,51 @@ class InfoReviewsCaretaker extends StatelessWidget {
                       style: valueStyle,
                     ),
                   ],
+                ),
+              ],
+            ),
+          ),
+        ),
+        SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: 12,
+              vertical: 30,
+            ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.blue[50],
+                    borderRadius: const BorderRadius.all(Radius.circular(8)),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.info,
+                            color: Colors.blue.shade700,
+                          ),
+                          const SizedBox(width: 10),
+                          const Expanded(
+                            child: Text(
+                              "The images below are the certificates of the owner for the parking space that shows the legality of the business as well as the legality of the parking space.",
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 10),
+                GalleryImage(
+                  titleGallery: "Business Certificates",
+                  numOfShowImages: certificatesUrl.length,
+                  imageUrls: certificatesUrl,
                 ),
               ],
             ),
