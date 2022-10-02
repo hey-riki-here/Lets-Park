@@ -60,7 +60,10 @@ class FirebaseServices {
 
   static void getOwnedParkingAreas(AsyncSnapshot<List<ParkingSpace>> snapshot) {
     List<ParkingSpace> ownedSpaces = [];
+    globals.parkinSpaceQuantity =  snapshot.data!.length;
+    globals.currentParkingSpaces = snapshot.data!;
     snapshot.data!.forEach((parkingSpace) {
+      
       if (parkingSpace.getOwnerId!
               .compareTo(FirebaseAuth.instance.currentUser!.uid) ==
           0) {
@@ -99,8 +102,8 @@ class FirebaseServices {
     });
 
     await _spaces.first.then((value) {
-      globals.parkinSpaceQuantity = value.length;
-      globals.currentParkingSpaces = value;
+      
+      //globals.currentParkingSpaces = value;
       value.forEach((parkingSpace) {
         if (parkingSpace.isDisabled == false) {
           markers.add(

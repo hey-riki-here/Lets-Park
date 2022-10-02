@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:lets_park/screens/intro/enable_location.dart';
 import 'package:location/location.dart';
+import 'package:page_transition/page_transition.dart';
 
 class AllowLocationPermission extends StatelessWidget {
   const AllowLocationPermission({Key? key}) : super(key: key);
@@ -54,12 +55,12 @@ class AllowLocationPermission extends StatelessWidget {
                     child: ElevatedButton(
                       onPressed: () async {
                         await grantPermission();
-                        Navigator.pop(context);
-                        Navigator.push(
+                        Navigator.pushReplacement(
                           context,
-                          MaterialPageRoute(
-                            fullscreenDialog: true,
-                            builder: (context) => const EnableLocationService(),
+                          PageTransition(
+                            type: PageTransitionType.rightToLeftJoined,
+                            childCurrent: this,
+                            child: const EnableLocationService(),
                           ),
                         );
                       },

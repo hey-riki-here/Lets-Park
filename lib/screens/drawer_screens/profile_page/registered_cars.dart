@@ -139,7 +139,7 @@ class _RegisteredCarsState extends State<RegisteredCars> {
                       ),
                       SizedBox(width: 10),
                       Text(
-                        "No added cars. Click the \"+\" button to add",
+                        "No added cars.",
                         style: TextStyle(
                           color: Colors.grey,
                           fontSize: 16,

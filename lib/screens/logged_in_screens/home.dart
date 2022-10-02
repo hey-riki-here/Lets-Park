@@ -943,8 +943,8 @@ class _NearbySpacesViewState extends State<NearbySpacesView> {
 
   @override
   void initState() {
-    getNearbySpaces();
     super.initState();
+    getNearbySpaces();
   }
 
   @override

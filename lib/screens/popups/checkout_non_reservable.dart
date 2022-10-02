@@ -15,6 +15,7 @@ import 'package:intl/intl.dart';
 import 'package:lets_park/models/notification.dart';
 import 'package:lets_park/models/parking.dart';
 import 'package:lets_park/models/parking_space.dart';
+import 'package:lets_park/screens/drawer_screens/profile_page/registered_cars.dart';
 import 'package:lets_park/screens/popups/notice_dialog.dart';
 import 'package:lets_park/screens/popups/successful_booking.dart';
 import 'package:lets_park/services/parking_space_services.dart';
@@ -876,6 +877,8 @@ class Vehicle extends StatefulWidget {
 class VehicleState extends State<Vehicle> {
   final plateNumberController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
+  List<String> plateNumbers = [];
+  String selectedCar = "Select plate number";
 
   @override
   Widget build(BuildContext context) {
@@ -907,35 +910,54 @@ class VehicleState extends State<Vehicle> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Row(
-                      children: [
-                        const Text(
-                          "Plate No.: ",
-                          style: TextStyle(
-                            fontSize: 18,
-                            color: Colors.grey,
-                          ),
-                        ),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: TextFormField(
-                            controller: plateNumberController,
-                            decoration: const InputDecoration(
-                              border: InputBorder.none,
+                    const SizedBox(width: 10),
+                    plateNumbers.length == 1
+                        ? Row(
+                            children: [
+                              Expanded(
+                                child: OutlinedButton.icon(
+                                  onPressed: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) =>
+                                            const RegisteredCars(),
+                                      ),
+                                    ).then((value) {
+                                      setState(() {});
+                                    });
+                                  },
+                                  icon: const Icon(FontAwesomeIcons.car),
+                                  label: const Text("Add car"),
+                                  style: ElevatedButton.styleFrom(
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(8.0),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          )
+                        : Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 10),
+                            child: DropdownButtonHideUnderline(
+                              child: DropdownButton<String>(
+                                value: selectedCar,
+                                icon: const Icon(
+                                  Icons.arrow_drop_down_rounded,
+                                  size: 32,
+                                ),
+                                elevation: 16,
+                                isExpanded: true,
+                                onChanged: (String? newValue) {
+                                  setState(() {
+                                    selectedCar = newValue!;
+                                  });
+                                },
+                                items: plateNumbers.map(dropdownItem).toList(),
+                              ),
                             ),
-                            style: const TextStyle(
-                              fontSize: 18,
-                            ),
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return 'Please enter some text';
-                              }
-                              return null;
-                            },
                           ),
-                        ),
-                      ],
-                    ),
                   ],
                 ),
               ),
@@ -946,7 +968,21 @@ class VehicleState extends State<Vehicle> {
     );
   }
 
-  String? get getPlateNumber => plateNumberController.text.trim();
+  DropdownMenuItem<String> dropdownItem(String item) {
+    return DropdownMenuItem(
+      child: Text(
+        item,
+        style: TextStyle(
+          color: item.compareTo("Select plate number") == 0
+              ? Colors.grey
+              : Colors.black,
+        ),
+      ),
+      value: item,
+    );
+  }
+
+  String? get getPlateNumber => selectedCar;
 }
 
 class PhotoPicker extends StatefulWidget {

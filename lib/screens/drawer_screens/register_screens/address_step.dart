@@ -416,6 +416,7 @@ class CaretakerState extends State<Caretaker> {
               const SizedBox(height: 10),
               _sharedWidget.textFormField(
                 action: TextInputAction.done,
+                textInputType: TextInputType.number,
                 controller: numberController,
                 hintText: "182083028",
                 obscure: false,

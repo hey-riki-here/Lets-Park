@@ -15,6 +15,7 @@ import 'package:intl/intl.dart';
 import 'package:lets_park/models/notification.dart';
 import 'package:lets_park/models/parking.dart';
 import 'package:lets_park/models/parking_space.dart';
+import 'package:lets_park/screens/drawer_screens/profile_page/registered_cars.dart';
 import 'package:lets_park/screens/popups/notice_dialog.dart';
 import 'package:lets_park/screens/popups/successful_booking.dart';
 import 'package:lets_park/services/parking_space_services.dart';
@@ -109,11 +110,14 @@ class _CheckoutState extends State<Checkout> {
               return;
             }
 
-            if (_vehicleState.currentState!.getPlateNumber!.isEmpty) {
+            print(_vehicleState.currentState!.getPlateNumber!);
+            if (_vehicleState.currentState!.getPlateNumber!
+                    .compareTo("Select plate number") ==
+                0) {
               showAlertDialog("Please provide car's plate number.");
               return;
             }
-
+            print(_vehicleState.currentState!.getPlateNumber!);
             if (FirebaseAuth.instance.currentUser!.emailVerified == false) {
               return;
             }
@@ -931,77 +935,137 @@ class Vehicle extends StatefulWidget {
 class VehicleState extends State<Vehicle> {
   final plateNumberController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
+  List<String> plateNumbers = [];
+  String selectedCar = "Select plate number";
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const SizedBox(height: 5),
-        const Text(
-          "Vehicle",
-          style: TextStyle(
-            fontSize: 18,
-            color: Colors.black87,
-          ),
-        ),
-        const SizedBox(height: 5),
-        SizedBox(
-          width: double.infinity,
-          child: Card(
-            elevation: 2,
-            shape: const RoundedRectangleBorder(
-              borderRadius: BorderRadius.all(
-                Radius.circular(12),
-              ),
-            ),
-            child: Padding(
-              padding: const EdgeInsets.all(12),
-              child: Form(
-                key: _formKey,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        const Text(
-                          "Plate No.: ",
-                          style: TextStyle(
-                            fontSize: 18,
-                            color: Colors.grey,
-                          ),
-                        ),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: TextFormField(
-                            controller: plateNumberController,
-                            decoration: const InputDecoration(
-                              border: InputBorder.none,
-                            ),
-                            style: const TextStyle(
-                              fontSize: 18,
-                            ),
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return 'Please enter some text';
-                              }
-                              return null;
-                            },
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
+    return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+      stream: FirebaseFirestore.instance
+          .collection("user-data")
+          .doc(FirebaseAuth.instance.currentUser!.uid)
+          .collection("cars")
+          .snapshots(),
+      builder: (context, snapshot) {
+        if (snapshot.hasData) {
+          plateNumbers.clear();
+          plateNumbers.add("Select plate number");
+          snapshot.data!.docs.forEach((car) {
+            plateNumbers.add(car.data()["plateNumber"]);
+          });
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SizedBox(height: 5),
+              const Text(
+                "Vehicle",
+                style: TextStyle(
+                  fontSize: 18,
+                  color: Colors.black87,
                 ),
               ),
-            ),
-          ),
-        ),
-      ],
+              const SizedBox(height: 5),
+              SizedBox(
+                width: double.infinity,
+                child: Card(
+                  elevation: 2,
+                  shape: const RoundedRectangleBorder(
+                    borderRadius: BorderRadius.all(
+                      Radius.circular(12),
+                    ),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(12),
+                    child: Form(
+                      key: _formKey,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const SizedBox(width: 10),
+                          plateNumbers.length == 1
+                              ? Row(
+                                  children: [
+                                    Expanded(
+                                      child: OutlinedButton.icon(
+                                        onPressed: () {
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (context) =>
+                                                  const RegisteredCars(),
+                                            ),
+                                          ).then((value) {
+                                            setState(() {});
+                                          });
+                                        },
+                                        icon: const Icon(FontAwesomeIcons.car),
+                                        label: const Text("Add car"),
+                                        style: ElevatedButton.styleFrom(
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(8.0),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                )
+                              : Container(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 10),
+                                  child: DropdownButtonHideUnderline(
+                                    child: DropdownButton<String>(
+                                      value: selectedCar,
+                                      icon: const Icon(
+                                        Icons.arrow_drop_down_rounded,
+                                        size: 32,
+                                      ),
+                                      elevation: 16,
+                                      isExpanded: true,
+                                      onChanged: (String? newValue) {
+                                        setState(() {
+                                          selectedCar = newValue!;
+                                        });
+                                      },
+                                      items: plateNumbers
+                                          .map(dropdownItem)
+                                          .toList(),
+                                    ),
+                                  ),
+                                ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          );
+        } else {
+          return const Padding(
+            padding: EdgeInsets.all(12.0),
+            child: CircularProgressIndicator(),
+          );
+        }
+      },
     );
   }
 
-  String? get getPlateNumber => plateNumberController.text.trim();
+  DropdownMenuItem<String> dropdownItem(String item) {
+    return DropdownMenuItem(
+      child: Text(
+        item,
+        style: TextStyle(
+          color: item.compareTo("Select plate number") == 0
+              ? Colors.grey
+              : Colors.black,
+        ),
+      ),
+      value: item,
+    );
+  }
+
+  String? get getPlateNumber => selectedCar;
 }
 
 class PhotoPicker extends StatefulWidget {

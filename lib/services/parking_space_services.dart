@@ -14,6 +14,7 @@ import 'package:lets_park/models/parking.dart';
 import 'package:lets_park/models/parking_space.dart';
 import 'package:lets_park/models/review.dart';
 import 'package:lets_park/screens/popups/notice_dialog.dart';
+import 'package:url_launcher/url_launcher.dart' as launcher;
 
 class ParkingSpaceServices {
   static final _parkingSpaces =
@@ -278,13 +279,28 @@ class ParkingSpaceServices {
   }
 
   static void showNavigator(LatLng position) async {
-    AndroidIntent(
+    final intent = AndroidIntent(
       action: 'action_view',
       data: Uri.encodeFull(
         'google.navigation:q=${position.latitude}, +${position.longitude}&avoid=tf',
       ),
       package: 'com.google.android.apps.maps',
-    ).launch();
+    );
+
+    final canResolve = await intent.canResolveActivity().then((value) => value);
+
+    if (canResolve!) {
+      await intent.launch();
+    } else {
+      String url =
+          "https://www.google.com/maps/dir/?api=1&origin&destination=${position.latitude},${position.longitude}&travelmode=driving&dir_action=navigate";
+      if (await launcher.canLaunchUrl(Uri.parse(url))) {
+        await launcher.launchUrl(
+          Uri.parse(url),
+          mode: launcher.LaunchMode.externalApplication,
+        );
+      }
+    }
   }
 
   static Stream<QuerySnapshot<Map<String, dynamic>>> getEearningsToday(

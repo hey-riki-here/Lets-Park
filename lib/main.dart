@@ -13,7 +13,7 @@ Future main() async {
   NotificationServices.initChannel();
 
   final prefs = await SharedPreferences.getInstance();
-
+  // prefs.setBool('firstOpen', true);
   runApp(LetsPark(
     prefs: prefs,
   ));

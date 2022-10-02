@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:lets_park/screens/wrapper.dart';
 import 'package:location/location.dart';
+import 'package:page_transition/page_transition.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class EnableLocationService extends StatelessWidget {
@@ -55,15 +56,14 @@ class EnableLocationService extends StatelessWidget {
                     child: ElevatedButton(
                       onPressed: () async {
                         await activateLocationService();
-
                         final prefs = await SharedPreferences.getInstance();
                         await prefs.setBool("firstOpen", false);
-                        Navigator.pop(context);
-                        Navigator.push(
+                        Navigator.pushReplacement(
                           context,
-                          MaterialPageRoute(
-                            fullscreenDialog: true,
-                            builder: (context) => const Wrapper(),
+                          PageTransition(
+                            type: PageTransitionType.rightToLeftJoined,
+                            childCurrent: this,
+                            child: const Wrapper(),
                           ),
                         );
                       },
