@@ -1,8 +1,6 @@
 // ignore_for_file: unused_catch_clause, empty_catches
 
 import 'dart:io';
-
-import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';

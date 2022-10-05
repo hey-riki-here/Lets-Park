@@ -110,14 +110,13 @@ class _CheckoutState extends State<Checkout> {
               return;
             }
 
-            print(_vehicleState.currentState!.getPlateNumber!);
             if (_vehicleState.currentState!.getPlateNumber!
                     .compareTo("Select plate number") ==
                 0) {
               showAlertDialog("Please provide car's plate number.");
               return;
             }
-            print(_vehicleState.currentState!.getPlateNumber!);
+
             if (FirebaseAuth.instance.currentUser!.emailVerified == false) {
               return;
             }

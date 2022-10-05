@@ -1,4 +1,4 @@
-// ignore_for_file: avoid_function_literals_in_foreach_calls, empty_catches
+// ignore_for_file: avoid_function_literals_in_foreach_calls, empty_catches, unused_catch_clause
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:community_material_icon/community_material_icon.dart';
@@ -45,7 +45,7 @@ class _HomeState extends State<Home> {
   void initState() {
     initDateNow();
     UserServices.getFavorites(user!.uid);
-    
+
     // Location().onLocationChanged.listen((currentLocation) {
     //   if (globals.parkingLoc.latitude != 0 &&
     //       globals.parkingLoc.longitude != 0) {
@@ -369,92 +369,92 @@ class _FilterButtonsState extends State<FilterButtons> {
           context: context,
           canShowModal: nearbyCanShowModal,
           onTap: () async {
-            Location location = Location();
+            // Location location = Location();
 
-            bool _serviceEnabled;
+            // bool _serviceEnabled;
 
-            _serviceEnabled = await location.serviceEnabled();
-            if (!_serviceEnabled) {
-              _serviceEnabled = await location.requestService();
-              if (!_serviceEnabled) {
-                return;
-              }
-            } else {
-              if (nearbyCanShowModal == true) {
-                setState(() {
-                  nearbyCanShowModal = false;
-                });
-                var position = await geolocator.Geolocator().getCurrentPosition(
-                    desiredAccuracy: geolocator.LocationAccuracy.high);
-                Map<ParkingSpace, double> nearbySpaces =
-                    _firebaseServices.getNearbyParkingSpaces(
-                  LatLng(
-                    position.latitude,
-                    position.longitude,
-                  ),
-                );
-                setState(() {
-                  nearbyCanShowModal = true;
-                });
-                await showModalBottomSheet<void>(
-                  barrierColor: const Color.fromARGB(0, 0, 0, 0),
-                  elevation: 50,
-                  context: context,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  builder: (BuildContext context) {
-                    return Container(
-                      height: 370,
-                      padding: const EdgeInsets.all(8),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Center(
-                            child: Icon(
-                              Icons.drag_handle_rounded,
-                              color: Colors.grey,
-                              size: 30,
-                            ),
-                          ),
-                          const Text(
-                            "Top nearby places",
-                            style: TextStyle(
-                              fontSize: 23,
-                            ),
-                          ),
-                          const SizedBox(
-                            height: 20,
-                          ),
-                          const Text(
-                            "Click on the parking space to focus it on the map",
-                            style: TextStyle(
-                              color: Colors.grey,
-                            ),
-                          ),
-                          Expanded(
-                            child: ListView.builder(
-                              scrollDirection: Axis.horizontal,
-                              itemCount: nearbySpaces.keys.length,
-                              itemBuilder: (context, index) {
-                                return NearbyParkingCard(
-                                  space: nearbySpaces.keys.elementAt(index),
-                                  gMapKey: widget.gMapKey,
-                                  distance: getDistance(
-                                    nearbySpaces.values.elementAt(index),
-                                  ),
-                                  forNearby: true,
-                                );
-                              },
-                            ),
-                          ),
-                        ],
-                      ),
-                    );
-                  },
-                );
-              }
-            }
+            // _serviceEnabled = await location.serviceEnabled();
+            // if (!_serviceEnabled) {
+            //   _serviceEnabled = await location.requestService();
+            //   if (!_serviceEnabled) {
+            //     return;
+            //   }
+            // } else {
+            //   if (nearbyCanShowModal == true) {
+            //     setState(() {
+            //       nearbyCanShowModal = false;
+            //     });
+            //     var position = await geolocator.Geolocator().getCurrentPosition(
+            //         desiredAccuracy: geolocator.LocationAccuracy.high);
+            //     Map<ParkingSpace, double> nearbySpaces =
+            //         _firebaseServices.getNearbyParkingSpaces(
+            //       LatLng(
+            //         position.latitude,
+            //         position.longitude,
+            //       ),
+            //     );
+            //     setState(() {
+            //       nearbyCanShowModal = true;
+            //     });
+            //     await showModalBottomSheet<void>(
+            //       barrierColor: const Color.fromARGB(0, 0, 0, 0),
+            //       elevation: 50,
+            //       context: context,
+            //       shape: RoundedRectangleBorder(
+            //         borderRadius: BorderRadius.circular(20),
+            //       ),
+            //       builder: (BuildContext context) {
+            //         return Container(
+            //           height: 370,
+            //           padding: const EdgeInsets.all(8),
+            //           child: Column(
+            //             crossAxisAlignment: CrossAxisAlignment.start,
+            //             children: [
+            //               const Center(
+            //                 child: Icon(
+            //                   Icons.drag_handle_rounded,
+            //                   color: Colors.grey,
+            //                   size: 30,
+            //                 ),
+            //               ),
+            //               const Text(
+            //                 "Top nearby places",
+            //                 style: TextStyle(
+            //                   fontSize: 23,
+            //                 ),
+            //               ),
+            //               const SizedBox(
+            //                 height: 20,
+            //               ),
+            //               const Text(
+            //                 "Click on the parking space to focus it on the map",
+            //                 style: TextStyle(
+            //                   color: Colors.grey,
+            //                 ),
+            //               ),
+            //               Expanded(
+            //                 child: ListView.builder(
+            //                   scrollDirection: Axis.horizontal,
+            //                   itemCount: nearbySpaces.keys.length,
+            //                   itemBuilder: (context, index) {
+            //                     return NearbyParkingCard(
+            //                       space: nearbySpaces.keys.elementAt(index),
+            //                       gMapKey: widget.gMapKey,
+            //                       distance: getDistance(
+            //                         nearbySpaces.values.elementAt(index),
+            //                       ),
+            //                       forNearby: true,
+            //                     );
+            //                   },
+            //                 ),
+            //               ),
+            //             ],
+            //           ),
+            //         );
+            //       },
+            //     );
+            //   }
+            // }
           },
         ),
         _buildCategory(
@@ -938,54 +938,72 @@ class NearbySpacesView extends StatefulWidget {
 }
 
 class _NearbySpacesViewState extends State<NearbySpacesView> {
+  List<ParkingSpace> spaces = [];
   Map<ParkingSpace, double> nearbySpaces = {};
   bool loading = true, locationEnabled = true;
 
   @override
   void initState() {
     super.initState();
-    getNearbySpaces();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(
-        right: 10,
-      ),
-      child: locationEnabled
-          ? loading
-              ? Shimmer.fromColors(
-                  child: SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    child: Row(
-                      children: const [
-                        ShimmerItem(),
-                        ShimmerItem(),
-                        ShimmerItem(),
-                      ],
+    return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+        stream:
+            FirebaseFirestore.instance.collection('parking-spaces').snapshots(),
+        builder: (context, snapshot) {
+          if (snapshot.hasData) {
+            spaces.clear();
+            snapshot.data!.docs.forEach((space) {
+              spaces.add(ParkingSpace.fromJson(space.data()));
+            });
+
+            getNearbySpaces();
+
+            return Padding(
+              padding: const EdgeInsets.only(
+                right: 10,
+              ),
+              child: locationEnabled
+                  ? loading
+                      ? const CircularProgressIndicator()
+                      : SingleChildScrollView(
+                          scrollDirection: Axis.horizontal,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: nearbySpaces.entries.map((entry) {
+                              return NearbySpaces(
+                                space: entry.key,
+                                distance: entry.value,
+                              );
+                            }).toList(),
+                          ),
+                        )
+                  : EnableLocationService(
+                      getNearbySpaces: getNearbySpaces,
                     ),
-                  ),
-                  baseColor: Colors.grey.shade300,
-                  highlightColor: Colors.grey.shade100,
-                )
-              : SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: nearbySpaces.entries.map((entry) {
-                      return NearbySpaces(
-                        space: entry.key,
-                        distance: entry.value,
-                      );
-                    }).toList(),
-                  ),
-                )
-          : EnableLocationService(
-              getNearbySpaces: getNearbySpaces,
-            ),
-    );
+            );
+          } else {
+            return const CircularProgressIndicator();
+          }
+        });
   }
+
+  // Shimmer.fromColors(
+  //                         child: SingleChildScrollView(
+  //                           scrollDirection: Axis.horizontal,
+  //                           child: Row(
+  //                             children: const [
+  //                               ShimmerItem(),
+  //                               ShimmerItem(),
+  //                               ShimmerItem(),
+  //                             ],
+  //                           ),
+  //                         ),
+  //                         baseColor: Colors.grey.shade300,
+  //                         highlightColor: Colors.grey.shade100,
+  //                       )
 
   void getNearbySpaces() async {
     FirebaseServices _firebaseServices = FirebaseServices();
@@ -1014,17 +1032,21 @@ class _NearbySpacesViewState extends State<NearbySpacesView> {
       });
 
       var position = await geolocator.Geolocator().getCurrentPosition(
-          desiredAccuracy: geolocator.LocationAccuracy.high);
+        desiredAccuracy: geolocator.LocationAccuracy.high,
+      );
       nearbySpaces = _firebaseServices.getNearbyParkingSpaces(
         LatLng(
           position.latitude,
           position.longitude,
         ),
+        spaces,
       );
 
-      setState(() {
-        loading = false;
-      });
+      if (mounted) {
+        setState(() {
+          loading = false;
+        });
+      }
     }
   }
 }
@@ -1401,52 +1423,7 @@ class _TopSpacesGridState extends State<TopSpacesGrid> {
     return Padding(
       padding: const EdgeInsets.all(16),
       child: loading
-          ? Shimmer.fromColors(
-              child: GridView.count(
-                physics: const NeverScrollableScrollPhysics(),
-                padding: const EdgeInsets.all(0),
-                crossAxisCount: 2,
-                mainAxisSpacing: 12,
-                crossAxisSpacing: 12,
-                shrinkWrap: true,
-                children: [
-                  Container(
-                    height: 200,
-                    width: 100,
-                    decoration: BoxDecoration(
-                      borderRadius: const BorderRadius.all(Radius.circular(8)),
-                      color: Colors.grey.shade300,
-                    ),
-                  ),
-                  Container(
-                    height: 200,
-                    width: 100,
-                    decoration: BoxDecoration(
-                      borderRadius: const BorderRadius.all(Radius.circular(8)),
-                      color: Colors.grey.shade300,
-                    ),
-                  ),
-                  Container(
-                    height: 200,
-                    width: 100,
-                    decoration: BoxDecoration(
-                      borderRadius: const BorderRadius.all(Radius.circular(8)),
-                      color: Colors.grey.shade300,
-                    ),
-                  ),
-                  Container(
-                    height: 200,
-                    width: 100,
-                    decoration: BoxDecoration(
-                      borderRadius: const BorderRadius.all(Radius.circular(8)),
-                      color: Colors.grey.shade300,
-                    ),
-                  ),
-                ],
-              ),
-              baseColor: Colors.grey.shade300,
-              highlightColor: Colors.grey.shade100,
-            )
+          ? const CircularProgressIndicator()
           : GridView.count(
               physics: const NeverScrollableScrollPhysics(),
               padding: const EdgeInsets.all(0),
@@ -1462,6 +1439,53 @@ class _TopSpacesGridState extends State<TopSpacesGrid> {
             ),
     );
   }
+
+  // Shimmer.fromColors(
+  //             child: GridView.count(
+  //               physics: const NeverScrollableScrollPhysics(),
+  //               padding: const EdgeInsets.all(0),
+  //               crossAxisCount: 2,
+  //               mainAxisSpacing: 12,
+  //               crossAxisSpacing: 12,
+  //               shrinkWrap: true,
+  //               children: [
+  //                 Container(
+  //                   height: 200,
+  //                   width: 100,
+  //                   decoration: BoxDecoration(
+  //                     borderRadius: const BorderRadius.all(Radius.circular(8)),
+  //                     color: Colors.grey.shade300,
+  //                   ),
+  //                 ),
+  //                 Container(
+  //                   height: 200,
+  //                   width: 100,
+  //                   decoration: BoxDecoration(
+  //                     borderRadius: const BorderRadius.all(Radius.circular(8)),
+  //                     color: Colors.grey.shade300,
+  //                   ),
+  //                 ),
+  //                 Container(
+  //                   height: 200,
+  //                   width: 100,
+  //                   decoration: BoxDecoration(
+  //                     borderRadius: const BorderRadius.all(Radius.circular(8)),
+  //                     color: Colors.grey.shade300,
+  //                   ),
+  //                 ),
+  //                 Container(
+  //                   height: 200,
+  //                   width: 100,
+  //                   decoration: BoxDecoration(
+  //                     borderRadius: const BorderRadius.all(Radius.circular(8)),
+  //                     color: Colors.grey.shade300,
+  //                   ),
+  //                 ),
+  //               ],
+  //             ),
+  //             baseColor: Colors.grey.shade300,
+  //             highlightColor: Colors.grey.shade100,
+  //           )
 
   void getTopParkingSpaces() async {
     await Future.delayed(const Duration(seconds: 5));

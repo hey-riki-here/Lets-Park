@@ -11,7 +11,6 @@ class InfoAndFeatures extends StatefulWidget {
 class InfoAndFeaturesState extends State<InfoAndFeatures> {
   final SharedWidget _sharedWidget = SharedWidget();
   final GlobalKey<InformationState> _informationState = GlobalKey();
-  final GlobalKey<CapacityState> _capacityState = GlobalKey();
   final GlobalKey<ReservabilityState> _reservabilityState = GlobalKey();
   final GlobalKey<FeaturesState> _featuresState = GlobalKey();
   final GlobalKey<PaypalState> _paypalState = GlobalKey();

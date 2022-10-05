@@ -1,7 +1,5 @@
 // ignore_for_file: unused_catch_clause, empty_catches, avoid_function_literals_in_foreach_calls
 
-import 'dart:io';
-
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:geocoding/geocoding.dart';

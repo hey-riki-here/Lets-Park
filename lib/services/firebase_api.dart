@@ -14,7 +14,7 @@ import 'package:lets_park/models/parking_space.dart';
 import 'package:lets_park/screens/popups/parking_area_info.dart';
 
 class FirebaseServices {
-  late Stream<List<ParkingSpace>> _spaces;
+  //late Stream<List<ParkingSpace>> _spaces;
   Set<Marker> markers = {};
 
   static Future uploadParkingSpace() async {
@@ -74,18 +74,18 @@ class FirebaseServices {
     globals.userData.setOwnedParkingSpaces = ownedSpaces;
   }
 
-  Stream<List<ParkingSpace>> getParkingSpacesFromDatabase() {
-    _spaces = FirebaseFirestore.instance
-        .collection('parking-spaces')
-        .snapshots()
-        .map((snapshot) => snapshot.docs
-            .map<ParkingSpace>((doc) => ParkingSpace.fromJson(doc.data()))
-            .toList());
+  // Stream<List<ParkingSpace>> getParkingSpacesFromDatabase() {
+  //   _spaces = FirebaseFirestore.instance
+  //       .collection('parking-spaces')
+  //       .snapshots()
+  //       .map((snapshot) => snapshot.docs
+  //           .map<ParkingSpace>((doc) => ParkingSpace.fromJson(doc.data()))
+  //           .toList());
 
-    return _spaces;
-  }
+  //   return _spaces;
+  // }
 
-  Future<Set<Marker>> getMarkers(BuildContext context) async {
+  Future<Set<Marker>> getMarkers(BuildContext context, List<ParkingSpace> spaces) async {
     markers = {};
     late BitmapDescriptor reservableMarker, nonReservableMarker, monthlyMarker;
 
@@ -101,10 +101,8 @@ class FirebaseServices {
       monthlyMarker = value;
     });
 
-    await _spaces.first.then((value) {
-      
       //globals.currentParkingSpaces = value;
-      value.forEach((parkingSpace) {
+      spaces.forEach((parkingSpace) {
         if (parkingSpace.isDisabled == false) {
           markers.add(
             Marker(
@@ -134,7 +132,6 @@ class FirebaseServices {
           );
         }
       });
-    });
     return markers;
   }
 
@@ -162,11 +159,11 @@ class FirebaseServices {
     return markerbitmap;
   }
 
-  Map<ParkingSpace, double> getNearbyParkingSpaces(LatLng userLocation) {
+  Map<ParkingSpace, double> getNearbyParkingSpaces(LatLng userLocation, List<ParkingSpace> spaces) {
     Map<ParkingSpace, double> _nearbyParkings = {};
     Map<ParkingSpace, double> _map = {};
 
-    globals.currentParkingSpaces.forEach((parkingSpace) {
+    spaces.forEach((parkingSpace) {
       double distance = calculateDistance(
         userLocation.latitude,
         userLocation.longitude,
