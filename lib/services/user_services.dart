@@ -142,7 +142,7 @@ class UserServices {
                     .compareTo(now) ==
                 1) &&
             parking.isInProgress == false) {
-          // parkingSessionsStreams.pause();
+          parkingSessionsStreams.pause();
           await userParkings.doc(parking.getParkingId).update({
             'inProgress': true,
             'upcoming': false,
@@ -163,12 +163,12 @@ class UserServices {
             "Parking session started",
             "Your parking session has started. Click View Parking to view parking session details.",
           );
-          // parkingSessionsStreams.resume();
+          parkingSessionsStreams.resume();
         } else if (_getDateTimeFromMillisecondEpoch(parking.getArrival!)
                     .compareTo(now) ==
                 1 &&
             parking.isUpcoming == false) {
-          // parkingSessionsStreams.pause();
+          parkingSessionsStreams.pause();
           await userParkings.doc(parking.getParkingId).update({
             'inProgress': false,
             'upcoming': true,
@@ -184,7 +184,7 @@ class UserServices {
             'upcoming': true,
             'inHistory': false,
           });
-          // parkingSessionsStreams.resume();
+          parkingSessionsStreams.resume();
         } else if ((_getDateTimeFromMillisecondEpoch(parking.getArrival!)
                         .compareTo(now) ==
                     -1 &&
@@ -195,20 +195,20 @@ class UserServices {
                             .compareTo(now) ==
                         -1)) &&
             parking.isInHistory == false) {
-          // parkingSessionsStreams.pause();
+          parkingSessionsStreams.pause();
           await userParkings.doc(parking.getParkingId).update({
             'inProgress': false,
             'upcoming': false,
             'inHistory': true,
           }).then((_) async {
-            int notifLength = await UserServices.getUserNotificationLength(
-              parking.getParkingOwner!,
-            );
+            // int notifLength = await UserServices.getUserNotificationLength(
+            //   parking.getParkingOwner!,
+            // );
             UserServices.notifyUser(
-              "NOTIF" + notifLength.toString(),
+              "NOTIF" + globals.userData.getUserNotifications!.length.toString(),
               parking.getParkingOwner!,
               UserNotification(
-                "NOTIF" + notifLength.toString(),
+                "NOTIF" + globals.userData.getUserNotifications!.length.toString(),
                 parking.getParkingSpaceId!,
                 FirebaseAuth.instance.currentUser!.photoURL!,
                 FirebaseAuth.instance.currentUser!.displayName!,
@@ -221,14 +221,14 @@ class UserServices {
               ),
             );
 
-            notifLength = await UserServices.getUserNotificationLength(
-              FirebaseAuth.instance.currentUser!.uid,
-            );
+            // notifLength = await UserServices.getUserNotificationLength(
+            //   FirebaseAuth.instance.currentUser!.uid,
+            // );
             UserServices.notifyUser(
-              "NOTIF" + notifLength.toString(),
+              "NOTIF" + globals.userData.getUserNotifications!.length.toString(),
               FirebaseAuth.instance.currentUser!.uid,
               UserNotification(
-                "NOTIF" + notifLength.toString(),
+                "NOTIF" + globals.userData.getUserNotifications!.length.toString(),
                 parking.getParkingSpaceId!,
                 FirebaseAuth.instance.currentUser!.photoURL!,
                 FirebaseAuth.instance.currentUser!.displayName!,
@@ -256,7 +256,7 @@ class UserServices {
             "Parking session ended",
             "Your parking session has ended. Click View Parking to view parking session details.",
           );
-          // parkingSessionsStreams.resume();
+          parkingSessionsStreams.resume();
         }
       }
     } on Exception catch (e) {}
@@ -295,7 +295,7 @@ class UserServices {
                       .compareTo(now) ==
                   1) &&
               parking.isInProgress == false) {
-            // ownedParkingSessionsStreams.pause();
+            ownedParkingSessionsStreams.pause();
             await parkingSpacesDb
                 .doc(parking.getParkingSpaceId)
                 .collection("parking-sessions")
@@ -305,7 +305,7 @@ class UserServices {
               'upcoming': false,
               'inHistory': false,
             });
-            // ownedParkingSessionsStreams.resume();
+            ownedParkingSessionsStreams.resume();
           } else if ((_getDateTimeFromMillisecondEpoch(parking.getArrival!)
                           .compareTo(now) ==
                       -1 &&
@@ -316,7 +316,7 @@ class UserServices {
                               .compareTo(now) ==
                           -1)) &&
               parking.isInHistory == false) {
-            // ownedParkingSessionsStreams.pause();
+            ownedParkingSessionsStreams.pause();
             await parkingSpacesDb
                 .doc(parking.getParkingSpaceId)
                 .collection("parking-sessions")
@@ -326,17 +326,17 @@ class UserServices {
               'upcoming': false,
               'inHistory': true,
             });
-            // ownedParkingSessionsStreams.resume();
+            ownedParkingSessionsStreams.resume();
 
-            int notifLength = await UserServices.getUserNotificationLength(
-              FirebaseAuth.instance.currentUser!.uid,
-            );
+            // int notifLength = await UserServices.getUserNotificationLength(
+            //   FirebaseAuth.instance.currentUser!.uid,
+            // );
 
             UserServices.notifyUser(
-              "NOTIF" + notifLength.toString(),
+              "NOTIF" + globals.userData.getUserNotifications!.length.toString(),
               parking.getParkingOwner!,
               UserNotification(
-                "NOTIF" + notifLength.toString(),
+                "NOTIF" + globals.userData.getUserNotifications!.length.toString(),
                 parking.getParkingSpaceId!,
                 parking.getDriverImage!,
                 parking.getDriver!,

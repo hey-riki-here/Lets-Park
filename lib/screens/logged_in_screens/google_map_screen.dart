@@ -1,8 +1,7 @@
-// ignore_for_file: unused_catch_clause, empty_catches, avoid_function_literals_in_foreach_calls
+// ignore_for_file: unused_catch_clause, empty_catches
 
 import 'dart:async';
 import 'dart:convert';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:geocoding/geocoding.dart' as geocoding;
@@ -30,7 +29,6 @@ class GoogleMapScreenState extends State<GoogleMapScreen> {
   final double mapMinZoom = 15, mapMaxZoom = 18;
   final Completer<GoogleMapController> _controller = Completer();
   final FirebaseServices _firebaseServices = FirebaseServices();
-  List<ParkingSpace> spaces = [];
   Set<Marker> markers = {};
   GoogleMapController? googleMapController;
   geolocator.Position? position;
@@ -46,52 +44,43 @@ class GoogleMapScreenState extends State<GoogleMapScreen> {
   bool isMapLoading = true;
 
   @override
+  void initState() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        setState(() {});
+      }
+    });
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-        stream:
-            FirebaseFirestore.instance.collection('parking-spaces').snapshots(),
+      body: StreamBuilder<List<ParkingSpace>>(
+        stream: _firebaseServices.getParkingSpacesFromDatabase(),
         builder: (context, snapshot) {
           if (snapshot.hasData) {
-            spaces.clear();
-            snapshot.data!.docs.forEach((space) {
-              spaces.add(ParkingSpace.fromJson(space.data()));
-            });
+            getMarkers();
             return Stack(
               children: [
-                FutureBuilder<Set<Marker>>(
-                  future: getMarkers(),
-                  builder: (
-                    BuildContext context,
-                    AsyncSnapshot<Set<Marker>> snapshot,
-                  ) {
-                    if (snapshot.hasData) {
-                      return GoogleMap(
-                        initialCameraPosition: cameraPosition,
-                        myLocationEnabled: locationEnabled,
-                        markers: snapshot.data!,
-                        myLocationButtonEnabled: false,
-                        compassEnabled: false,
-                        rotateGesturesEnabled: false,
-                        zoomControlsEnabled: false,
-                        mapToolbarEnabled: false,
-                        minMaxZoomPreference: const MinMaxZoomPreference(
-                          15,
-                          22,
-                        ),
-                        onMapCreated: (GoogleMapController controller) async {
-                          _controller.complete(controller);
-                          googleMapController = controller;
-                          changeMapMode(googleMapController!);
-                          widget.notifyParent();
-                          setState(() {
-                            isMapLoading = false;
-                          });
-                        },
-                      );
-                    } else {
-                      return const SizedBox();
-                    }
+                GoogleMap(
+                  initialCameraPosition: cameraPosition,
+                  myLocationEnabled: locationEnabled,
+                  markers: markers,
+                  myLocationButtonEnabled: false,
+                  compassEnabled: false,
+                  rotateGesturesEnabled: false,
+                  zoomControlsEnabled: false,
+                  mapToolbarEnabled: false,
+                  minMaxZoomPreference: const MinMaxZoomPreference(15, 22),
+                  onMapCreated: (GoogleMapController controller) async {
+                    _controller.complete(controller);
+                    googleMapController = controller;
+                    changeMapMode(googleMapController!);
+                    widget.notifyParent();
+                    setState(() {
+                      isMapLoading = false;
+                    });
                   },
                 ),
                 isMapLoading
@@ -120,14 +109,25 @@ class GoogleMapScreenState extends State<GoogleMapScreen> {
           }
         },
       ),
+      floatingActionButton: FloatingActionButton(
+        backgroundColor: Colors.white,
+        child: const Icon(
+          Icons.location_searching,
+          color: Colors.black,
+        ),
+        onPressed: () async {
+          try {
+            getLocation(context);
+          } on Exception catch (e) {}
+        },
+      ),
     );
   }
 
-  Future<Set<Marker>> getMarkers() async {
-    final markers = await _firebaseServices
-        .getMarkers(context, spaces)
-        .then((markers) => markers);
-    return markers;
+  void getMarkers() async {
+    await _firebaseServices.getMarkers(context).then((value) {
+      markers = value;
+    });
   }
 
   void getLocation(BuildContext context) async {
@@ -148,7 +148,7 @@ class GoogleMapScreenState extends State<GoogleMapScreen> {
         builder: (context) => const NoticeDialog(
           imageLink: "assets/icons/marker.png",
           message: "Please wait while we are locating your current location...",
-          forLoading: true,
+          forLoading: false,
         ),
       );
 
@@ -163,7 +163,7 @@ class GoogleMapScreenState extends State<GoogleMapScreen> {
           ),
         ),
       );
-      navigatorKey.currentState!.popUntil((route) => route.isFirst);
+      Navigator.pop(context);
 
       setState(() {
         locationEnabled = true;

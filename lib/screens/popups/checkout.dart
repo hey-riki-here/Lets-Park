@@ -241,13 +241,13 @@ class _CheckoutState extends State<Checkout> {
                       );
                     });
 
-                    int notifLength =
-                        await UserServices.getUserNotificationLength(
-                      FirebaseAuth.instance.currentUser!.uid,
-                    );
+                    // int notifLength =
+                    //     await UserServices.getUserNotificationLength(
+                    //   FirebaseAuth.instance.currentUser!.uid,
+                    // );
 
                     final userNotif = UserNotification(
-                      "NOTIF" + notifLength.toString(),
+                      "NOTIF" + globals.userData.getUserNotifications!.length.toString(),
                       widget.parkingSpace.getSpaceId!,
                       FirebaseAuth.instance.currentUser!.photoURL ??
                           "https://cdn4.iconfinder.com/data/icons/user-people-2/48/5-512.png",
@@ -262,7 +262,7 @@ class _CheckoutState extends State<Checkout> {
                     var params = {
                       "parking": newParking.toJson(),
                       "notification": {
-                        "notificationId": "NOTIF" + notifLength.toString(),
+                        "notificationId": "NOTIF" + globals.userData.getUserNotifications!.length.toString(),
                         "userId": widget.parkingSpace.getOwnerId!,
                         "userNotification": userNotif.toJson(),
                       },

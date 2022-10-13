@@ -30,7 +30,8 @@ class LocationSectionState extends State<LocationSection> {
     ),
   );
   final ImagePicker imagePicker = ImagePicker();
-
+  File? valenzuelaBusinessPermit, bnCertificate, fsic, govId;
+  List<File> certificates = [];
   List<XFile>? imageFileList = [];
 
   @override
@@ -141,7 +142,7 @@ class LocationSectionState extends State<LocationSection> {
         _sharedWidget.stepHeader("Business Certificates"),
         const SizedBox(height: 30),
         const Text(
-          "Please provide the business certificates (Valenzuela Business Permit and BIR) of your space",
+          "Please provide the following certificates of your space:\n\n• Valenzuela Business Permit\n• BN - Certificate\n• Fire Safety Inspection Certificate\n• Government ID",
           style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.w300,
@@ -155,67 +156,85 @@ class LocationSectionState extends State<LocationSection> {
             fontWeight: FontWeight.w300,
           ),
         ),
-        const SizedBox(height: 15),
-        Wrap(
-          children: imageFileList!
-              .map(
-                (image) => Padding(
-                  padding: const EdgeInsets.only(
-                    top: 8.0,
-                    bottom: 8.0,
-                    right: 12,
-                  ),
-                  child: Stack(
-                    children: [
-                      SizedBox(
-                        width: 150,
-                        height: 150,
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(8),
-                          child: Image.file(
-                            File(image.path),
-                            fit: BoxFit.cover,
-                          ),
-                        ),
-                      ),
-                      Positioned(
-                        top: 5,
-                        right: 5,
-                        child: GestureDetector(
-                          onTap: (){
-                            setState(() {
-                              imageFileList!.remove(image);
-                            });
-                          },
-                          child: Container(
-                            alignment: Alignment.center,
-                            width: 30,
-                            height: 30,
-                            decoration: BoxDecoration(
-                              color: Colors.grey.shade300,
-                              borderRadius: BorderRadius.circular(50),
-                            ),
-                            child: const Text(
-                              "✕",
-                              style: TextStyle(
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              )
-              .toList(),
+        const SizedBox(height: 20),
+        const Text(
+          "Valenzuela Business Permit",
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w300,
+          ),
         ),
-        OutlinedButton.icon(
+        const SizedBox(height: 5),
+        valenzuelaBusinessPermit != null ? buildImage("vbp", valenzuelaBusinessPermit) : OutlinedButton.icon(
           onPressed: () {
-            selectImages();
+            chooseImage("vbp");
           },
           icon: const Icon(Icons.add_photo_alternate_outlined),
-          label: const Text("Add photos"),
+          label: const Text("Select from photos"),
+          style: ElevatedButton.styleFrom(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8.0),
+            ),
+          ),
+        ),
+        const SizedBox(height: 10),
+        const Text(
+          "BN - Certificate",
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w300,
+          ),
+        ),
+        //File? valenzuelaBusinessPermit, bnCertificate, fsic, govId;
+        const SizedBox(height: 5),
+        bnCertificate != null ? buildImage("bnc", bnCertificate) : OutlinedButton.icon(
+          onPressed: () {
+            chooseImage("bnc");
+          },
+          icon: const Icon(Icons.add_photo_alternate_outlined),
+          label: const Text("Select from photos"),
+          style: ElevatedButton.styleFrom(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8.0),
+            ),
+          ),
+        ),
+        const SizedBox(height: 10),
+        const Text(
+          "Fire Safety Inspection Certificate",
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w300,
+          ),
+        ),
+        const SizedBox(height: 5),
+        fsic != null ? buildImage("fsic", fsic) : OutlinedButton.icon(
+          onPressed: () {
+            chooseImage("fsic");
+          },
+          icon: const Icon(Icons.add_photo_alternate_outlined),
+          label: const Text("Select from photos"),
+          style: ElevatedButton.styleFrom(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8.0),
+            ),
+          ),
+        ),
+        const SizedBox(height: 10),
+        const Text(
+          "Government ID",
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w300,
+          ),
+        ),
+        const SizedBox(height: 5),
+        govId != null ? buildImage("govId", govId) : OutlinedButton.icon(
+          onPressed: () {
+            chooseImage("govId");
+          },
+          icon: const Icon(Icons.add_photo_alternate_outlined),
+          label: const Text("Select from photos"),
           style: ElevatedButton.styleFrom(
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(8.0),
@@ -226,13 +245,37 @@ class LocationSectionState extends State<LocationSection> {
     );
   }
 
-  void selectImages() async {
-    final List<XFile>? selectedImages = await imagePicker.pickMultiImage();
-    if (selectedImages!.isNotEmpty) {
-      imageFileList!.addAll(selectedImages);
-    }
-    setState(() {});
+  Future chooseImage(String imageSrc) async {
+    try {
+      final image = await ImagePicker().pickImage(
+        source: ImageSource.gallery,
+      );
+      if (image == null) return;
+      final imageTemp = File(image.path);
+      if (imageSrc.compareTo("vbp") == 0){
+        setState(() => valenzuelaBusinessPermit = imageTemp);
+        certificates.add(valenzuelaBusinessPermit!);
+      } else if (imageSrc.compareTo("bnc") == 0){
+        setState(() => bnCertificate = imageTemp);
+        certificates.add(bnCertificate!);
+      } else if (imageSrc.compareTo("fsic") == 0){
+        setState(() => fsic = imageTemp);
+        certificates.add(fsic!);
+      } else {
+        setState(() => govId = imageTemp);
+        certificates.add(govId!);
+      }
+      print(certificates);
+    } on Exception catch (e) {}
   }
+
+  // void selectImages() async {
+  //   final List<XFile>? selectedImages = await imagePicker.pickMultiImage();
+  //   if (selectedImages!.isNotEmpty) {
+  //     imageFileList!.addAll(selectedImages);
+  //   }
+  //   setState(() {});
+  // }
 
   void refreshPage() {
     googleMapController.animateCamera(
@@ -242,5 +285,122 @@ class LocationSectionState extends State<LocationSection> {
     );
   }
 
-  List<XFile>? get getImageFiles => imageFileList;
+  Widget buildImage(String imageSrc, File? image){
+    return Padding(
+      padding: const EdgeInsets.only(
+        top: 8.0,
+        bottom: 8.0,
+        right: 12,
+      ),
+      child: Stack(
+        children: [
+          SizedBox(
+            width: 150,
+            height: 150,
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: Image.file(
+                File(image!.path),
+                fit: BoxFit.cover,
+              ),
+            ),
+          ),
+          Positioned(
+            top: 5,
+            right: 5,
+            child: GestureDetector(
+              onTap: (){
+                if (imageSrc.compareTo("vbp") == 0){
+                  certificates.remove(valenzuelaBusinessPermit!);
+                  setState(() => valenzuelaBusinessPermit = null);
+                } else if (imageSrc.compareTo("bnc") == 0){
+                  certificates.remove(bnCertificate!);
+                  setState(() => bnCertificate = null);
+                } else if (imageSrc.compareTo("fsic") == 0){
+                  certificates.remove(fsic!);
+                  setState(() => fsic = null);
+                } else {
+                  certificates.remove(govId!);
+                  setState(() => govId = null);
+                }
+                print(certificates);
+              },
+              child: Container(
+                alignment: Alignment.center,
+                width: 30,
+                height: 30,
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade300,
+                  borderRadius: BorderRadius.circular(50),
+                ),
+                child: const Text(
+                  "✕",
+                  style: TextStyle(
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+  
+  List<File>? get getImageFiles => certificates;
 }
+
+// Wrap(
+//           children: imageFileList!
+//               .map(
+//                 (image) => Padding(
+//                   padding: const EdgeInsets.only(
+//                     top: 8.0,
+//                     bottom: 8.0,
+//                     right: 12,
+//                   ),
+//                   child: Stack(
+//                     children: [
+//                       SizedBox(
+//                         width: 150,
+//                         height: 150,
+//                         child: ClipRRect(
+//                           borderRadius: BorderRadius.circular(8),
+//                           child: Image.file(
+//                             File(image.path),
+//                             fit: BoxFit.cover,
+//                           ),
+//                         ),
+//                       ),
+//                       Positioned(
+//                         top: 5,
+//                         right: 5,
+//                         child: GestureDetector(
+//                           onTap: (){
+//                             setState(() {
+//                               imageFileList!.remove(image);
+//                             });
+//                           },
+//                           child: Container(
+//                             alignment: Alignment.center,
+//                             width: 30,
+//                             height: 30,
+//                             decoration: BoxDecoration(
+//                               color: Colors.grey.shade300,
+//                               borderRadius: BorderRadius.circular(50),
+//                             ),
+//                             child: const Text(
+//                               "✕",
+//                               style: TextStyle(
+//                                 fontWeight: FontWeight.w600,
+//                               ),
+//                             ),
+//                           ),
+//                         ),
+//                       ),
+//                     ],
+//                   ),
+//                 ),
+//               )
+//               .toList(),
+//         ),

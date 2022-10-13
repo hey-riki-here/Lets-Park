@@ -2,7 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:lets_park/screens/signin_register/singin_register.dart';
 
-import 'logged_in_screens/home.dart';
+import 'logged_in_screens/home_screen.dart';
 
 class Wrapper extends StatelessWidget {
   const Wrapper({Key? key}) : super(key: key);
@@ -16,7 +16,7 @@ class Wrapper extends StatelessWidget {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const CircularProgressIndicator();
           } else if (snapshot.hasData) {
-            return const Home();
+            return const HomeScreen();
           } else {
             return const SignInOrRegister();
           }

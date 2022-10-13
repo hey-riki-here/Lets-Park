@@ -205,7 +205,7 @@ class InProgressState extends State<InProgress> {
       return timeA.compareTo(timeB);
     });
 
-    return ListView.builder(
+    return parkings.isNotEmpty ? ListView.builder(
       padding: const EdgeInsets.all(8),
       itemCount: parkings.length,
       itemBuilder: (context, index) {
@@ -803,7 +803,25 @@ class InProgressState extends State<InProgress> {
           ),
         );
       },
-    );
+    ) : Center(
+    child: Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: const [
+        Icon(
+          Icons.info_outline,
+          color: Colors.grey,
+        ),
+        SizedBox(width: 10),
+        Text(
+          "No in progress parking to show.",
+          style: TextStyle(
+            color: Colors.grey,
+            fontSize: 16,
+          ),
+        ),
+      ],
+    ),
+  );
   }
 
   String _getFormattedTime(DateTime time) {
@@ -855,7 +873,7 @@ class _UpcomingState extends State<Upcoming> {
       return timeA.compareTo(timeB);
     });
 
-    return ListView.builder(
+    return parkings.isNotEmpty ? ListView.builder(
       padding: const EdgeInsets.all(8),
       scrollDirection: Axis.vertical,
       itemCount: parkings.length,
@@ -1132,6 +1150,24 @@ class _UpcomingState extends State<Upcoming> {
           ),
         );
       },
+    ) : Center(
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: const [
+          Icon(
+            Icons.info_outline,
+            color: Colors.grey,
+          ),
+          SizedBox(width: 10),
+          Text(
+            "No upcoming parkings yet.",
+            style: TextStyle(
+              color: Colors.grey,
+              fontSize: 16,
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -1183,7 +1219,7 @@ class _HistoryState extends State<History> {
       return timeA.compareTo(timeB);
     });
 
-    return ListView.builder(
+    return parkings.isNotEmpty ? ListView.builder(
       padding: const EdgeInsets.all(8),
       scrollDirection: Axis.vertical,
       itemCount: parkings.length,
@@ -1267,6 +1303,24 @@ class _HistoryState extends State<History> {
           ),
         );
       },
+    ) : Center(
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: const [
+          Icon(
+            Icons.info_outline,
+            color: Colors.grey,
+          ),
+          SizedBox(width: 10),
+          Text(
+            "You haven't parked to any parking spaces yet.",
+            style: TextStyle(
+              color: Colors.grey,
+              fontSize: 16,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

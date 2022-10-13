@@ -14,7 +14,7 @@ import 'package:lets_park/models/parking_space.dart';
 import 'package:lets_park/screens/popups/parking_area_info.dart';
 
 class FirebaseServices {
-  //late Stream<List<ParkingSpace>> _spaces;
+  late Stream<List<ParkingSpace>> _spaces;
   Set<Marker> markers = {};
 
   static Future uploadParkingSpace() async {
@@ -36,7 +36,7 @@ class FirebaseServices {
     await docUser.set(globals.parkingSpace.toJson());
   }
 
-  static Future<List<String>> uploadFiles(List<XFile> _images) async {
+  static Future<List<String>> uploadFiles(List<File> _images) async {
     var imageUrls = await Future.wait(
       _images.map(
         (_image) => uploadImage(
@@ -60,10 +60,7 @@ class FirebaseServices {
 
   static void getOwnedParkingAreas(AsyncSnapshot<List<ParkingSpace>> snapshot) {
     List<ParkingSpace> ownedSpaces = [];
-    globals.parkinSpaceQuantity =  snapshot.data!.length;
-    globals.currentParkingSpaces = snapshot.data!;
     snapshot.data!.forEach((parkingSpace) {
-      
       if (parkingSpace.getOwnerId!
               .compareTo(FirebaseAuth.instance.currentUser!.uid) ==
           0) {
@@ -74,18 +71,18 @@ class FirebaseServices {
     globals.userData.setOwnedParkingSpaces = ownedSpaces;
   }
 
-  // Stream<List<ParkingSpace>> getParkingSpacesFromDatabase() {
-  //   _spaces = FirebaseFirestore.instance
-  //       .collection('parking-spaces')
-  //       .snapshots()
-  //       .map((snapshot) => snapshot.docs
-  //           .map<ParkingSpace>((doc) => ParkingSpace.fromJson(doc.data()))
-  //           .toList());
+  Stream<List<ParkingSpace>> getParkingSpacesFromDatabase() {
+    _spaces = FirebaseFirestore.instance
+        .collection('parking-spaces')
+        .snapshots()
+        .map((snapshot) => snapshot.docs
+            .map<ParkingSpace>((doc) => ParkingSpace.fromJson(doc.data()))
+            .toList());
 
-  //   return _spaces;
-  // }
+    return _spaces;
+  }
 
-  Future<Set<Marker>> getMarkers(BuildContext context, List<ParkingSpace> spaces) async {
+  Future<Set<Marker>> getMarkers(BuildContext context) async {
     markers = {};
     late BitmapDescriptor reservableMarker, nonReservableMarker, monthlyMarker;
 
@@ -101,8 +98,10 @@ class FirebaseServices {
       monthlyMarker = value;
     });
 
-      //globals.currentParkingSpaces = value;
-      spaces.forEach((parkingSpace) {
+    await _spaces.first.then((value) {
+      globals.parkinSpaceQuantity = value.length;
+      globals.currentParkingSpaces = value;
+      value.forEach((parkingSpace) {
         if (parkingSpace.isDisabled == false) {
           markers.add(
             Marker(
@@ -132,6 +131,7 @@ class FirebaseServices {
           );
         }
       });
+    });
     return markers;
   }
 
@@ -189,6 +189,15 @@ class FirebaseServices {
     return _nearbyParkings;
   }
 
+  static Future<QuerySnapshot<Map<String, dynamic>>> getMonthlyParkingSpaces(){
+    return FirebaseFirestore.instance
+        .collection('parking-spaces')
+        .where("dailyOrMonthly", isEqualTo: "Monthly")
+        .snapshots()
+        .first
+        .then((snapshot) => snapshot);
+  }
+
   static List<ParkingSpace> getHighestRatedParkings() {
     List<ParkingSpace> highRatedSpaces = [];
 
@@ -207,6 +216,15 @@ class FirebaseServices {
     }
 
     return highRatedSpaces;
+  }
+
+  static Future<QuerySnapshot<Map<String, dynamic>>>
+      getParkingSpaces() async {
+    return FirebaseFirestore.instance
+        .collection('parking-spaces')
+        .snapshots()
+        .first
+        .then((snapshot) => snapshot);
   }
 
   static Future<QuerySnapshot<Map<String, dynamic>>>

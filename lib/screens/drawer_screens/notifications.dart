@@ -58,7 +58,7 @@ class _NotificationsState extends State<Notifications> {
               });
             }
 
-            return ListView.builder(
+            return notifications.isNotEmpty ? ListView.builder(
               itemCount: notifications.length,
               itemBuilder: (context, index) {
                 return InkWell(
@@ -183,6 +183,24 @@ class _NotificationsState extends State<Notifications> {
                   ),
                 );
               },
+            ) : Center(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: const [
+                  Icon(
+                    Icons.info_outline,
+                    color: Colors.grey,
+                  ),
+                  SizedBox(width: 10),
+                  Text(
+                    "No notifications to show.",
+                    style: TextStyle(
+                      color: Colors.grey,
+                      fontSize: 16,
+                    ),
+                  ),
+                ],
+              ),
             );
           }),
     );

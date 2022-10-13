@@ -922,7 +922,7 @@ class InfoReviewsCaretaker extends StatelessWidget {
                 const SizedBox(height: 10),
                 GalleryImage(
                   titleGallery: "Business Certificates",
-                  numOfShowImages: certificatesUrl.length,
+                  numOfShowImages: 3,
                   imageUrls: certificatesUrl,
                 ),
               ],
