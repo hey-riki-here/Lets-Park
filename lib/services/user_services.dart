@@ -142,7 +142,7 @@ class UserServices {
                     .compareTo(now) ==
                 1) &&
             parking.isInProgress == false) {
-          parkingSessionsStreams.pause();
+          // parkingSessionsStreams.pause();
           await userParkings.doc(parking.getParkingId).update({
             'inProgress': true,
             'upcoming': false,
@@ -163,12 +163,16 @@ class UserServices {
             "Parking session started",
             "Your parking session has started. Click View Parking to view parking session details.",
           );
-          parkingSessionsStreams.resume();
+
+          // parkingSessionsStreams.resume();
+
         } else if (_getDateTimeFromMillisecondEpoch(parking.getArrival!)
                     .compareTo(now) ==
                 1 &&
             parking.isUpcoming == false) {
-          parkingSessionsStreams.pause();
+
+          // parkingSessionsStreams.pause();
+
           await userParkings.doc(parking.getParkingId).update({
             'inProgress': false,
             'upcoming': true,
@@ -184,7 +188,9 @@ class UserServices {
             'upcoming': true,
             'inHistory': false,
           });
-          parkingSessionsStreams.resume();
+
+          // parkingSessionsStreams.resume();
+
         } else if ((_getDateTimeFromMillisecondEpoch(parking.getArrival!)
                         .compareTo(now) ==
                     -1 &&
@@ -195,41 +201,46 @@ class UserServices {
                             .compareTo(now) ==
                         -1)) &&
             parking.isInHistory == false) {
-          parkingSessionsStreams.pause();
+
+          // parkingSessionsStreams.pause();
+
           await userParkings.doc(parking.getParkingId).update({
             'inProgress': false,
             'upcoming': false,
             'inHistory': true,
           }).then((_) async {
+
             // int notifLength = await UserServices.getUserNotificationLength(
             //   parking.getParkingOwner!,
             // );
-            UserServices.notifyUser(
-              "NOTIF" + globals.userData.getUserNotifications!.length.toString(),
-              parking.getParkingOwner!,
-              UserNotification(
-                "NOTIF" + globals.userData.getUserNotifications!.length.toString(),
-                parking.getParkingSpaceId!,
-                FirebaseAuth.instance.currentUser!.photoURL!,
-                FirebaseAuth.instance.currentUser!.displayName!,
-                "finished parking in your parking space. Give him a rate now.",
-                false,
-                true,
-                parking.getDeparture!,
-                false,
-                false,
-              ),
-            );
+
+            // UserServices.notifyUser(
+            //   parking.getParkingOwner!,
+            //   UserNotification(
+            //     "",
+            //     parking.getParkingSpaceId!,
+            //     parking.getParkingId!,
+            //     FirebaseAuth.instance.currentUser!.photoURL!,
+            //     FirebaseAuth.instance.currentUser!.displayName!,
+            //     "finished parking in your parking space. Give him a rate now.",
+            //     false,
+            //     true,
+            //     parking.getDeparture!,
+            //     false,
+            //     false,
+            //   ),
+            // );
 
             // notifLength = await UserServices.getUserNotificationLength(
             //   FirebaseAuth.instance.currentUser!.uid,
             // );
+
             UserServices.notifyUser(
-              "NOTIF" + globals.userData.getUserNotifications!.length.toString(),
               FirebaseAuth.instance.currentUser!.uid,
               UserNotification(
-                "NOTIF" + globals.userData.getUserNotifications!.length.toString(),
+                "",
                 parking.getParkingSpaceId!,
+                parking.getParkingId!,
                 FirebaseAuth.instance.currentUser!.photoURL!,
                 FirebaseAuth.instance.currentUser!.displayName!,
                 "How did the parking went? Share your thoughts now.",
@@ -238,25 +249,31 @@ class UserServices {
                 parking.getDeparture!,
                 false,
                 false,
+                false,
+                "",
+                "",
+                "",
               ),
             );
           });
 
-          await parkingSpacesDb
-              .doc(parking.getParkingSpaceId)
-              .collection("parking-sessions")
-              .doc(parking.getParkingId)
-              .update({
-            'inProgress': false,
-            'upcoming': false,
-            'inHistory': true,
-          });
+          // await parkingSpacesDb
+          //     .doc(parking.getParkingSpaceId)
+          //     .collection("parking-sessions")
+          //     .doc(parking.getParkingId)
+          //     .update({
+          //   'inProgress': false,
+          //   'upcoming': false,
+          //   'inHistory': true,
+          // });
 
           NotificationServices.showNotification(
             "Parking session ended",
             "Your parking session has ended. Click View Parking to view parking session details.",
           );
-          parkingSessionsStreams.resume();
+
+          // parkingSessionsStreams.resume();
+
         }
       }
     } on Exception catch (e) {}
@@ -295,7 +312,9 @@ class UserServices {
                       .compareTo(now) ==
                   1) &&
               parking.isInProgress == false) {
-            ownedParkingSessionsStreams.pause();
+
+            // ownedParkingSessionsStreams.pause();
+
             await parkingSpacesDb
                 .doc(parking.getParkingSpaceId)
                 .collection("parking-sessions")
@@ -305,7 +324,9 @@ class UserServices {
               'upcoming': false,
               'inHistory': false,
             });
-            ownedParkingSessionsStreams.resume();
+
+            // ownedParkingSessionsStreams.resume();
+
           } else if ((_getDateTimeFromMillisecondEpoch(parking.getArrival!)
                           .compareTo(now) ==
                       -1 &&
@@ -316,7 +337,9 @@ class UserServices {
                               .compareTo(now) ==
                           -1)) &&
               parking.isInHistory == false) {
-            ownedParkingSessionsStreams.pause();
+
+            // ownedParkingSessionsStreams.pause();
+
             await parkingSpacesDb
                 .doc(parking.getParkingSpaceId)
                 .collection("parking-sessions")
@@ -326,27 +349,37 @@ class UserServices {
               'upcoming': false,
               'inHistory': true,
             });
-            ownedParkingSessionsStreams.resume();
+
+            // ownedParkingSessionsStreams.resume();
 
             // int notifLength = await UserServices.getUserNotificationLength(
             //   FirebaseAuth.instance.currentUser!.uid,
             // );
-
+            
             UserServices.notifyUser(
-              "NOTIF" + globals.userData.getUserNotifications!.length.toString(),
               parking.getParkingOwner!,
               UserNotification(
-                "NOTIF" + globals.userData.getUserNotifications!.length.toString(),
+                "",
                 parking.getParkingSpaceId!,
+                parking.getParkingId!,
                 parking.getDriverImage!,
                 parking.getDriver!,
-                "finished parking in your parking space. Give him a rate now.",
+                "finished parking in your parking space.",
                 false,
                 true,
                 now.millisecondsSinceEpoch,
                 false,
                 false,
+                false,
+                "",
+                "",
+                "",
               ),
+            );
+
+            NotificationServices.showNotification(
+              "Parking session ended",
+              "${parking.getDriver!} finished parking in your parking space.",
             );
           }
         });
@@ -354,13 +387,16 @@ class UserServices {
     });
   }
 
-  static void notifyUser(
-      String notifId, String userId, UserNotification notif) async {
+  // TODO: Checkout NR, Checkout M - add await setPayedToFalse
+
+  static Future<void> notifyUser(String userId, UserNotification notif) async {
     final docUser = FirebaseFirestore.instance
         .collection('user-data')
         .doc(userId)
         .collection("notifications")
-        .doc(notifId);
+        .doc();
+
+    notif.setNotificationId = docUser.id;
 
     await docUser.set(notif.toJson());
   }
@@ -492,7 +528,7 @@ class UserServices {
     });
   }
 
-  static void setPayedToFalse(String uid) async {
+  static Future<void> setPayedToFalse(String uid) async {
     return await FirebaseFirestore.instance
         .collection('user-data')
         .doc(uid)
@@ -567,16 +603,16 @@ class UserServices {
         .doc(session.getParkingId!)
         .update(session.toJson());
 
-    int notifLength = await UserServices.getUserNotificationLength(
-      session.getParkingOwner!,
-    );
+    // int notifLength = await UserServices.getUserNotificationLength(
+    //   session.getParkingOwner!,
+    // );
 
     UserServices.notifyUser(
-      "NOTIF" + notifLength.toString(),
       session.getParkingOwner!,
       UserNotification(
-        "NOTIF" + notifLength.toString(),
+        "",
         session.getParkingSpaceId!,
+        session.getParkingId!,
         FirebaseAuth.instance.currentUser!.photoURL ??
             "https://cdn4.iconfinder.com/data/icons/user-people-2/48/5-512.png",
         FirebaseAuth.instance.currentUser!.displayName!,
@@ -586,19 +622,23 @@ class UserServices {
         session.getDeparture!,
         false,
         false,
+        false,
+        "",
+        "",
+        "",
       ),
     );
 
-    notifLength = await UserServices.getUserNotificationLength(
-      FirebaseAuth.instance.currentUser!.uid,
-    );
+    // notifLength = await UserServices.getUserNotificationLength(
+    //   FirebaseAuth.instance.currentUser!.uid,
+    // );
 
     UserServices.notifyUser(
-      "NOTIF" + notifLength.toString(),
       FirebaseAuth.instance.currentUser!.uid,
       UserNotification(
-        "NOTIF" + notifLength.toString(),
+        "",
         session.getParkingSpaceId!,
+        session.getParkingId!,
         FirebaseAuth.instance.currentUser!.photoURL ??
             "https://cdn4.iconfinder.com/data/icons/user-people-2/48/5-512.png",
         FirebaseAuth.instance.currentUser!.displayName!,
@@ -608,11 +648,15 @@ class UserServices {
         session.getDeparture!,
         false,
         false,
+        false,
+        "",
+        "",
+        "",
       ),
     );
   }
 
-  static Future<void> extendParking(
+  static Future<bool> extendParking(
     int hour,
     int minute,
     Parking session,
@@ -655,9 +699,45 @@ class UserServices {
         return isAvailable;
       });
     }
+
     Navigator.pop(
       context,
     );
+
+    return isAvailable;
+  }
+
+  static Future<void> updateDepartureOnParkingSession(Parking session, int departure) async {
+    await FirebaseFirestore.instance
+        .collection('user-data')
+        .doc(FirebaseAuth.instance.currentUser!.uid)
+        .collection("user-parkings")
+        .doc(session.getParkingId)
+        .update({
+          "departure" : departure,
+        });
+  }
+
+  static Future<void> updateDurationOnParkingSession(Parking session, String duration) async {
+    await FirebaseFirestore.instance
+        .collection('user-data')
+        .doc(FirebaseAuth.instance.currentUser!.uid)
+        .collection("user-parkings")
+        .doc(session.getParkingId)
+        .update({
+          "duration" : duration,
+        });
+  }
+
+  static Future<void> setExtensionDuration(Parking session, String duration) async {
+    await FirebaseFirestore.instance
+        .collection('user-data')
+        .doc(FirebaseAuth.instance.currentUser!.uid)
+        .collection("user-parkings")
+        .doc(session.getParkingId)
+        .update({
+          "extensionDuration" : duration,
+        });
   }
 
   StreamSubscription get getParkingSessionsStream => parkingSessionsStreams;

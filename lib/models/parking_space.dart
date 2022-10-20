@@ -22,6 +22,7 @@ class ParkingSpace {
   String? _paypalEmail;
   List<String>? _certificates = [];
   bool? _disabled = false;
+  int? _creditScore = 10;
 
   ParkingSpace();
 
@@ -46,6 +47,7 @@ class ParkingSpace {
     String? paypalEmail,
     bool? disabled,
     List<String>? certificates,
+    int? creditScore,
   ) {
     _id = id;
     _ownerId = ownerId;
@@ -67,6 +69,7 @@ class ParkingSpace {
     _paypalEmail = paypalEmail;
     _disabled = disabled;
     _certificates = certificates;
+    _creditScore = creditScore;
   }
 
   String? get getSpaceId => _id;
@@ -195,6 +198,12 @@ class ParkingSpace {
     _certificates = certificates;
   }
 
+  int? get getCreditScore => _creditScore;
+
+  set setCreditScore(int? creditScore) {
+    _creditScore = creditScore;
+  }
+
   @override
   String toString() {
     return "ParkingSpace [ $_ownerId , $_imageUrl , $_address, $_latLng , $_capacity , $_rating , $_info , $_verticalClearance, $_type , $_features, $_isFull]";
@@ -221,6 +230,7 @@ class ParkingSpace {
         'paypalEmail': _paypalEmail,
         'disabled': _disabled,
         'certificates' : _certificates,
+        'creditScore' : _creditScore,
       };
 
   static ParkingSpace fromJson(Map<String, dynamic> json) {
@@ -253,6 +263,7 @@ class ParkingSpace {
       json['paypalEmail'],
       json['disabled'],
       certificates,
+      json['creditScore'],
     );
   }
 }

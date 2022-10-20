@@ -11,7 +11,15 @@ import 'package:lets_park/screens/logged_in_screens/google_map_screen.dart';
 import 'package:lets_park/services/parking_space_services.dart';
 import 'package:lets_park/services/user_services.dart';
 import 'package:lets_park/shared/navigation_drawer.dart';
+import 'package:lets_park/shared/navigation_drawer.dart';
 import 'package:numberpicker/numberpicker.dart';
+import 'package:lets_park/screens/popups/report_space.dart';
+import 'package:lets_park/models/parking_space.dart';
+import 'package:lets_park/screens/popups/checkout.dart';
+import 'package:lets_park/screens/popups/checkout_monthly.dart';
+import 'package:lets_park/screens/popups/notice_dialog.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:lets_park/screens/popups/extend_parking.dart';
 
 class MyParkings extends StatefulWidget {
   final int _pageId = 3;
@@ -44,15 +52,6 @@ class _MyParkingsState extends State<MyParkings> {
       child: Scaffold(
         key: _scaffoldKey,
         appBar: AppBar(
-          actions: [
-            IconButton(
-              onPressed: () {},
-              icon: const Icon(
-                Icons.stop,
-                color: Colors.black,
-              ),
-            ),
-          ],
           backgroundColor: Colors.white,
           leading: IconButton(
             icon: const Icon(Icons.menu, color: Colors.black),
@@ -540,111 +539,15 @@ class InProgressState extends State<InProgress> {
                                           Column(
                                             children: [
                                               IconButton(
-                                                onPressed: () {
-                                                  showDialog<int>(
-                                                    context: context,
-                                                    builder:
-                                                        (BuildContext context) {
-                                                      return AlertDialog(
-                                                        title: Center(
-                                                          child: Text(
-                                                            "Select parking duration (HH:MM)",
-                                                            style: TextStyle(
-                                                              fontSize: 15,
-                                                              color: Colors.blue
-                                                                  .shade900,
-                                                            ),
-                                                          ),
-                                                        ),
-                                                        content:
-                                                            StatefulBuilder(
-                                                          builder: (context,
-                                                              sbSetState) {
-                                                            return Row(
-                                                              mainAxisAlignment:
-                                                                  MainAxisAlignment
-                                                                      .center,
-                                                              children: [
-                                                                NumberPicker(
-                                                                  textStyle:
-                                                                      const TextStyle(
-                                                                    color: Colors
-                                                                        .grey,
-                                                                  ),
-                                                                  value:
-                                                                      _selectedHour,
-                                                                  minValue: 0,
-                                                                  maxValue: 23,
-                                                                  onChanged:
-                                                                      (value) {
-                                                                    setState(
-                                                                      () {
-                                                                        _selectedHour =
-                                                                            value;
-                                                                      },
-                                                                    );
-                                                                    sbSetState(
-                                                                      () {
-                                                                        _selectedHour =
-                                                                            value;
-                                                                      },
-                                                                    );
-                                                                  },
-                                                                ),
-                                                                NumberPicker(
-                                                                  textStyle:
-                                                                      const TextStyle(
-                                                                    color: Colors
-                                                                        .grey,
-                                                                  ),
-                                                                  value:
-                                                                      _selectedMinute,
-                                                                  minValue: 0,
-                                                                  maxValue: 59,
-                                                                  onChanged:
-                                                                      (value) {
-                                                                    setState(
-                                                                      () => _selectedMinute =
-                                                                          value,
-                                                                    );
-                                                                    sbSetState(
-                                                                      () => _selectedMinute =
-                                                                          value,
-                                                                    );
-                                                                  },
-                                                                ),
-                                                              ],
-                                                            );
-                                                          },
-                                                        ),
-                                                        actions: [
-                                                          TextButton(
-                                                            onPressed: () {
-                                                              Navigator.pop(
-                                                                context,
-                                                              );
-                                                            },
-                                                            child: const Text(
-                                                              "Cancel",
-                                                            ),
-                                                          ),
-                                                          TextButton(
-                                                            onPressed: () {
-                                                              UserServices
-                                                                  .extendParking(
-                                                                _selectedHour,
-                                                                _selectedMinute,
-                                                                parkings[index],
-                                                                context,
-                                                              );
-                                                            },
-                                                            child: const Text(
-                                                              "Confirm",
-                                                            ),
-                                                          ),
-                                                        ],
-                                                      );
-                                                    },
+                                                onPressed: () async {
+                                                  Navigator.push(
+                                                    context,
+                                                    MaterialPageRoute(
+                                                      fullscreenDialog: true,
+                                                      builder: (context) => ExtendParking(
+                                                        parking: parkings[index],
+                                                      ),
+                                                    ),
                                                   );
                                                 },
                                                 icon: Icon(
@@ -1343,6 +1246,14 @@ class InfoPopup extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Parking Information"),
+        actions: [
+          PopupMenuButton<MenuItem>(
+            itemBuilder: (context) => [
+              ...MenuItems.items.map(buildItem).toList(),
+            ],
+            onSelected: (item) => onSelected(context, item, parking),
+          ),
+        ],
       ),
       body: Padding(
         padding: const EdgeInsets.all(16),
@@ -1385,37 +1296,6 @@ class InfoPopup extends StatelessWidget {
                     Text(
                       parking.getAddress!,
                       style: _infoStyle,
-                    ),
-                    const SizedBox(height: 5),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.star,
-                          color: Colors.yellow.shade600,
-                          size: 15,
-                        ),
-                        Icon(
-                          Icons.star,
-                          color: Colors.yellow.shade600,
-                          size: 15,
-                        ),
-                        Icon(
-                          Icons.star,
-                          color: Colors.yellow.shade600,
-                          size: 15,
-                        ),
-                        Icon(
-                          Icons.star,
-                          color: Colors.yellow.shade600,
-                          size: 15,
-                        ),
-                        Icon(
-                          Icons.star,
-                          color: Colors.yellow.shade600,
-                          size: 15,
-                        ),
-                      ],
                     ),
                   ],
                 ),
@@ -1508,7 +1388,7 @@ class InfoPopup extends StatelessWidget {
             ),
             const SizedBox(height: 10),
             Text(
-              parking.getPrice.toString(),
+              "${parking.getPrice.toString()}.00",
               style: const TextStyle(
                 fontSize: 20,
               ),
@@ -1516,6 +1396,115 @@ class InfoPopup extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+
+  PopupMenuItem<MenuItem> buildItem(MenuItem item) => PopupMenuItem<MenuItem>(
+    value: item,
+    child: Row(
+      children: [
+        Icon(item.icon, color: Colors.black54, size: 20),
+        const SizedBox(width: 15),
+        Text(item.text),
+      ],
+    ),
+  );
+
+  void onSelected(BuildContext context, MenuItem item, Parking parking) async {
+    switch(item){
+      case MenuItems.itemBookAgain:
+        ParkingSpace space = await ParkingSpaceServices.getParkingSpace(parking.getParkingSpaceId!);
+
+        globals.nonReservable = space;
+        space.getDailyOrMonthly!.compareTo("Monthly") == 0
+            ? Navigator.push(
+                context,
+                MaterialPageRoute(
+                  fullscreenDialog: true,
+                  builder: (context) => CheckoutMonthly(
+                    parkingSpace: space,
+                  ),
+                ),
+              )
+            : space.getType!.compareTo("Reservable") == 0
+                ? Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      fullscreenDialog: true,
+                      builder: (context) => Checkout(
+                        parkingSpace: space,
+                      ),
+                    ),
+                  )
+                : showDialog(
+                    context: context,
+                    barrierDismissible: true,
+                    builder: (context) => NoticeDialog(
+                      imageLink: "assets/logo/lets-park-logo.png",
+                      header:
+                          "You're about to rent a non-reservable space...",
+                      parkingAreaAddress: space.getAddress!,
+                      message:
+                          "Please confirm that you are currently at the parking location.",
+                      forNonreservableConfirmation: true,
+                    ),
+                  );
+
+        break;
+      case MenuItems.itemReportSpace:
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (context) => WillPopScope(
+            onWillPop: () async => false,
+            child: const NoticeDialog(
+              imageLink: "assets/logo/lets-park-logo.png",
+              message: "Loading please wait...",
+              forLoading: true,
+            ),
+          ),
+        );
+
+        bool canReport = await ParkingSpaceServices.checkIsSpaceReported(parking.getParkingSpaceId!, parking.getParkingId!);
+
+        Navigator.pop(context);
+
+        if (!canReport){
+          await Navigator.push(
+            context,
+            MaterialPageRoute(
+              fullscreenDialog: true,
+              builder: (context) => ReportSpace(
+                spaceId: parking.getParkingSpaceId!,
+                parkingId: parking.getParkingId!,
+              ),
+            ),
+          );
+        } else {
+          _showDialog(
+            context,
+            "assets/logo/lets-park-logo.png",
+            "You can only report a parking space once.",
+          );
+        }
+        
+        break;
+    }
+  }
+
+  Future _showDialog(
+    BuildContext context,
+    String image,
+    String message,
+  ) async {
+    return showDialog(
+      context: context,
+      builder: (context) {
+        return (NoticeDialog(
+          imageLink: image,
+          message: message,
+        ));
+      },
     );
   }
 
@@ -1531,4 +1520,32 @@ class InfoPopup extends StatelessWidget {
     formattedTime += DateFormat("h:mm a").format(time);
     return formattedTime;
   }
+}
+
+class MenuItem {
+  final String text;
+  final IconData icon;
+
+  const MenuItem({
+    required this.text,
+    required this.icon,
+  });
+}
+
+class MenuItems {
+
+  static const List<MenuItem> items = [
+    itemBookAgain,
+    itemReportSpace,
+  ];
+
+  static const itemBookAgain = MenuItem(
+    text: "Book again",
+    icon: Icons.book_outlined,
+  );
+
+  static const itemReportSpace = MenuItem(
+    text: "Report space",
+    icon: Icons.report_outlined,
+  );
 }

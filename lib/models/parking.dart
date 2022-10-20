@@ -2,6 +2,8 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 class Parking {
   String? _parkingSpaceId;
+  String? _type;
+  String? _dailyOrMonthly;
   String? _parkingId;
   String? _imageUrl;
   String? _ownerId;
@@ -21,9 +23,12 @@ class Parking {
   bool? _inProgress;
   bool? _upcoming;
   bool? _inHistory;
+  bool? _reported = false;
 
   Parking(
     String? parkingSpaceId,
+    String? type,
+    String? dailyOrMonthly,
     String? parkingId,
     String? imageUrl,
     String? ownerId,
@@ -43,8 +48,11 @@ class Parking {
     bool? inProgress,
     bool? upcoming,
     bool? inHistory,
+    bool? reported,
   ) {
     _parkingSpaceId = parkingSpaceId;
+    _type = type;
+    _dailyOrMonthly = dailyOrMonthly;
     _parkingId = parkingId;
     _imageUrl = imageUrl;
     _ownerId = ownerId;
@@ -64,9 +72,14 @@ class Parking {
     _inProgress = inProgress;
     _upcoming = upcoming;
     _inHistory = inHistory;
+    _reported = reported;
   }
 
   String? get getParkingSpaceId => _parkingSpaceId;
+
+  String? get getType => _type;
+
+  String? get getDailyOrMonthly => _dailyOrMonthly;
 
   String? get getParkingId => _parkingId;
 
@@ -154,6 +167,12 @@ class Parking {
     _inHistory = inHistory;
   }
 
+  bool? get isReported => _reported;
+
+  set setReported(bool? reported) {
+    _reported = reported;
+  }
+
   @override
   String toString() {
     return "Parking[$_parkingId, $_driver, $_stars, $_address, $_plateNumber, $_arrival, $_departure, $_duration, $_price, $_inProgress]";
@@ -161,6 +180,8 @@ class Parking {
 
   Map<String, dynamic> toJson() => {
         'parkingSpaceId': _parkingSpaceId,
+        'type': _type,
+        'dailyOrMonthly': _dailyOrMonthly,
         'parkingId': _parkingId,
         'imageUrl': _imageUrl,
         'ownerId': _ownerId,
@@ -180,11 +201,14 @@ class Parking {
         'inProgress': _inProgress,
         'upcoming': _upcoming,
         'inHistory': _inHistory,
+        'reported': _reported,
       };
 
   static Parking fromJson(Map<String, dynamic> json) {
     return Parking(
       json['parkingSpaceId'],
+      json['type'],
+      json['dailyOrMonthly'],
       json['parkingId'],
       json['imageUrl'],
       json['ownerId'],
@@ -204,6 +228,7 @@ class Parking {
       json['inProgress'],
       json['upcoming'],
       json['inHistory'],
+      json['reported'],
     );
   }
 }

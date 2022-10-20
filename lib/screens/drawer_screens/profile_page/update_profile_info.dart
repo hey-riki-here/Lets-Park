@@ -180,6 +180,7 @@ class _UpdateProfileState extends State<UpdateProfile> {
                                           Navigator.pop(context);
                                           setState(() {
                                             user = FirebaseAuth.instance.currentUser!;
+                                            photoUrl = user.photoURL!;
                                             widget.notifyParent();
                                           });
                                         } on Exception catch (e) {}

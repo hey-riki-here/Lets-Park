@@ -11,6 +11,10 @@ import 'package:lets_park/screens/popups/review_parking_area.dart';
 import 'package:lets_park/services/user_services.dart';
 import 'package:lets_park/shared/navigation_drawer.dart';
 import 'package:lets_park/shared/shared_widgets.dart';
+import 'package:lets_park/screens/popups/parking_information.dart';
+import 'package:lets_park/screens/popups/extension_info.dart';
+import 'package:lets_park/models/parking.dart';
+import 'package:lets_park/services/parking_space_services.dart';
 
 class Notifications extends StatefulWidget {
   final int _pageId = 4;
@@ -65,6 +69,53 @@ class _NotificationsState extends State<Notifications> {
                   splashColor: Colors.blue.shade100,
                   highlightColor: Colors.blue.shade100,
                   onTap: () async {
+                    if (notifications[index].isForExtension!){
+                      Parking parking = await ParkingSpaceServices.getParkingSession(notifications[index].getParkingSpaceId!, notifications[index].getParkingId!);
+                      
+                      if (!notifications[index].isNotifRead!){
+                        UserServices.updateNotificationStatus(
+                          FirebaseAuth.instance.currentUser!.uid,
+                          notifications[index].getNotificationId!,
+                        );
+                      }
+                      
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => ExtensionInformation(
+                            parking: parking,
+                            notificationDate: notifications[index].getNotificationDate!,
+                            extensionInfo: notifications[index].getExtensionInfo!,
+                            oldDeparture: notifications[index].getOldDeparture!,
+                            oldDuration: notifications[index].getOldDuration!,
+                          ),
+                        ),
+                      );
+                      return;
+                    }
+
+                    if (notifications[index].isNewParking! || notifications[index].getMessage!.compareTo("finished parking in your parking space.") == 0){
+                      Parking parking = await ParkingSpaceServices.getParkingSession(notifications[index].getParkingSpaceId!, notifications[index].getParkingId!);
+                      
+                      if (!notifications[index].isNotifRead!){
+                        UserServices.updateNotificationStatus(
+                          FirebaseAuth.instance.currentUser!.uid,
+                          notifications[index].getNotificationId!,
+                        );
+                      }
+                      
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => ParkingInformation(
+                            parking: parking,
+                            notificationDate: notifications[index].getNotificationDate!,
+                          ),
+                        ),
+                      );
+                      return;
+                    }
+
                     if (notifications[index].isFinishedReviewing!) {
                       showDialog(
                         context: context,

@@ -9,6 +9,9 @@ import 'package:lets_park/screens/popups/notice_dialog.dart';
 import 'package:lets_park/globals/globals.dart' as globals;
 import 'package:lets_park/services/parking_space_services.dart';
 import 'package:lets_park/services/user_services.dart';
+import 'package:lets_park/main.dart';
+import 'package:lets_park/models/report.dart';
+import 'package:lets_park/services/world_time_api.dart';
 
 class ReviewParkingArea extends StatefulWidget {
   final String spaceId;
@@ -224,27 +227,75 @@ class _ReviewParkingAreaState extends State<ReviewParkingArea> {
           child: ElevatedButton(
             onPressed: rate == 0
                 ? null
-                : () {
-                    UserServices.updateReviewNotificationStatus(
-                      FirebaseAuth.instance.currentUser!.uid,
-                      widget.notificationId,
-                    );
+                : () async {
 
-                    ParkingSpaceServices.updateParkingReviews(
-                      widget.spaceId,
-                      Review(
-                        FirebaseAuth.instance.currentUser!.photoURL,
-                        FirebaseAuth.instance.currentUser!.displayName,
-                        rate,
-                        _infoController.text.trim(),
-                        selectedTags,
+                  showDialog(
+                    context: context,
+                    barrierDismissible: false,
+                    builder: (context) => WillPopScope(
+                      onWillPop: () async => false,
+                      child: const NoticeDialog(
+                        imageLink: "assets/logo/lets-park-logo.png",
+                        message: "Saving review...",
+                        forLoading: true,
                       ),
-                    );
-                    ParkingSpaceServices.updateParkingSpaceRating(
-                      widget.spaceId,
+                    ),
+                  );
+
+                  UserServices.updateReviewNotificationStatus(
+                    FirebaseAuth.instance.currentUser!.uid,
+                    widget.notificationId,
+                  );
+
+                  await ParkingSpaceServices.updateParkingReviews(
+                    widget.spaceId,
+                    Review(
+                      FirebaseAuth.instance.currentUser!.photoURL,
+                      FirebaseAuth.instance.currentUser!.displayName,
                       rate,
-                      context,
-                    );
+                      _infoController.text.trim(),
+                      selectedTags,
+                    ),
+                  );
+
+                  await ParkingSpaceServices.updateParkingSpaceRating(
+                    widget.spaceId,
+                    rate,
+                  );
+
+                  if (rate >= 4){
+                    DateTime now = DateTime(0, 0, 0, 0, 0);
+                    await WorldTimeServices.getDateTimeNow().then((time) {
+                      now = DateTime(
+                        time.year,
+                        time.month,
+                        time.day,
+                        time.hour,
+                        time.minute,
+                      );
+                    });
+
+                    Report report = Report("", FirebaseAuth.instance.currentUser!.displayName!, "Reviewed 4-5 star", now.millisecondsSinceEpoch, "Merit");
+                
+                    await ParkingSpaceServices.addReport(widget.spaceId, report);
+
+                    await ParkingSpaceServices.updateCreditScore(widget.spaceId, 1);
+                  }
+
+                  navigatorKey.currentState!.popUntil((route) => route.isFirst);
+                  showDialog(
+                    context: context,
+                    barrierDismissible: false,
+                    builder: (context) => WillPopScope(
+                      onWillPop: () async => false,
+                      child: const NoticeDialog(
+                        imageLink: "assets/logo/lets-park-logo.png",
+                        message:
+                            "Thanks for reviewing!\nYour review will help others to choose a better parking.",
+                        forLoading: false,
+                      ),
+                    ),
+                  );
                   },
             child: const Text(
               "Submit",

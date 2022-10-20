@@ -13,6 +13,7 @@ import 'package:lets_park/services/parking_space_services.dart';
 import 'package:lets_park/shared/shared_widgets.dart';
 import 'package:lets_park/models/review.dart';
 import 'package:lets_park/globals/globals.dart' as globals;
+import 'package:lets_park/screens/drawer_screens/manage_space/credit_score_page.dart';
 
 class Space extends StatefulWidget {
   final ParkingSpace space;
@@ -599,6 +600,20 @@ class _SpaceState extends State<Space> {
                             }
                           },
                           child: const Text("Update parking space"),
+                        ),
+                        TextButton(
+                          onPressed: (){
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (BuildContext context) => CreditScorePage(
+                                  spaceId: widget.space.getSpaceId!,
+                                  creditScore: widget.space.getCreditScore!,
+                                ),
+                              ),
+                            );
+                          },
+                          child: const Text("Credit score"),
                         ),
                         TextButton(
                           style: TextButton.styleFrom(

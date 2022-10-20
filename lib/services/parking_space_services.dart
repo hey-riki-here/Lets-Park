@@ -11,6 +11,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:lets_park/globals/globals.dart' as globals;
 import 'package:lets_park/main.dart';
 import 'package:lets_park/models/parking.dart';
+import 'package:lets_park/models/report.dart';
 import 'package:lets_park/models/parking_space.dart';
 import 'package:lets_park/models/review.dart';
 import 'package:lets_park/screens/popups/notice_dialog.dart';
@@ -135,6 +136,52 @@ class ParkingSpaceServices {
     return isAvailable;
   }
 
+  static Future<void> updateDepartureOnParkingSession(Parking session, int departure) async {
+    await FirebaseFirestore.instance
+        .collection('parking-spaces')
+        .doc(session.getParkingSpaceId!)
+        .collection("parking-sessions")
+        .doc(session.getParkingId)
+        .update({
+          "departure" : departure,
+        });
+  }
+
+  static Future<void> updateDurationOnParkingSession(Parking session, String duration) async {
+    await FirebaseFirestore.instance
+        .collection('parking-spaces')
+        .doc(session.getParkingSpaceId!)
+        .collection("parking-sessions")
+        .doc(session.getParkingId)
+        .update({
+          "duration" : duration,
+        });
+  }
+
+  static Future<void> setExtensionDuration(Parking session, String duration) async {
+    await FirebaseFirestore.instance
+        .collection('parking-spaces')
+        .doc(session.getParkingSpaceId!)
+        .collection("parking-sessions")
+        .doc(session.getParkingId)
+        .update({
+          "extensionDuration" : duration,
+        });
+  }
+  
+  static Future<String> getSpacePaypalEmail(String spaceId) async {
+    String paypal = "";
+    await FirebaseFirestore.instance
+        .collection('parking-spaces')
+        .doc(spaceId)
+        .get()
+        .then((value) {
+      paypal = value.data()!["paypalEmail"];
+    });
+
+    return paypal;
+  }
+
   static Stream<QuerySnapshot<Map<String, dynamic>>> getParkingSessionsDocs(
       String spaceId) {
     return FirebaseFirestore.instance
@@ -157,7 +204,7 @@ class ParkingSpaceServices {
     return dateTime;
   }
 
-  static void updateParkingReviews(
+  static Future<void> updateParkingReviews(
     String spaceId,
     Review review,
   ) async {
@@ -179,10 +226,9 @@ class ParkingSpaceServices {
         .snapshots();
   }
 
-  static void updateParkingSpaceRating(
+  static Future<void> updateParkingSpaceRating(
     String spaceId,
     double newRating,
-    BuildContext context,
   ) async {
     int reviewsLength = 0;
     double fiveStar = 0, fourStar = 0, threeStar = 0, twoStar = 0, oneStar = 0;
@@ -192,19 +238,6 @@ class ParkingSpaceServices {
         .doc(spaceId)
         .collection('parking-reviews')
         .snapshots();
-
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => WillPopScope(
-        onWillPop: () async => false,
-        child: const NoticeDialog(
-          imageLink: "assets/logo/lets-park-logo.png",
-          message: "Saving review...",
-          forLoading: true,
-        ),
-      ),
-    );
 
     await reviews.first.then((documents) {
       reviewsLength = documents.size;
@@ -236,20 +269,6 @@ class ParkingSpaceServices {
         .update({
       'rating': newRating,
     });
-    navigatorKey.currentState!.popUntil((route) => route.isFirst);
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => WillPopScope(
-        onWillPop: () async => false,
-        child: const NoticeDialog(
-          imageLink: "assets/logo/lets-park-logo.png",
-          message:
-              "Thanks for reviewing!\nYour review will help others to choose a better parking.",
-          forLoading: false,
-        ),
-      ),
-    );
   }
 
   static Row getStars(double stars) {
@@ -531,4 +550,81 @@ class ParkingSpaceServices {
         .first
         .then((value) => value.size);
   }
+
+  static Future<ParkingSpace> getParkingSpace(String spaceId) async {
+    return await FirebaseFirestore.instance
+        .collection('parking-spaces')
+        .doc(spaceId)
+        .get()
+        .then((value) => ParkingSpace.fromJson(value.data()!));
+  }
+
+  static Future<Parking> getParkingSession(String spaceId, String sessionId) async {
+    return await FirebaseFirestore.instance
+        .collection("parking-spaces")
+        .doc(spaceId)
+        .collection("parking-sessions")
+        .doc(sessionId)
+        .get()
+        .then((value) => Parking.fromJson(value.data()!));
+  }
+
+  static Future<void> addReport(String spaceId, Report report) async {
+    var docRef = FirebaseFirestore.instance
+        .collection("parking-spaces")
+        .doc(spaceId)
+        .collection("reports")
+        .doc();
+    
+    report.setReportId = docRef.id;
+
+    await docRef.set(report.toJson());
+  }
+
+  static Future<QuerySnapshot<Map<String, dynamic>>> getSpaceReports(String spaceId){
+    return FirebaseFirestore.instance
+        .collection('parking-spaces')
+        .doc(spaceId)
+        .collection("reports")
+        .snapshots()
+        .first
+        .then((snapshot) => snapshot);
+  }
+
+  static Future<void> setSpaceReported(String uid, String spaceId, String parkingId) async {
+    await FirebaseFirestore.instance
+        .collection("parking-spaces")
+        .doc(spaceId)
+        .collection("parking-sessions")
+        .doc(parkingId)
+        .update({
+      'reported': true,
+    });
+
+  }
+
+  static Future<bool> checkIsSpaceReported(String spaceId, String parkingId) async {
+    return await FirebaseFirestore.instance
+        .collection("parking-spaces")
+        .doc(spaceId)
+        .collection("parking-sessions")
+        .doc(parkingId)
+        .get()
+        .then((value) => value.data()!["reported"]);
+  }
+
+  static Future<void> updateCreditScore(String spaceId, int addPoint) async {
+    final docRef = FirebaseFirestore.instance
+      .collection("parking-spaces")
+      .doc(spaceId);
+
+    int creditScore = await docRef.get().then((value) => value.data()!["creditScore"]);
+    
+    creditScore += addPoint;
+
+    await docRef.update({
+      'creditScore': creditScore,
+    });
+  }
+
 }

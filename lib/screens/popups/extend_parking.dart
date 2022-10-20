@@ -18,6 +18,7 @@ import 'package:lets_park/models/parking_space.dart';
 import 'package:lets_park/screens/drawer_screens/profile_page/registered_cars.dart';
 import 'package:lets_park/screens/popups/notice_dialog.dart';
 import 'package:lets_park/screens/popups/successful_booking.dart';
+import 'package:lets_park/screens/popups/parking_extended.dart';
 import 'package:lets_park/services/parking_space_services.dart';
 import 'package:lets_park/services/user_services.dart';
 import 'package:lets_park/services/world_time_api.dart';
@@ -27,18 +28,18 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:url_launcher/url_launcher.dart' as launcher;
 
-class Checkout extends StatefulWidget {
-  final ParkingSpace parkingSpace;
-  const Checkout({
+class ExtendParking extends StatefulWidget {
+  final Parking parking;
+  const ExtendParking({
     Key? key,
-    required this.parkingSpace,
+    required this.parking,
   }) : super(key: key);
 
   @override
-  State<Checkout> createState() => _CheckoutState();
+  State<ExtendParking> createState() => _ExtendParkingState();
 }
 
-class _CheckoutState extends State<Checkout> {
+class _ExtendParkingState extends State<ExtendParking> {
   final GlobalKey<VehicleState> _vehicleState = GlobalKey();
   final GlobalKey<SetUpTimeState> _setupTimeState = GlobalKey();
   StreamSubscription? checkPayedStream;
@@ -53,52 +54,35 @@ class _CheckoutState extends State<Checkout> {
       checkPayedStream!.cancel();
     }
 
+    
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    final capacity = widget.parkingSpace.getCapacity!;
-    int availableSlot = 0;
-
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Rent details"),
+        title: const Text("Extend Parking"),
       ),
       backgroundColor: Colors.grey.shade100,
-      body: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-          stream: ParkingSpaceServices.getParkingSessionsDocs(
-              widget.parkingSpace.getSpaceId!),
-          builder: (context, snapshot) {
-            if (snapshot.hasData) {
-              int occupied = 0;
-              snapshot.data!.docs.forEach((parking) {
-                if (parking.data()["inProgress"] == true ||
-                    parking.data()["upcoming"] == true) {
-                  occupied++;
-                }
-              });
-              availableSlot = capacity - occupied;
-            }
-            return Padding(
-              padding: const EdgeInsets.all(12),
-              child: SingleChildScrollView(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Column(
-                      children: [
-                        SetUpTime(key: _setupTimeState),
-                        Vehicle(key: _vehicleState),
-                        //const PhotoPicker(),
-                        const Payment(),
-                      ],
-                    ),
-                  ],
-                ),
+      body: Padding(
+        padding: const EdgeInsets.all(12),
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Column(
+                children: [
+                  SetUpTime(key: _setupTimeState, parking: widget.parking),
+                  Vehicle(key: _vehicleState, plateNumber: widget.parking.getPlateNumber!),
+                  //const PhotoPicker(),
+                  const Payment(),
+                ],
               ),
-            );
-          }),
+            ],
+          ),
+        ),
+      ),
       bottomNavigationBar: Padding(
         padding: const EdgeInsets.symmetric(
           vertical: 8,
@@ -106,93 +90,19 @@ class _CheckoutState extends State<Checkout> {
         ),
         child: ElevatedButton(
           onPressed: () async {
-            if (!(_setupTimeState.currentState!.isTimeValid())) {
-              return;
-            }
-
-            if (_vehicleState.currentState!.getPlateNumber!
-                    .compareTo("Select plate number") ==
-                0) {
-              showAlertDialog("Please provide car's plate number.");
-              return;
-            }
-
-            if (FirebaseAuth.instance.currentUser!.emailVerified == false) {
-              return;
-            }
-
-            int qty = globals.userData.getUserParkings!.length + 1;
-            String parkingId = "PARKSESS" +
-                DateTime.now().millisecondsSinceEpoch.toString().toString() +
-                "$qty";
-
-            showDialog(
-              context: context,
-              barrierDismissible: false,
-              builder: (context) => WillPopScope(
-                onWillPop: () async => false,
-                child: const NoticeDialog(
-                  imageLink: "assets/logo/lets-park-logo.png",
-                  message: "Checking and verifying your booking...",
-                  forLoading: true,
-                ),
-              ),
+            
+            bool isAvailable = await UserServices.extendParking(
+              _setupTimeState.currentState!.getHour!,
+              _setupTimeState.currentState!.getMinute!,
+              widget.parking,
+              context,
             );
 
-            int paymentDate = 0;
-            await WorldTimeServices.getDateOnlyNow().then((date) {
-              paymentDate = date.millisecondsSinceEpoch;
-            });
-
-            Parking newParking = Parking(
-              widget.parkingSpace.getSpaceId,
-              widget.parkingSpace.getType,
-              widget.parkingSpace.getDailyOrMonthly,
-              parkingId,
-              widget.parkingSpace.getImageUrl,
-              widget.parkingSpace.getOwnerId,
-              widget.parkingSpace.getOwnerName,
-              FirebaseAuth.instance.currentUser!.displayName,
-              FirebaseAuth.instance.currentUser!.uid,
-              FirebaseAuth.instance.currentUser!.photoURL,
-              widget.parkingSpace.getRating!.toInt(),
-              widget.parkingSpace.getAddress,
-              [
-                widget.parkingSpace.getLatLng!.latitude,
-                widget.parkingSpace.getLatLng!.longitude
-              ],
-              _vehicleState.currentState!.getPlateNumber,
-              _setupTimeState.currentState!.getArrival!.millisecondsSinceEpoch,
-              _setupTimeState
-                  .currentState!.getDeparture!.millisecondsSinceEpoch,
-              paymentDate,
-              _setupTimeState.currentState!.getDuration,
-              _setupTimeState.currentState!.getParkingPrice,
-              false,
-              true,
-              false,
-              false,
-            );
-            bool isAvailable = true;
-            if (availableSlot > 0) {
-              isAvailable = true;
-            } else {
-              isAvailable =
-                  await ParkingSpaceServices.isParkingSpaceAvailableAtTimeRange(
-                widget.parkingSpace.getSpaceId,
-                _setupTimeState
-                    .currentState!.getArrival!.millisecondsSinceEpoch,
-                _setupTimeState
-                    .currentState!.getDeparture!.millisecondsSinceEpoch,
-              ).then((isAvailable) async {
-                return isAvailable;
-              });
-            }
-            Navigator.pop(context);
             if (isAvailable) {
+              String paypalEmail = await ParkingSpaceServices.getSpacePaypalEmail(widget.parking.getParkingSpaceId!);
               UserServices.setPaymentParams(
                 FirebaseAuth.instance.currentUser!.uid,
-                "${widget.parkingSpace.getPaypalEmail}/${_setupTimeState.currentState!.getParkingPrice}",
+                "$paypalEmail/${_setupTimeState.currentState!.getParkingPrice}",
               );
               String url =
                   "https://sample-paypal-payment-sandbox.herokuapp.com/${FirebaseAuth.instance.currentUser!.uid}";
@@ -218,23 +128,32 @@ class _CheckoutState extends State<Checkout> {
                         onWillPop: () async => false,
                         child: const NoticeDialog(
                           imageLink: "assets/logo/lets-park-logo.png",
-                          message: "Finalizing your booking. Please wait.",
+                          message: "Extending your parking session. Please wait.",
                           forLoading: true,
                         ),
                       ),
                     );
 
-                    var request = http.Request(
-                      'POST',
-                      Uri.parse(
-                        "https://sample-paypal-payment-sandbox.herokuapp.com/write/to/database",
-                      ),
-                    )..headers.addAll({
-                        HttpHeaders.contentTypeHeader: "application/json",
-                    });
+                    await UserServices.updateDepartureOnParkingSession(
+                      widget.parking, 
+                    _setupTimeState.currentState!.getDeparture!.millisecondsSinceEpoch,
+                    );
 
-                    print("Under request var");
+                    await ParkingSpaceServices.updateDepartureOnParkingSession(
+                      widget.parking, 
+                    _setupTimeState.currentState!.getDeparture!.millisecondsSinceEpoch,
+                    );
+                    
+                    await UserServices.updateDurationOnParkingSession(
+                      widget.parking,
+                      _setupTimeState.currentState!.getNewDuration,
+                    );
 
+                    await ParkingSpaceServices.updateDurationOnParkingSession(
+                      widget.parking,
+                      _setupTimeState.currentState!.getNewDuration,
+                    );
+                    
                     DateTime now = DateTime(0, 0, 0, 0, 0);
                     await WorldTimeServices.getDateTimeNow().then((time) {
                       now = DateTime(
@@ -246,86 +165,39 @@ class _CheckoutState extends State<Checkout> {
                       );
                     });
 
-                    print("Under datetime now var");
-
-                    // int notifLength =
-                    //     await UserServices.getUserNotificationLength(
-                    //   FirebaseAuth.instance.currentUser!.uid,
-                    // );
-
                     final userNotif = UserNotification(
                       "",
-                      widget.parkingSpace.getSpaceId!,
-                      newParking.getParkingId!,
+                      widget.parking.getParkingSpaceId!,
+                      widget.parking.getParkingId!,
                       FirebaseAuth.instance.currentUser!.photoURL ??
                           "https://cdn4.iconfinder.com/data/icons/user-people-2/48/5-512.png",
                       FirebaseAuth.instance.currentUser!.displayName!,
-                      "just booked on your parking space. Tap to view details.",
+                      "extend parking session on your space. Tap to view details.",
                       true,
                       false,
                       now.millisecondsSinceEpoch,
                       false,
                       false,
-                      false,
-                      "",
-                      "",
-                      "",
+                      true,
+                      "${_setupTimeState.currentState!.getDuration!}",
+                      "${getDateTime(widget.parking.getDeparture!)}",
+                      "${widget.parking.getDuration!}",
                     );
 
-                    print("Under userNotif var");
-
-                    var params = {
-                      "parking": newParking.toJson(),
-                      "notification": {
-                        "notificationId": "",
-                        "userId": widget.parkingSpace.getOwnerId!,
-                        "userNotification": userNotif.toJson(),
-                      },
-                    };
-
-                    print("Under params var");
-
-                    request.body = jsonEncode(params);
-
-                    print("Under request.body");
-
-                    await request.send();
-
-                    print("Under request.send var");
+                    await UserServices.notifyUser(
+                      widget.parking.getParkingOwner!,
+                      userNotif,
+                    );
 
                     await UserServices.setPayedToFalse(FirebaseAuth.instance.currentUser!.uid);
 
-                    print("Under setPayedToFalse var");
-
                     Navigator.pop(context);
+
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: ((context) => SuccessfulBooking(
-                              owner: widget.parkingSpace.getOwnerName!,
-                              parkee: FirebaseAuth
-                                  .instance.currentUser!.displayName!,
-                              transactioDate:
-                                  DateFormat('MMMM dd, yyyy').format(now),
-                              arrivalDate: DateFormat('MMMM dd, yyyy - h:mm a')
-                                  .format(DateTime.fromMillisecondsSinceEpoch(
-                                      _setupTimeState.currentState!.getArrival!
-                                          .millisecondsSinceEpoch)),
-                              departureDate:
-                                  DateFormat('MMMM dd, yyyy - h:mm a').format(
-                                      DateTime.fromMillisecondsSinceEpoch(
-                                          _setupTimeState
-                                              .currentState!
-                                              .getDeparture!
-                                              .millisecondsSinceEpoch)),
-                              duration:
-                                  _setupTimeState.currentState!.getDuration!,
-                              parkingFee:
-                                  _setupTimeState.currentState!.getParkingPrice,
-                              spaceAddress: widget.parkingSpace.getAddress!,
-                              sendTo: FirebaseAuth.instance.currentUser!.email!,
-                              replyTo: "chuarex55@gmail.com",
-                            )),
+                        fullscreenDialog: true,
+                        builder: (context) => const ParkingExtended(),
                       ),
                     );
                   }
@@ -360,6 +232,10 @@ class _CheckoutState extends State<Checkout> {
         ),
       ),
     );
+  }
+
+  String getDateTime(int date){
+    return DateFormat('MMM. dd, yyyy h:mm a').format(DateTime.fromMillisecondsSinceEpoch(date));
   }
 
   void showAlertDialog(String message) {
@@ -424,7 +300,8 @@ class _CheckoutState extends State<Checkout> {
 }
 
 class SetUpTime extends StatefulWidget {
-  const SetUpTime({Key? key}) : super(key: key);
+  final Parking parking;
+  const SetUpTime({Key? key, required this.parking}) : super(key: key);
 
   @override
   State<SetUpTime> createState() => SetUpTimeState();
@@ -439,40 +316,46 @@ class SetUpTimeState extends State<SetUpTime> {
     fontSize: 16,
     fontWeight: FontWeight.bold,
   );
-
+  int originalHour = 0;
+  int originalMinute = 0;
+  String newParkingDuration = "";
+  DateTime? sessionDeparture;
   DateTime? _selectedDate = DateTime.now();
   DateTime? _selectedTime;
   DateTime? _selectedDateTime;
-  DateTime? _selectedArrivalDateTime;
   DateTime? _selectedDepartureDateTime;
-  String _arrivalDate = "Today";
-  String? _arrivalTime = DateFormat("h:mm a")
-      .format(DateTime.now().add(const Duration(minutes: 15)));
   String _departureDate = "Today";
   String? _departureTime;
   String _parkingDuration = "";
   int _selectedHour = 0;
-  int _selectedMinute = 15;
+  int _selectedMinute = 0;
   double price = 50;
-  bool isTimeBehind = true;
 
   @override
   void initState() {
-    _selectedArrivalDateTime = DateTime(
-      _selectedDate!.year,
-      _selectedDate!.month,
-      _selectedDate!.day,
-      _selectedDate!.hour,
-      _selectedDate!.minute,
-    ).add(const Duration(minutes: 15));
+    print(widget.parking.getDuration!);
+    _selectedMinute = 15;
 
-    _selectedDateTime = _selectedArrivalDateTime;
+    List<String> elements = widget.parking.getDuration!.trim().split(" ");
 
-    _selectedDepartureDateTime =
-        _selectedArrivalDateTime!.add(const Duration(minutes: 15));
+    if (elements.length == 2){
+      if (elements[1].compareTo("minute") == 0 || elements[1].compareTo("minutes") == 0){
+        originalMinute = int.parse(elements[0]);
+      } else {
+        originalHour = int.parse(elements[0]);
+      }
+    } else {
+      originalMinute = int.parse(widget.parking.getDuration!.split(" ")[3]);
+      originalHour = int.parse(widget.parking.getDuration!.split(" ")[0]);
+    }
+    
+    sessionDeparture = DateTime.fromMillisecondsSinceEpoch(widget.parking.getDeparture!);
+
+    _selectedDepartureDateTime = sessionDeparture!.add(const Duration(minutes: 15));
     _departureTime = DateFormat("h:mm a").format(_selectedDepartureDateTime!);
 
     setDuration();
+    getNewParkingDuration();
     super.initState();
   }
 
@@ -482,7 +365,7 @@ class SetUpTimeState extends State<SetUpTime> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Text(
-          "Setup time",
+          "Extend time",
           style: TextStyle(
             fontSize: 18,
             color: Colors.black87,
@@ -504,50 +387,11 @@ class SetUpTimeState extends State<SetUpTime> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
                   const Text(
-                    "Please select the time of arrival and departure",
+                    "Please select the duration",
                     style: TextStyle(
                       fontSize: 16,
                       color: Colors.grey,
                     ),
-                  ),
-                  const SizedBox(height: 5),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text("Arrival:", style: labelStyle),
-                      Card(
-                        elevation: 2,
-                        shape: const RoundedRectangleBorder(
-                          borderRadius: BorderRadius.all(
-                            Radius.circular(12),
-                          ),
-                        ),
-                        child: InkWell(
-                          onTap: () {
-                            showDateTimePicker(context);
-                          },
-                          child: Ink(
-                            child: Padding(
-                              padding: const EdgeInsets.all(7.0),
-                              child: Row(
-                                children: [
-                                  Text(
-                                    "$_arrivalDate at $_arrivalTime",
-                                    style: timeStampStyle,
-                                  ),
-                                  const SizedBox(width: 10),
-                                  const Icon(
-                                    FontAwesomeIcons.calendarAlt,
-                                    color: Colors.blue,
-                                    size: 15,
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
                   ),
                   const SizedBox(height: 5),
                   Row(
@@ -607,7 +451,7 @@ class SetUpTimeState extends State<SetUpTime> {
                                               color: Colors.grey,
                                             ),
                                             value: _selectedMinute,
-                                            minValue: 0,
+                                            minValue: 1,
                                             maxValue: 59,
                                             onChanged: (value) {
                                               setState(
@@ -632,6 +476,7 @@ class SetUpTimeState extends State<SetUpTime> {
                                     TextButton(
                                       onPressed: () {
                                         setDuration();
+                                        getNewParkingDuration();
                                         getDepartureTime();
                                         getPrice();
                                         Navigator.pop(context);
@@ -713,96 +558,6 @@ class SetUpTimeState extends State<SetUpTime> {
     );
   }
 
-  Future<dynamic> showDateTimePicker(BuildContext context) {
-    return showDialog(
-      barrierDismissible: false,
-      context: context,
-      builder: (context) => Dialog(
-        child: SizedBox(
-          height: 335,
-          child: Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Column(
-              children: [
-                Text(
-                  "Please select valid time and date of arrival",
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: Colors.blue.shade900,
-                  ),
-                ),
-                const SizedBox(height: 20),
-                TimePickerSpinner(
-                  time: _selectedArrivalDateTime,
-                  is24HourMode: false,
-                  normalTextStyle: const TextStyle(
-                    fontSize: 18,
-                    color: Colors.grey,
-                  ),
-                  highlightedTextStyle: const TextStyle(
-                    fontSize: 23,
-                    color: Colors.black,
-                  ),
-                  spacing: 40,
-                  itemHeight: 25,
-                  isForce2Digits: true,
-                  onTimeChange: (time) {
-                    _selectedTime = time;
-                  },
-                ),
-                DatePickerWidget(
-                  initialDate: _selectedArrivalDateTime,
-                  looping: false,
-                  firstDate: DateTime.now(),
-                  dateFormat: "MMM/dd/yyyy",
-                  onChange: (DateTime newDate, _) {
-                    _selectedDate = newDate;
-                  },
-                  pickerTheme: const DateTimePickerTheme(
-                    itemTextStyle: TextStyle(
-                      color: Colors.black,
-                      fontSize: 19,
-                    ),
-                  ),
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    TextButton(
-                      onPressed: () => Navigator.pop(context),
-                      child: const Text("Cancel"),
-                    ),
-                    ElevatedButton(
-                      onPressed: () {
-                        try {
-                          _selectedDateTime = DateTime(
-                            _selectedDate!.year,
-                            _selectedDate!.month,
-                            _selectedDate!.day,
-                            _selectedTime!.hour,
-                            _selectedTime!.minute,
-                          );
-                          Navigator.pop(context);
-                          getArrivalDateTime(_selectedDateTime!);
-                        } on Exception catch (e) {
-                          Navigator.pop(context);
-                          getArrivalDateTime(DateTime.now());
-                        } finally {
-                          getPrice();
-                        }
-                      },
-                      child: const Text("Confirm"),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
   void setDuration() {
     if (_selectedHour != 0 || _selectedMinute != 0) {
       setState(() {
@@ -828,36 +583,35 @@ class SetUpTimeState extends State<SetUpTime> {
     }
   }
 
-  void getArrivalDateTime(DateTime selectedDateTime) {
-    setState(() {
-      DateTime now = DateTime(
-        DateTime.now().year,
-        DateTime.now().month,
-        DateTime.now().day,
-      );
-      DateTime selected = DateTime(
-        selectedDateTime.year,
-        selectedDateTime.month,
-        selectedDateTime.day,
-      );
-
-      if (isTimeValid()) {
-        if (selected.compareTo(now) == 0) {
-          _arrivalDate = "Today";
-        } else {
-          _arrivalDate = DateFormat('MMM. dd, yyyy').format(selected);
-        }
-        _arrivalTime = DateFormat("h:mm a").format(selectedDateTime);
-
-        getDepartureTime();
+  void getNewParkingDuration() {
+    int minute = originalMinute + _selectedMinute;
+    int hour = originalHour + _selectedHour;
+    if (hour != 0 || minute != 0) {
+      if (hour == 0 && minute == 1) {
+        newParkingDuration = "$minute minute";
+      } else if (hour == 1 && minute == 0) {
+        newParkingDuration = "$hour hour";
+      } else if (hour == 0 && minute > 1) {
+        newParkingDuration = "$minute minutes";
+      } else if (hour > 1 && minute == 0) {
+        newParkingDuration = "$hour hours";
+      } else if (hour > 1 && minute > 1) {
+        newParkingDuration =
+            "$hour hours and $minute minutes";
+      } else if (hour == 1 && minute == 1) {
+        newParkingDuration = "$hour hour and $minute minute";
+      } else if (hour > 1 && minute == 1) {
+        newParkingDuration = "$hour hours and $minute minute";
+      } else if (hour == 1 && minute > 1) {
+        newParkingDuration = "$hour hour and $minute minutes";
       }
-    });
+    }
   }
 
   void getDepartureTime() {
     setState(() {
       if (_selectedHour != 0 || _selectedMinute != 0) {
-        _selectedDepartureDateTime = _selectedArrivalDateTime!.add(
+        _selectedDepartureDateTime = sessionDeparture!.add(
           Duration(
             hours: _selectedHour,
             minutes: _selectedMinute,
@@ -896,39 +650,6 @@ class SetUpTimeState extends State<SetUpTime> {
     }
   }
 
-  bool isTimeValid() {
-    bool result = false;
-    DateTime now = getDateTimeNow();
-    if (_selectedDateTime!.compareTo(now) == -1) {
-      showDialog(
-        context: context,
-        builder: (_) => AlertDialog(
-          content: const Text("Arrival can't be a past time."),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context);
-              },
-              child: const Text("Close"),
-            ),
-          ],
-        ),
-      );
-      result = false;
-    } else {
-      _selectedArrivalDateTime = DateTime(
-        _selectedDateTime!.year,
-        _selectedDateTime!.month,
-        _selectedDateTime!.day,
-        _selectedDateTime!.hour,
-        _selectedDateTime!.minute,
-      );
-      result = true;
-    }
-    _selectedDateTime = _selectedArrivalDateTime;
-    return result;
-  }
-
   DateTime getDateTimeNow() {
     return DateTime(
       DateTime.now().year,
@@ -939,17 +660,22 @@ class SetUpTimeState extends State<SetUpTime> {
     );
   }
 
-  DateTime? get getArrival => _selectedArrivalDateTime;
-
   DateTime? get getDeparture => _selectedDepartureDateTime;
 
   String? get getDuration => _parkingDuration;
+
+  String get getNewDuration => newParkingDuration;
+
+  int? get getHour => _selectedHour;
+
+  int? get getMinute => _selectedMinute;
 
   double get getParkingPrice => price;
 }
 
 class Vehicle extends StatefulWidget {
-  const Vehicle({Key? key}) : super(key: key);
+  final String plateNumber;
+  const Vehicle({Key? key, required this.plateNumber}) : super(key: key);
 
   @override
   State<Vehicle> createState() => VehicleState();
@@ -963,129 +689,41 @@ class VehicleState extends State<Vehicle> {
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-      stream: FirebaseFirestore.instance
-          .collection("user-data")
-          .doc(FirebaseAuth.instance.currentUser!.uid)
-          .collection("cars")
-          .snapshots(),
-      builder: (context, snapshot) {
-        if (snapshot.hasData) {
-          plateNumbers.clear();
-          plateNumbers.add("Select plate number");
-          snapshot.data!.docs.forEach((car) {
-            plateNumbers.add(car.data()["plateNumber"]);
-          });
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 5),
-              const Text(
-                "Vehicle",
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SizedBox(height: 5),
+        const Text(
+          "Vehicle",
+          style: TextStyle(
+            fontSize: 18,
+            color: Colors.black87,
+          ),
+        ),
+        const SizedBox(height: 5),
+        SizedBox(
+          width: double.infinity,
+          child: Card(
+            elevation: 2,
+            shape: const RoundedRectangleBorder(
+              borderRadius: BorderRadius.all(
+                Radius.circular(12),
+              ),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(12),
+              child: Text(
+                widget.plateNumber,
                 style: TextStyle(
                   fontSize: 18,
-                  color: Colors.black87,
+                  color: Colors.black54,
                 ),
               ),
-              const SizedBox(height: 5),
-              SizedBox(
-                width: double.infinity,
-                child: Card(
-                  elevation: 2,
-                  shape: const RoundedRectangleBorder(
-                    borderRadius: BorderRadius.all(
-                      Radius.circular(12),
-                    ),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(12),
-                    child: Form(
-                      key: _formKey,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const SizedBox(width: 10),
-                          plateNumbers.length == 1
-                              ? Row(
-                                  children: [
-                                    Expanded(
-                                      child: OutlinedButton.icon(
-                                        onPressed: () {
-                                          Navigator.push(
-                                            context,
-                                            MaterialPageRoute(
-                                              builder: (context) =>
-                                                  const RegisteredCars(),
-                                            ),
-                                          ).then((value) {
-                                            setState(() {});
-                                          });
-                                        },
-                                        icon: const Icon(FontAwesomeIcons.car),
-                                        label: const Text("Add car"),
-                                        style: ElevatedButton.styleFrom(
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius:
-                                                BorderRadius.circular(8.0),
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                )
-                              : Container(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 10),
-                                  child: DropdownButtonHideUnderline(
-                                    child: DropdownButton<String>(
-                                      value: selectedCar,
-                                      icon: const Icon(
-                                        Icons.arrow_drop_down_rounded,
-                                        size: 32,
-                                      ),
-                                      elevation: 16,
-                                      isExpanded: true,
-                                      onChanged: (String? newValue) {
-                                        setState(() {
-                                          selectedCar = newValue!;
-                                        });
-                                      },
-                                      items: plateNumbers
-                                          .map(dropdownItem)
-                                          .toList(),
-                                    ),
-                                  ),
-                                ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          );
-        } else {
-          return const Padding(
-            padding: EdgeInsets.all(12.0),
-            child: CircularProgressIndicator(),
-          );
-        }
-      },
-    );
-  }
-
-  DropdownMenuItem<String> dropdownItem(String item) {
-    return DropdownMenuItem(
-      child: Text(
-        item,
-        style: TextStyle(
-          color: item.compareTo("Select plate number") == 0
-              ? Colors.grey
-              : Colors.black,
+            ),
+          ),
         ),
-      ),
-      value: item,
-    );
+      ],
+    );   
   }
 
   String? get getPlateNumber => selectedCar;

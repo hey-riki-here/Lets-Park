@@ -261,6 +261,19 @@ class FirebaseServices {
     return monthlyParkingSpaces;
   }
 
+  static Future<bool> spaceExists(String spaceId) async {
+    bool exists = false;
+    await FirebaseFirestore.instance
+        .collection('parking-spaces')
+        .doc(spaceId)
+        .get()
+        .then((value) {
+          exists = value.exists;
+        });
+
+    return exists;
+  } 
+
   static double calculateDistance(lat1, lon1, lat2, lon2) {
     var p = 0.017453292519943295;
     var c = cos;

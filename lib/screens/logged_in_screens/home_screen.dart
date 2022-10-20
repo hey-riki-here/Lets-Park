@@ -447,7 +447,7 @@ class NearbySpacesViewState extends State<NearbySpacesView> {
                   baseColor: Colors.grey.shade300,
                   highlightColor: Colors.grey.shade100,
                 )
-              : SingleChildScrollView(
+              : nearbySpaces.isNotEmpty ? SingleChildScrollView(
                   scrollDirection: Axis.horizontal,
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -458,7 +458,7 @@ class NearbySpacesViewState extends State<NearbySpacesView> {
                       );
                     }).toList(),
                   ),
-                )
+                ) : const NoNearbySpaces()
           : EnableLocationService(
               getNearbySpaces: getNearbySpaces,
             ),
@@ -664,6 +664,56 @@ class EnableLocationService extends StatelessWidget {
   }
 }
 
+class NoNearbySpaces extends StatelessWidget {
+  const NoNearbySpaces({
+    Key? key,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        border: Border.all(
+          color: const Color.fromARGB(66, 26, 18, 18),
+          width: 1,
+        ),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Image.asset(
+              "assets/icons/map-type-2.png",
+              width: 40,
+            ),
+            const SizedBox(height: 20),
+            const Text(
+              "No nearby parking spaces found",
+              style: TextStyle(
+                color: Colors.black45,
+                fontWeight: FontWeight.bold,
+                fontSize: 20,
+              ),
+            ),
+            const SizedBox(height: 10),
+            const Text(
+              "No nearby parking spaces was found nearby your current area.",
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: Colors.black45,
+                fontSize: 15,
+              ),
+            ),
+            const SizedBox(height: 15),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 class NearbySpaces extends StatelessWidget {
   final ParkingSpace space;
   final double distance;
@@ -689,7 +739,11 @@ class NearbySpaces extends StatelessWidget {
               borderRadius: BorderRadius.circular(8),
             ),
             child: GestureDetector(
-              onTap: () {
+              onTap: () async {
+                if (await FirebaseServices.spaceExists(space.getSpaceId!) == false){
+                  showAlertDialog(context, "Something went wrong. Pull down to refresh the app");
+                  return;
+                } 
                 Navigator.push(
                   context,
                   MaterialPageRoute(
@@ -724,7 +778,11 @@ class NearbySpaces extends StatelessWidget {
               borderRadius: const BorderRadius.all(Radius.circular(8)),
               child: InkWell(
                 borderRadius: const BorderRadius.all(Radius.circular(8)),
-                onTap: () {
+                onTap: () async {
+                  if (await FirebaseServices.spaceExists(space.getSpaceId!) == false){
+                    showAlertDialog(context, "Something went wrong. Pull down to refresh the app");
+                    return;
+                  } 
                   Navigator.push(
                     context,
                     MaterialPageRoute(
@@ -795,7 +853,12 @@ class NearbySpaces extends StatelessWidget {
             ),
           ),
           OutlinedButton.icon(
-            onPressed: () {
+            onPressed: () async {
+              if (await FirebaseServices.spaceExists(space.getSpaceId!) == false){
+                showAlertDialog(context, "Something went wrong. Pull down to refresh the app");
+                return;
+              } 
+              
               globals.nonReservable = space;
               space.getDailyOrMonthly!.compareTo("Monthly") == 0
                   ? Navigator.push(
@@ -842,6 +905,29 @@ class NearbySpaces extends StatelessWidget {
                 borderRadius: BorderRadius.circular(8.0),
               ),
             ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void showAlertDialog(BuildContext context, String message) {
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: Center(
+          child: Image.asset(
+            "assets/logo/app_icon.png",
+            scale: 20,
+          ),
+        ),
+        content: Text(message),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+            },
+            child: const Text("Close"),
           ),
         ],
       ),
@@ -1010,7 +1096,12 @@ class TopSpace extends StatelessWidget {
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 5),
             child: OutlinedButton(
-              onPressed: () {
+              onPressed: () async {
+                if (await FirebaseServices.spaceExists(space.getSpaceId!) == false){
+                  showAlertDialog(context, "Something went wrong. Pull down to refresh the app");
+                  return;
+                } 
+
                 Navigator.push(
                   context,
                   MaterialPageRoute(
@@ -1037,6 +1128,29 @@ class TopSpace extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+
+  void showAlertDialog(BuildContext context, String message) {
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: Center(
+          child: Image.asset(
+            "assets/logo/app_icon.png",
+            scale: 20,
+          ),
+        ),
+        content: Text(message),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+            },
+            child: const Text("Close"),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -1264,7 +1378,11 @@ class MonthlyParkingSpaceCard extends StatelessWidget {
                   ],
                 ),
                 OutlinedButton(
-                  onPressed: () {
+                  onPressed: () async {
+                    if (await FirebaseServices.spaceExists(space.getSpaceId!) == false){
+                      showAlertDialog(context, "Something went wrong. Pull down to refresh the app");
+                      return;
+                    } 
                     Navigator.push(
                       context,
                       MaterialPageRoute(
@@ -1293,6 +1411,29 @@ class MonthlyParkingSpaceCard extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+
+  void showAlertDialog(BuildContext context, String message) {
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: Center(
+          child: Image.asset(
+            "assets/logo/app_icon.png",
+            scale: 20,
+          ),
+        ),
+        content: Text(message),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+            },
+            child: const Text("Close"),
+          ),
+        ],
+      ),
     );
   }
 }

@@ -126,6 +126,8 @@ class _CheckoutMonthlyState extends State<CheckoutMonthly> {
 
             Parking newParking = Parking(
               widget.parkingSpace.getSpaceId,
+              widget.parkingSpace.getType,
+              widget.parkingSpace.getDailyOrMonthly,
               parkingId,
               widget.parkingSpace.getImageUrl,
               widget.parkingSpace.getOwnerId,
@@ -148,6 +150,7 @@ class _CheckoutMonthlyState extends State<CheckoutMonthly> {
               _setupTimeState.currentState!.getParkingPrice,
               false,
               true,
+              false,
               false,
             );
 
@@ -236,14 +239,15 @@ class _CheckoutMonthlyState extends State<CheckoutMonthly> {
                       );
                     });
 
-                    int notifLength =
-                        await UserServices.getUserNotificationLength(
-                      FirebaseAuth.instance.currentUser!.uid,
-                    );
+                    // int notifLength =
+                    //     await UserServices.getUserNotificationLength(
+                    //   FirebaseAuth.instance.currentUser!.uid,
+                    // );
 
                     final userNotif = UserNotification(
-                      "NOTIF" + notifLength.toString(),
+                      "",
                       widget.parkingSpace.getSpaceId!,
+                      newParking.getParkingId!,
                       FirebaseAuth.instance.currentUser!.photoURL ??
                           "https://cdn4.iconfinder.com/data/icons/user-people-2/48/5-512.png",
                       FirebaseAuth.instance.currentUser!.displayName!,
@@ -253,13 +257,15 @@ class _CheckoutMonthlyState extends State<CheckoutMonthly> {
                       now.millisecondsSinceEpoch,
                       false,
                       false,
+                      false,
+                      "",
+                      "",
+                      "",
                     );
                     var params = {
                       "parking": newParking.toJson(),
                       "notification": {
-                        "notificationId": "NOTIF" +
-                            globals.userData.getUserNotifications!.length
-                                .toString(),
+                        "notificationId": "",
                         "userId": widget.parkingSpace.getOwnerId!,
                         "userNotification": userNotif.toJson(),
                       },
@@ -268,9 +274,9 @@ class _CheckoutMonthlyState extends State<CheckoutMonthly> {
                     request.body = jsonEncode(params);
                     await request.send();
 
-                    UserServices.setPayedToFalse(
-                        FirebaseAuth.instance.currentUser!.uid);
+                    await UserServices.setPayedToFalse(FirebaseAuth.instance.currentUser!.uid);
                     Navigator.pop(context);
+                    
                     Navigator.push(
                       context,
                       MaterialPageRoute(
@@ -906,89 +912,114 @@ class VehicleState extends State<Vehicle> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const SizedBox(height: 5),
-        const Text(
-          "Vehicle",
-          style: TextStyle(
-            fontSize: 18,
-            color: Colors.black87,
-          ),
-        ),
-        const SizedBox(height: 5),
-        SizedBox(
-          width: double.infinity,
-          child: Card(
-            elevation: 2,
-            shape: const RoundedRectangleBorder(
-              borderRadius: BorderRadius.all(
-                Radius.circular(12),
+    return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+      stream: FirebaseFirestore.instance
+          .collection("user-data")
+          .doc(FirebaseAuth.instance.currentUser!.uid)
+          .collection("cars")
+          .snapshots(),
+      builder: (context, snapshot) {
+        if (snapshot.hasData) {
+          plateNumbers.clear();
+          plateNumbers.add("Select plate number");
+          snapshot.data!.docs.forEach((car) {
+            plateNumbers.add(car.data()["plateNumber"]);
+          });
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SizedBox(height: 5),
+              const Text(
+                "Vehicle",
+                style: TextStyle(
+                  fontSize: 18,
+                  color: Colors.black87,
+                ),
               ),
-            ),
-            child: Padding(
-              padding: const EdgeInsets.all(12),
-              child: Form(
-                key: _formKey,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const SizedBox(width: 10),
-                    plateNumbers.length == 1
-                        ? Row(
-                            children: [
-                              Expanded(
-                                child: OutlinedButton.icon(
-                                  onPressed: () {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) =>
-                                            const RegisteredCars(),
+              const SizedBox(height: 5),
+              SizedBox(
+                width: double.infinity,
+                child: Card(
+                  elevation: 2,
+                  shape: const RoundedRectangleBorder(
+                    borderRadius: BorderRadius.all(
+                      Radius.circular(12),
+                    ),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(12),
+                    child: Form(
+                      key: _formKey,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const SizedBox(width: 10),
+                          plateNumbers.length == 1
+                              ? Row(
+                                  children: [
+                                    Expanded(
+                                      child: OutlinedButton.icon(
+                                        onPressed: () {
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (context) =>
+                                                  const RegisteredCars(),
+                                            ),
+                                          ).then((value) {
+                                            setState(() {});
+                                          });
+                                        },
+                                        icon: const Icon(FontAwesomeIcons.car),
+                                        label: const Text("Add car"),
+                                        style: ElevatedButton.styleFrom(
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(8.0),
+                                          ),
+                                        ),
                                       ),
-                                    ).then((value) {
-                                      setState(() {});
-                                    });
-                                  },
-                                  icon: const Icon(FontAwesomeIcons.car),
-                                  label: const Text("Add car"),
-                                  style: ElevatedButton.styleFrom(
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(8.0),
+                                    ),
+                                  ],
+                                )
+                              : Container(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 10),
+                                  child: DropdownButtonHideUnderline(
+                                    child: DropdownButton<String>(
+                                      value: selectedCar,
+                                      icon: const Icon(
+                                        Icons.arrow_drop_down_rounded,
+                                        size: 32,
+                                      ),
+                                      elevation: 16,
+                                      isExpanded: true,
+                                      onChanged: (String? newValue) {
+                                        setState(() {
+                                          selectedCar = newValue!;
+                                        });
+                                      },
+                                      items: plateNumbers
+                                          .map(dropdownItem)
+                                          .toList(),
                                     ),
                                   ),
                                 ),
-                              ),
-                            ],
-                          )
-                        : Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 10),
-                            child: DropdownButtonHideUnderline(
-                              child: DropdownButton<String>(
-                                value: selectedCar,
-                                icon: const Icon(
-                                  Icons.arrow_drop_down_rounded,
-                                  size: 32,
-                                ),
-                                elevation: 16,
-                                isExpanded: true,
-                                onChanged: (String? newValue) {
-                                  setState(() {
-                                    selectedCar = newValue!;
-                                  });
-                                },
-                                items: plateNumbers.map(dropdownItem).toList(),
-                              ),
-                            ),
-                          ),
-                  ],
+                        ],
+                      ),
+                    ),
+                  ),
                 ),
               ),
-            ),
-          ),
-        ),
-      ],
+            ],
+          );
+        } else {
+          return const Padding(
+            padding: EdgeInsets.all(12.0),
+            child: CircularProgressIndicator(),
+          );
+        }
+      },
     );
   }
 
