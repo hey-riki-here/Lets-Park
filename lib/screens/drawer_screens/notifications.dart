@@ -88,6 +88,9 @@ class _NotificationsState extends State<Notifications> {
                             extensionInfo: notifications[index].getExtensionInfo!,
                             oldDeparture: notifications[index].getOldDeparture!,
                             oldDuration: notifications[index].getOldDuration!,
+                            newDeparture: notifications[index].getNewDeparture!,
+                            newDuration: notifications[index].getNewDuration!,
+                            price: notifications[index].getExtensionPrice!,
                           ),
                         ),
                       );

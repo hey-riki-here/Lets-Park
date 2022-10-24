@@ -1451,44 +1451,6 @@ class InfoPopup extends StatelessWidget {
                   );
 
         break;
-      case MenuItems.itemReportSpace:
-        showDialog(
-          context: context,
-          barrierDismissible: false,
-          builder: (context) => WillPopScope(
-            onWillPop: () async => false,
-            child: const NoticeDialog(
-              imageLink: "assets/logo/lets-park-logo.png",
-              message: "Loading please wait...",
-              forLoading: true,
-            ),
-          ),
-        );
-
-        bool canReport = await ParkingSpaceServices.checkIsSpaceReported(parking.getParkingSpaceId!, parking.getParkingId!);
-
-        Navigator.pop(context);
-
-        if (!canReport){
-          await Navigator.push(
-            context,
-            MaterialPageRoute(
-              fullscreenDialog: true,
-              builder: (context) => ReportSpace(
-                spaceId: parking.getParkingSpaceId!,
-                parkingId: parking.getParkingId!,
-              ),
-            ),
-          );
-        } else {
-          _showDialog(
-            context,
-            "assets/logo/lets-park-logo.png",
-            "You can only report a parking space once.",
-          );
-        }
-        
-        break;
     }
   }
 

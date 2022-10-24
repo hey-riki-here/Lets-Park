@@ -683,8 +683,6 @@ class _PriceAndDistanceState extends State<PriceAndDistance> {
     );
   }
 
-  void showPriceInfoDialog() {}
-
   void showAlertDialog(String message) {
     showDialog(
       context: context,

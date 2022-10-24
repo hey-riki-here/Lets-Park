@@ -270,6 +270,9 @@ class _CheckoutState extends State<Checkout> {
                       "",
                       "",
                       "",
+                      "",
+                      "",
+                      0.0,
                     );
 
                     print("Under userNotif var");
@@ -1266,8 +1269,8 @@ class _PaymentState extends State<Payment> {
                   Row(
                     children: [
                       Image.asset(
-                        "assets/icons/gpay-logo.png",
-                        width: 40,
+                        "assets/icons/paypal_logo.png",
+                        width: 30,
                       ),
                       const SizedBox(width: 10),
                       Row(

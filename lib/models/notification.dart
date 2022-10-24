@@ -14,6 +14,9 @@ class UserNotification {
   String? _extensionInfo;
   String? _oldDeparture;
   String? _oldDuration;
+  String? _newDeparture;
+  String? _newDuration;
+  double? _price;
 
   UserNotification(
     String notificationId,
@@ -31,6 +34,9 @@ class UserNotification {
     String extensionInfo,
     String oldDeparture,
     String oldDuration,
+    String newDeparture,
+    String newDuration,
+    double price,
   ) {
     _notificationId = notificationId;
     _parkingSpaceId = parkingSpaceId;
@@ -47,6 +53,9 @@ class UserNotification {
     _extensionInfo = extensionInfo;
     _oldDeparture = oldDeparture;
     _oldDuration = oldDuration;
+    _newDeparture = newDeparture;
+    _newDuration = newDuration;
+    _price = price;
   }
 
   String? get getNotificationId => _notificationId;
@@ -81,6 +90,12 @@ class UserNotification {
   
   String? get getOldDuration => _oldDuration;
 
+  String? get getNewDeparture => _newDeparture;
+
+  String? get getNewDuration => _newDuration;
+
+  double? get getExtensionPrice => _price;
+
   @override
   String toString() {
     return "Notification [ $_parkingSpaceId, $_username , $_message , $_isNewParking, $_isForRating, $_notificationDate]";
@@ -102,9 +117,14 @@ class UserNotification {
         'extensionInfo': _extensionInfo,
         'oldDeparture': _oldDeparture,
         'oldDuration': _oldDuration,
+        'newDeparture': _newDeparture,
+        'newDuration': _newDuration,
+        'price': _price,
       };
 
   static UserNotification fromJson(Map<String, dynamic> json) {
+    double price = json['price'].toDouble();
+
     return UserNotification(
       json['notificationId'],
       json['parkingSpaceId'],
@@ -121,6 +141,9 @@ class UserNotification {
       json['extensionInfo'],
       json['oldDeparture'],
       json['oldDuration'],
+      json['newDeparture'],
+      json['newDuration'],
+      price,
     );
   }
 }

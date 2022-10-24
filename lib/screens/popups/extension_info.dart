@@ -8,6 +8,9 @@ class ExtensionInformation extends StatelessWidget {
   final String extensionInfo;
   final String oldDeparture;
   final String oldDuration;
+  final String newDeparture;
+  final String newDuration;
+  final double price;
   const ExtensionInformation({
     Key? key,
    required this.parking,
@@ -15,6 +18,9 @@ class ExtensionInformation extends StatelessWidget {
    required this.extensionInfo,
    required this.oldDeparture,
    required this.oldDuration,
+   required this.newDeparture,
+   required this.newDuration,
+   required this.price,
   }) : super(key: key);
 
   @override
@@ -224,7 +230,7 @@ class ExtensionInformation extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         const Text("Departure"),
-                        Text("${getDateTime(parking.getDeparture!)}"),
+                        Text(newDeparture),
                       ],
                     ),
                     const SizedBox(height: 10),
@@ -232,7 +238,7 @@ class ExtensionInformation extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         const Text("Duration"),
-                        Text("${parking.getDuration!}"),
+                        Text(newDuration),
                       ],
                     ),
                   ],
@@ -262,10 +268,10 @@ class ExtensionInformation extends StatelessWidget {
                   ),
                 ),
                 child: Row(
-                  children: [
+                  children: price != 0 ? [
                     Image.asset(
-                      "assets/icons/gpay-logo.png",
-                      width: 40,
+                      "assets/icons/paypal_logo.png",
+                      width: 30,
                     ),
                     const SizedBox(width: 10),
                     const Text(
@@ -279,13 +285,28 @@ class ExtensionInformation extends StatelessWidget {
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: [
                           Text(
-                            "${parking.getPrice!}.00", 
+                            "$price", 
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
                             ),
                           ),
                         ],
                       ),
+                    ),
+                  ] : [
+                    GestureDetector(
+                      onTap: () {
+                        showAlertDialog(context, "If the extension time together with the current duration does not exceed the first 8 hours, there will be no charges applied.");
+                      },
+                      child: Icon(
+                        Icons.info,
+                        color: Colors.grey.shade500,
+                        size: 14,
+                      ),
+                    ),
+                    const SizedBox(width: 5),
+                    const Text(
+                      "No charges applied"
                     ),
                   ],
                 ),
@@ -319,5 +340,66 @@ class ExtensionInformation extends StatelessWidget {
     }
 
     return "";
+  }
+
+  void showAlertDialog(BuildContext context, String message) {
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: Center(
+          child: Image.asset(
+            "assets/logo/app_icon.png",
+            scale: 20,
+          ),
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text(
+              "Price info",
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: Colors.blue,
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 10),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.blue[50],
+                borderRadius: const BorderRadius.all(Radius.circular(8)),
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.info,
+                    color: Colors.blue.shade700,
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      message,
+                      style: const TextStyle(
+                        fontSize: 15,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+            },
+            child: const Text("Close"),
+          ),
+        ],
+      ),
+    );
   }
 }

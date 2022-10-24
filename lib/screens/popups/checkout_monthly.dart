@@ -261,6 +261,9 @@ class _CheckoutMonthlyState extends State<CheckoutMonthly> {
                       "",
                       "",
                       "",
+                      "",
+                      "",
+                      0.0,
                     );
                     var params = {
                       "parking": newParking.toJson(),
@@ -1215,8 +1218,8 @@ class _PaymentState extends State<Payment> {
                   Row(
                     children: [
                       Image.asset(
-                        "assets/icons/gpay-logo.png",
-                        width: 40,
+                        "assets/icons/paypal_logo.png",
+                        width: 30,
                       ),
                       const SizedBox(width: 10),
                       Row(

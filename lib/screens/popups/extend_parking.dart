@@ -90,7 +90,7 @@ class _ExtendParkingState extends State<ExtendParking> {
         ),
         child: ElevatedButton(
           onPressed: () async {
-            
+
             bool isAvailable = await UserServices.extendParking(
               _setupTimeState.currentState!.getHour!,
               _setupTimeState.currentState!.getMinute!,
@@ -99,6 +99,94 @@ class _ExtendParkingState extends State<ExtendParking> {
             );
 
             if (isAvailable) {
+
+              if (!hasToPay(_setupTimeState.currentState!.getNewDuration)){
+                showDialog(
+                  context: context,
+                  barrierDismissible: false,
+                  builder: (context) => WillPopScope(
+                    onWillPop: () async => false,
+                    child: const NoticeDialog(
+                      imageLink: "assets/logo/lets-park-logo.png",
+                      message: "Extending your parking session. Please wait.",
+                      forLoading: true,
+                    ),
+                  ),
+                );
+
+                await UserServices.updateDepartureOnParkingSession(
+                  widget.parking, 
+                _setupTimeState.currentState!.getDeparture!.millisecondsSinceEpoch,
+                );
+
+                await ParkingSpaceServices.updateDepartureOnParkingSession(
+                  widget.parking, 
+                _setupTimeState.currentState!.getDeparture!.millisecondsSinceEpoch,
+                );
+                
+                await UserServices.updateDurationOnParkingSession(
+                  widget.parking,
+                  _setupTimeState.currentState!.getNewDuration,
+                );
+
+                await ParkingSpaceServices.updateDurationOnParkingSession(
+                  widget.parking,
+                  _setupTimeState.currentState!.getNewDuration,
+                );
+                
+                DateTime now = DateTime(0, 0, 0, 0, 0);
+                await WorldTimeServices.getDateTimeNow().then((time) {
+                  now = DateTime(
+                    time.year,
+                    time.month,
+                    time.day,
+                    time.hour,
+                    time.minute,
+                  );
+                });
+
+                final userNotif = UserNotification(
+                  "",
+                  widget.parking.getParkingSpaceId!,
+                  widget.parking.getParkingId!,
+                  FirebaseAuth.instance.currentUser!.photoURL ??
+                      "https://cdn4.iconfinder.com/data/icons/user-people-2/48/5-512.png",
+                  FirebaseAuth.instance.currentUser!.displayName!,
+                  "extend parking session on your space. Tap to view details.",
+                  true,
+                  false,
+                  now.millisecondsSinceEpoch,
+                  false,
+                  false,
+                  true,
+                  "${_setupTimeState.currentState!.getDuration!}",
+                  "${getDateTime(widget.parking.getDeparture!)}",
+                  "${widget.parking.getDuration!}",
+                  "${DateFormat('MMM. dd, yyyy h:mm a').format(_setupTimeState.currentState!.getDeparture!)}",
+                  "${_setupTimeState.currentState!.getNewDuration}",
+                  _setupTimeState.currentState!.getParkingPrice,
+                );
+
+                await UserServices.notifyUser(
+                  widget.parking.getParkingOwner!,
+                  userNotif,
+                );
+
+                await UserServices.setPayedToFalse(FirebaseAuth.instance.currentUser!.uid);
+
+                Navigator.pop(context);
+
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    fullscreenDialog: true,
+                    builder: (context) => const ParkingExtended(),
+                  ),
+                );
+
+                return;
+              }
+
               String paypalEmail = await ParkingSpaceServices.getSpacePaypalEmail(widget.parking.getParkingSpaceId!);
               UserServices.setPaymentParams(
                 FirebaseAuth.instance.currentUser!.uid,
@@ -182,6 +270,9 @@ class _ExtendParkingState extends State<ExtendParking> {
                       "${_setupTimeState.currentState!.getDuration!}",
                       "${getDateTime(widget.parking.getDeparture!)}",
                       "${widget.parking.getDuration!}",
+                      "${DateFormat('MMM. dd, yyyy h:mm a').format(_setupTimeState.currentState!.getDeparture!)}",
+                      "${_setupTimeState.currentState!.getNewDuration}",
+                      _setupTimeState.currentState!.getParkingPrice,
                     );
 
                     await UserServices.notifyUser(
@@ -232,6 +323,31 @@ class _ExtendParkingState extends State<ExtendParking> {
         ),
       ),
     );
+  }
+
+  bool hasToPay(String duration){
+    List<String> elements = duration.split(" ");
+    bool result = false;
+
+    if (elements.length == 2){
+      if (elements[1].compareTo("minute") == 0 || elements[1].compareTo("minutes") == 0){
+        result = false;
+      } else {
+        int hour = int.parse(elements[0]);
+
+        if (hour > 8){
+          result = true;
+        }
+      }
+    } else {
+      int hour = int.parse(elements[0]);
+
+      if (hour > 8){
+        result = true;
+      }
+    }
+
+    return result;
   }
 
   String getDateTime(int date){
@@ -327,15 +443,14 @@ class SetUpTimeState extends State<SetUpTime> {
   String _departureDate = "Today";
   String? _departureTime;
   String _parkingDuration = "";
-  int _selectedHour = 0;
+  int _selectedHour = 1;
   int _selectedMinute = 0;
-  double price = 50;
+  double price = 10;
 
   @override
   void initState() {
-    print(widget.parking.getDuration!);
-    _selectedMinute = 15;
-
+    _selectedHour = 1;
+    _selectedMinute = 0;
     List<String> elements = widget.parking.getDuration!.trim().split(" ");
 
     if (elements.length == 2){
@@ -351,10 +466,11 @@ class SetUpTimeState extends State<SetUpTime> {
     
     sessionDeparture = DateTime.fromMillisecondsSinceEpoch(widget.parking.getDeparture!);
 
-    _selectedDepartureDateTime = sessionDeparture!.add(const Duration(minutes: 15));
+    _selectedDepartureDateTime = sessionDeparture!.add(const Duration(hours: 1));
     _departureTime = DateFormat("h:mm a").format(_selectedDepartureDateTime!);
 
     setDuration();
+    getPrice();
     getNewParkingDuration();
     super.initState();
   }
@@ -364,6 +480,26 @@ class SetUpTimeState extends State<SetUpTime> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: Colors.blue[50],
+            borderRadius: const BorderRadius.all(Radius.circular(8)),
+          ),
+          child: Row(
+            children: [
+              Icon(
+                Icons.info,
+                color: Colors.blue.shade700,
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text("If the extension time together with the current duration does not exceed the first 8 hours, there will be no charges applied."),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 10),
         const Text(
           "Extend time",
           style: TextStyle(
@@ -413,7 +549,7 @@ class SetUpTimeState extends State<SetUpTime> {
                                 return AlertDialog(
                                   title: Center(
                                     child: Text(
-                                      "Select parking duration (HH:MM)",
+                                      "Select extend duration (HH:MM)",
                                       style: TextStyle(
                                         fontSize: 15,
                                         color: Colors.blue.shade900,
@@ -431,7 +567,7 @@ class SetUpTimeState extends State<SetUpTime> {
                                               color: Colors.grey,
                                             ),
                                             value: _selectedHour,
-                                            minValue: 0,
+                                            minValue: 1,
                                             maxValue: 23,
                                             onChanged: (value) {
                                               setState(
@@ -451,7 +587,7 @@ class SetUpTimeState extends State<SetUpTime> {
                                               color: Colors.grey,
                                             ),
                                             value: _selectedMinute,
-                                            minValue: 1,
+                                            minValue: 0,
                                             maxValue: 59,
                                             onChanged: (value) {
                                               setState(
@@ -641,13 +777,27 @@ class SetUpTimeState extends State<SetUpTime> {
   }
 
   void getPrice() {
-    price = 50;
-    if (_selectedHour <= 8) {
-      price = 50;
+
+    int hour = 0;
+    List<String> elements = widget.parking.getDuration!.trim().split(" ");
+
+    if (elements.length == 2){
+      if (elements[1].compareTo("hour") == 0 || elements[1].compareTo("hours") == 0){
+        hour = int.parse(elements[0]);
+      } 
     } else {
-      int exceededHours = _selectedHour - 8;
-      price += exceededHours * 10;
+      hour = int.parse(elements[0]);
     }
+
+    setState((){
+      hour += _selectedHour;
+      if (hour > 8){
+        price = 10;
+        price *= hour - 8;
+      } else {
+        price = 0.0;
+      }
+    });
   }
 
   DateTime getDateTimeNow() {
@@ -904,8 +1054,8 @@ class _PaymentState extends State<Payment> {
                   Row(
                     children: [
                       Image.asset(
-                        "assets/icons/gpay-logo.png",
-                        width: 40,
+                        "assets/icons/paypal_logo.png",
+                        width: 30,
                       ),
                       const SizedBox(width: 10),
                       Row(
