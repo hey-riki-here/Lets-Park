@@ -752,6 +752,16 @@ class UserServices {
         });
   }
 
+  static Future<QuerySnapshot<Map<String, dynamic>>> getFavoriteParkingSpaces() async {
+    
+    return FirebaseFirestore.instance
+        .collection('parking-spaces')
+        .where("id", arrayContains: globals.favorites)
+        .snapshots()
+        .first
+        .then((snapshot) => snapshot); 
+  }
+
   StreamSubscription get getParkingSessionsStream => parkingSessionsStreams;
 
   StreamSubscription get getOwnedParkingSessionsStream =>

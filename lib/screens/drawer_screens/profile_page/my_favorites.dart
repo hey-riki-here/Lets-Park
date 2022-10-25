@@ -4,7 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:lets_park/globals/globals.dart' as globals;
 import 'package:lets_park/models/parking_space.dart';
-import 'package:lets_park/screens/popups/parking_area_info.dart';
+import 'package:lets_park/screens/popups/parking_area_information.dart';
 import 'package:lets_park/services/parking_space_services.dart';
 import 'package:lets_park/services/user_services.dart';
 import 'package:lets_park/shared/shared_widgets.dart';
@@ -128,8 +128,8 @@ class MyFavoritesState extends State<MyFavorites> {
                                   });
                                 },
                                 child: const Icon(
-                                  Icons.star_rounded,
-                                  color: Colors.amber,
+                                  Icons.favorite_outlined,
+                                  color: Colors.red,
                                 ),
                               ),
                               const SizedBox(width: 10),
@@ -138,8 +138,7 @@ class MyFavoritesState extends State<MyFavorites> {
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                      fullscreenDialog: true,
-                                      builder: (context) => ParkingAreaInfo(
+                                      builder: (context) => ParkingAreaInformation(
                                         parkingSpace: _favorites[index],
                                       ),
                                     ),
@@ -186,6 +185,7 @@ class MyFavoritesState extends State<MyFavorites> {
   }
 
   List<ParkingSpace> getFavorites() {
+  
     List<ParkingSpace> favorites = [];
 
     globals.currentParkingSpaces.forEach((space) {

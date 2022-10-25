@@ -214,9 +214,9 @@ class Menu extends StatelessWidget {
                 },
               ),
               buildMenuItem(
-                icon: Icons.star_rounded,
+                icon: Icons.favorite_outlined,
                 iconSize: 22,
-                iconColor: Colors.yellow[600]!,
+                iconColor: Colors.red[400]!,
                 label: "My Favorites",
                 insets: const EdgeInsets.all(15),
                 borderRadius: const BorderRadius.only(

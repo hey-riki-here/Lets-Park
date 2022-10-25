@@ -1498,16 +1498,10 @@ class MenuItems {
 
   static const List<MenuItem> items = [
     itemBookAgain,
-    itemReportSpace,
   ];
 
   static const itemBookAgain = MenuItem(
     text: "Book again",
     icon: Icons.book_outlined,
-  );
-
-  static const itemReportSpace = MenuItem(
-    text: "Report space",
-    icon: Icons.report_outlined,
   );
 }

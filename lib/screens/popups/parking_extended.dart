@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:lets_park/html_strings/html_string.dart';
 import 'package:lets_park/main.dart';
+import 'package:lets_park/screens/drawer_screens/my_parkings.dart';
 
 class ParkingExtended extends StatelessWidget {
   const ParkingExtended({
@@ -55,7 +56,13 @@ class ParkingExtended extends StatelessWidget {
           child: ElevatedButton(
             onPressed: () async {
               navigatorKey.currentState!.popUntil((route) => route.isFirst);
-    
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => MyParkings(
+                        initialIndex: 0,
+                      )),
+              );
             },
             child: const Text(
               "Confirm",

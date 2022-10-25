@@ -8,6 +8,7 @@ import 'package:lets_park/services/firebase_api.dart';
 import 'package:location/location.dart';
 import 'package:geolocator/geolocator.dart' as geolocator;
 import 'package:lets_park/screens/popups/parking_area_info.dart';
+import 'package:lets_park/screens/popups/parking_area_information.dart';
 import 'package:lets_park/globals/globals.dart' as globals;
 import 'package:lets_park/screens/popups/checkout.dart';
 import 'package:lets_park/screens/popups/checkout_monthly.dart';
@@ -329,9 +330,9 @@ class QuickActions extends StatelessWidget {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                        builder: (context) => MyParkings(
-                              initialIndex: 0,
-                            )),
+                      builder: (context) => MyParkings(
+                            initialIndex: 0,
+                          )),
                   );
                 },
                 child: CircleAvatar(
@@ -513,7 +514,7 @@ class NearbySpacesViewState extends State<NearbySpacesView> {
       });
 
       globals.userData.setOwnedParkingSpaces = ownedSpaces;
-
+      globals.currentParkingSpaces = parkingSpaces;
       var position = await geolocator.Geolocator().getCurrentPosition(
           desiredAccuracy: geolocator.LocationAccuracy.high);
       nearbySpaces = _firebaseServices.getNearbyParkingSpaces(
@@ -747,8 +748,7 @@ class NearbySpaces extends StatelessWidget {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    fullscreenDialog: true,
-                    builder: (context) => ParkingAreaInfo(
+                    builder: (context) => ParkingAreaInformation(
                       parkingSpace: space,
                     ),
                   ),
@@ -787,7 +787,7 @@ class NearbySpaces extends StatelessWidget {
                     context,
                     MaterialPageRoute(
                       fullscreenDialog: true,
-                      builder: (context) => ParkingAreaInfo(
+                      builder: (context) => ParkingAreaInformation(
                         parkingSpace: space,
                       ),
                     ),
@@ -1105,8 +1105,7 @@ class TopSpace extends StatelessWidget {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    fullscreenDialog: true,
-                    builder: (context) => ParkingAreaInfo(
+                    builder: (context) => ParkingAreaInformation(
                       parkingSpace: space,
                     ),
                   ),
@@ -1387,7 +1386,7 @@ class MonthlyParkingSpaceCard extends StatelessWidget {
                       context,
                       MaterialPageRoute(
                         fullscreenDialog: true,
-                        builder: (context) => ParkingAreaInfo(
+                        builder: (context) => ParkingAreaInformation(
                           parkingSpace: space,
                         ),
                       ),
