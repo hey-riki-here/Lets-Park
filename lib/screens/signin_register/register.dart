@@ -17,6 +17,7 @@ class _RegisterState extends State<Register> {
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
   final confirmPasswordController = TextEditingController();
+  final numberController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
 
   @override

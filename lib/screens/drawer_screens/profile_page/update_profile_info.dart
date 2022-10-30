@@ -8,6 +8,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:lets_park/screens/popups/edit_name.dart';
 import 'package:lets_park/screens/popups/notice_dialog.dart';
 import 'package:lets_park/services/firebase_api.dart';
+import 'package:lets_park/shared/shared_widgets.dart';
 
 class UpdateProfile extends StatefulWidget {
   final Function notifyParent;
@@ -24,6 +25,7 @@ class _UpdateProfileState extends State<UpdateProfile> {
   User user = FirebaseAuth.instance.currentUser!;
   final _numberKey = GlobalKey<FormState>();
   late TextEditingController _numberController;
+  final SharedWidget _sharedWidget = SharedWidget();
   String photoUrl =
       "https://cdn4.iconfinder.com/data/icons/user-people-2/48/5-512.png";
   String originalNumber = "";
@@ -34,7 +36,7 @@ class _UpdateProfileState extends State<UpdateProfile> {
 
   @override
   void initState() {
-    _numberController = TextEditingController(text: originalNumber);
+    _numberController = TextEditingController(text: FirebaseAuth.instance.currentUser!.phoneNumber);
     if (user.photoURL != null) {
       photoUrl = user.photoURL!;
     }
@@ -309,11 +311,20 @@ class _UpdateProfileState extends State<UpdateProfile> {
                               children: [
                                 const Text("Phone number"),
                                 const SizedBox(height: 5),
-                                _buildFields(
-                                  _numberController,
-                                  "Phonenum",
-                                  "number",
-                                  false,
+                                _sharedWidget.textFormField(
+                                  action: TextInputAction.done,
+                                  textInputType: TextInputType.number,
+                                  controller: _numberController,
+                                  obscure: false,
+                                  readOnly: true,
+                                  validator: (value) {
+                                    if (value == null || value.isEmpty) {
+                                      return "Enter phone number";
+                                    } else if (value.length < 10) {
+                                      return "Invalid phone number";
+                                    }
+                                    return null;
+                                  },
                                 ),
                               ],
                             ),

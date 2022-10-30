@@ -26,6 +26,8 @@ import 'package:lets_park/screens/drawer_screens/notifications.dart';
 import 'package:lets_park/screens/drawer_screens/profile.dart';
 import 'package:lets_park/screens/drawer_screens/my_parkings.dart';
 import 'package:lets_park/services/parking_space_services.dart';
+import 'package:lets_park/screens/signin_register/otp_verification.dart';
+import 'package:lets_park/screens/signin_register/phone_number.dart';
 
 class HomeScreen extends StatefulWidget {
   final int _pageId = 0;
@@ -137,7 +139,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             onTap: (){
                               Navigator.push(
                                 context,
-                                MaterialPageRoute(builder: (context) => const Notifications()),
+                                MaterialPageRoute(builder: (context) => const PhoneNumber()),
                               );
                             },
                             child: const Icon(

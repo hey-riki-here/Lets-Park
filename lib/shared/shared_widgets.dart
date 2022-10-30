@@ -60,6 +60,7 @@ class SharedWidget {
     String? hintText,
     TextInputType textInputType = TextInputType.text,
     bool obscure = false,
+    bool readOnly = false,
     Widget? icon,
     int? maxLength,
     required String? Function(String?)? validator,
@@ -69,6 +70,7 @@ class SharedWidget {
       maxLength: maxLength,
       controller: controller,
       obscureText: obscure,
+      readOnly: readOnly,
       keyboardType: textInputType,
       decoration: InputDecoration(
         hintText: hintText,

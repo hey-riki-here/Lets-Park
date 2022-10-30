@@ -128,7 +128,7 @@ class SignInProvider extends ChangeNotifier {
     try {
       await googleSignIn.disconnect();
     } on Exception catch (e) {}
-    _auth.signOut();
+    await _auth.signOut();
     globals.inProgressParkings = [];
     navigatorKey.currentState!.popUntil((route) => route.isFirst);
   }

@@ -132,22 +132,15 @@ class _ProfileState extends State<Profile> {
               ),
               const SizedBox(height: 10),
               Menu(notifyParent: refresh),
-              const SizedBox(height: 15),
+              const SizedBox(height: 20),
               const Text(
-                "RECENT PARKINGS (Pending)",
+                "OTHER",
                 style: TextStyle(
                   color: Colors.grey,
                   fontSize: 14,
                 ),
               ),
-              const SizedBox(height: 15),
-              RecentParkingSample(photoURL: photoUrl),
-              const SizedBox(height: 15),
-              RecentParkingSample(photoURL: photoUrl),
-              const SizedBox(height: 15),
-              RecentParkingSample(photoURL: photoUrl),
-              const SizedBox(height: 15),
-              RecentParkingSample(photoURL: photoUrl),
+              MenuTD(),
             ],
           ),
         ),
@@ -267,24 +260,6 @@ class Menu extends StatelessWidget {
                 onTap: () {},
               ),
               buildMenuItem(
-                icon: FontAwesomeIcons.info,
-                iconSize: 17,
-                iconColor: Colors.grey[600]!,
-                label: "Terms of services",
-                insets: const EdgeInsets.all(15),
-                borderRadius: const BorderRadius.all(Radius.zero),
-                onTap: () {},
-              ),
-              buildMenuItem(
-                icon: Icons.policy,
-                iconSize: 20,
-                iconColor: Colors.blue[700]!,
-                label: "Data policy",
-                insets: const EdgeInsets.all(15),
-                borderRadius: const BorderRadius.all(Radius.zero),
-                onTap: () {},
-              ),
-              buildMenuItem(
                 icon: Icons.logout_rounded,
                 iconSize: 20,
                 iconColor: Colors.red[400]!,
@@ -300,6 +275,104 @@ class Menu extends StatelessWidget {
                     listen: false,
                   ).logout(context);
                 },
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  refresh() {
+    //setS
+  }
+
+  Widget buildMenuItem({
+    required IconData icon,
+    required double iconSize,
+    required Color iconColor,
+    required String label,
+    required EdgeInsets insets,
+    required BorderRadius borderRadius,
+    required VoidCallback onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: borderRadius,
+      child: Padding(
+        padding: insets,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Row(
+              children: [
+                Icon(
+                  icon,
+                  color: iconColor,
+                  size: iconSize,
+                ),
+                const SizedBox(width: 10),
+                Text(
+                  label,
+                  style: const TextStyle(
+                    fontSize: 15,
+                  ),
+                ),
+              ],
+            ),
+            Icon(
+              Icons.arrow_forward_ios_rounded,
+              size: 14,
+              color: Colors.grey.shade700,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class MenuTD extends StatelessWidget {
+  const MenuTD({
+    Key? key,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Card(
+          shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.all(
+              Radius.circular(12),
+            ),
+          ),
+          elevation: 5,
+          child: Column(
+            children: [
+              buildMenuItem(
+                icon: FontAwesomeIcons.info,
+                iconSize: 17,
+                iconColor: Colors.grey[600]!,
+                label: "Terms of services",
+                insets: const EdgeInsets.all(15),
+                borderRadius: const BorderRadius.only(
+                  topRight: Radius.circular(12),
+                  topLeft: Radius.circular(12),
+                ),
+                onTap: () {},
+              ),
+              buildMenuItem(
+                icon: Icons.policy,
+                iconSize: 20,
+                iconColor: Colors.blue[700]!,
+                label: "Data policy",
+                insets: const EdgeInsets.all(15),
+                borderRadius: const BorderRadius.only(
+                  bottomRight: Radius.circular(12),
+                  bottomLeft: Radius.circular(12),
+                ),
+                onTap: () {},
               ),
             ],
           ),

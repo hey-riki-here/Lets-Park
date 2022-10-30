@@ -67,6 +67,7 @@ dependencies:
   page_transition: ^2.0.9
   fluttertoast: ^8.1.1
   percent_indicator: ^4.2.2
+  pinput: ^2.2.16
   
 dev_dependencies:
   flutter_test:
