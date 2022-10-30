@@ -9,7 +9,6 @@ import 'package:lets_park/shared/shared_widgets.dart';
 import 'package:lets_park/globals/globals.dart' as globals;
 
 class YourSpace extends StatelessWidget {
-  final appUser = globals.userData;
   YourSpace({Key? key}) : super(key: key);
 
   @override
@@ -48,20 +47,36 @@ class YourSpace extends StatelessWidget {
   }
 }
 
-class ParkingCard extends StatelessWidget {
+class ParkingCard extends StatefulWidget {
   final ParkingSpace parkingSpace;
   final String title;
-  const ParkingCard({Key? key, required this.parkingSpace, required this.title})
-      : super(key: key);
+  const ParkingCard({
+    Key? key,
+    required this.parkingSpace, 
+    required this.title,
+  }) : super(key: key);
+
+  @override
+  State<ParkingCard> createState() => ParkingCardState();
+}
+
+class ParkingCardState extends State<ParkingCard> {
+  bool verified = false;
+
+  @override
+  initState(){
+    setSpaceVerified();
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
-    final capacity = parkingSpace.getCapacity!;
+    final capacity = widget.parkingSpace.getCapacity!;
     int availableSlot = 0;
 
     return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
       stream:
-          ParkingSpaceServices.getParkingSessionsDocs(parkingSpace.getSpaceId!),
+          ParkingSpaceServices.getParkingSessionsDocs(widget.parkingSpace.getSpaceId!),
       builder: (context, snapshot) {
         if (snapshot.hasData) {
           if (snapshot.hasData) {
@@ -84,13 +99,14 @@ class ParkingCard extends StatelessWidget {
           elevation: 3,
           child: InkWell(
             borderRadius: BorderRadius.circular(12),
-            onTap: () {
+            onTap: () async {
+              
               Navigator.push(
                 context,
                 MaterialPageRoute(
                   builder: (context) => Space(
-                    space: parkingSpace,
-                    title: title,
+                    space: widget.parkingSpace,
+                    title: widget.title,
                   ),
                 ),
               );
@@ -108,12 +124,17 @@ class ParkingCard extends StatelessWidget {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            "Space " + title,
+                            "Space " + widget.title,
                             style: const TextStyle(
                               fontSize: 17,
                               fontWeight: FontWeight.w600,
                             ),
                           ),
+                          verified ? Icon(
+                            Icons.verified,
+                            color: Colors.blue,
+                            size: 14,
+                          ) : const SizedBox(),
                         ],
                       ),
                       const SizedBox(height: 7),
@@ -125,7 +146,7 @@ class ParkingCard extends StatelessWidget {
                             size: 17,
                           ),
                           Text(
-                            parkingSpace.getAddress!,
+                            widget.parkingSpace.getAddress!,
                             style: const TextStyle(
                               fontSize: 16,
                               color: Colors.grey,
@@ -134,7 +155,7 @@ class ParkingCard extends StatelessWidget {
                         ],
                       ),
                       const SizedBox(height: 7),
-                      ParkingSpaceServices.getStars(parkingSpace.getRating!),
+                      ParkingSpaceServices.getStars(widget.parkingSpace.getRating!),
                       const SizedBox(height: 10),
                       Row(
                         children: [
@@ -166,7 +187,7 @@ class ParkingCard extends StatelessWidget {
                         child: ClipRRect(
                           borderRadius: BorderRadius.circular(12),
                           child: Image.network(
-                            parkingSpace.getImageUrl!,
+                            widget.parkingSpace.getImageUrl!,
                             fit: BoxFit.fill,
                           ),
                         ),
@@ -185,8 +206,8 @@ class ParkingCard extends StatelessWidget {
                           ),
                           const SizedBox(width: 5),
                           buildTag(
-                            parkingSpace.isDisabled! ? "Disabled" : "Active",
-                            parkingSpace.isDisabled!
+                            widget.parkingSpace.isDisabled! ? "Disabled" : "Active",
+                            widget.parkingSpace.isDisabled!
                                 ? Colors.red
                                 : Colors.green,
                           ),
@@ -220,5 +241,14 @@ class ParkingCard extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  void setSpaceVerified() async {
+    bool flag = await ParkingSpaceServices.isVerified(widget.parkingSpace.getSpaceId!);
+
+    setState((){
+      verified = flag && widget.parkingSpace.getRating! >= 4;
+    });
+    
   }
 }

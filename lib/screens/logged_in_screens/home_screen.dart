@@ -25,6 +25,7 @@ import 'package:lets_park/screens/drawer_screens/messages.dart';
 import 'package:lets_park/screens/drawer_screens/notifications.dart';
 import 'package:lets_park/screens/drawer_screens/profile.dart';
 import 'package:lets_park/screens/drawer_screens/my_parkings.dart';
+import 'package:lets_park/services/parking_space_services.dart';
 
 class HomeScreen extends StatefulWidget {
   final int _pageId = 0;
@@ -741,15 +742,25 @@ class NearbySpaces extends StatelessWidget {
             ),
             child: GestureDetector(
               onTap: () async {
+
                 if (await FirebaseServices.spaceExists(space.getSpaceId!) == false){
                   showAlertDialog(context, "Something went wrong. Pull down to refresh the app");
                   return;
-                } 
+                }
+
+                if (await FirebaseServices.spaceDisabled(space.getSpaceId!) == true){
+                  showAlertDialog(context, "Something went wrong. Pull down to refresh the app");
+                  return;
+                }
+
+                bool verified = await ParkingSpaceServices.isVerified(space.getSpaceId!);
+
                 Navigator.push(
                   context,
                   MaterialPageRoute(
                     builder: (context) => ParkingAreaInformation(
                       parkingSpace: space,
+                      verified: verified && space.getRating! >= 4,
                     ),
                   ),
                 );
@@ -779,16 +790,25 @@ class NearbySpaces extends StatelessWidget {
               child: InkWell(
                 borderRadius: const BorderRadius.all(Radius.circular(8)),
                 onTap: () async {
+
                   if (await FirebaseServices.spaceExists(space.getSpaceId!) == false){
                     showAlertDialog(context, "Something went wrong. Pull down to refresh the app");
                     return;
+                  }
+
+                  if (await FirebaseServices.spaceDisabled(space.getSpaceId!) == true){
+                    showAlertDialog(context, "Something went wrong. Pull down to refresh the app");
+                    return;
                   } 
+
+                  bool verified = await ParkingSpaceServices.isVerified(space.getSpaceId!);
+
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      fullscreenDialog: true,
                       builder: (context) => ParkingAreaInformation(
                         parkingSpace: space,
+                        verified: verified && space.getRating! >= 4,
                       ),
                     ),
                   );
@@ -857,7 +877,90 @@ class NearbySpaces extends StatelessWidget {
               if (await FirebaseServices.spaceExists(space.getSpaceId!) == false){
                 showAlertDialog(context, "Something went wrong. Pull down to refresh the app");
                 return;
-              } 
+              }
+
+              if (await FirebaseServices.spaceDisabled(space.getSpaceId!) == true){
+                showAlertDialog(context, "Something went wrong. Pull down to refresh the app");
+                return;
+              }
+
+              bool verified = await ParkingSpaceServices.isVerified(space.getSpaceId!);
+              bool? proceed = true; 
+
+              if (!(verified && space.getRating! >= 4)){
+                  proceed = await showDialog<bool>(
+                    context: context,
+                    builder: (_) => AlertDialog(
+                      title: Center(
+                        child: Image.asset(
+                          "assets/logo/app_icon.png",
+                          scale: 20,
+                        ),
+                      ),
+                      content: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Text(
+                            "Unverified parking space",
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              color: Colors.blue,
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(height: 10),
+                          Container(
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: Colors.blue[50],
+                              borderRadius: const BorderRadius.all(Radius.circular(8)),
+                            ),
+                            child: Row(
+                              children: [
+                                Icon(
+                                  Icons.info,
+                                  color: Colors.blue.shade700,
+                                ),
+                                const SizedBox(width: 10),
+                                Expanded(
+                                  child: Text(
+                                    "Please be advised that you are about to rent a parking space that is not yet verified.",
+                                    style: const TextStyle(
+                                      fontSize: 15,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                      actions: [
+                        TextButton(
+                          onPressed: () {
+                            Navigator.pop(context, false);
+                          },
+                          child: const Text("Cancel"),
+                        ),
+                        TextButton(
+                          onPressed: () {
+                            Navigator.pop(context, true);
+                          },
+                          child: const Text("Proceed anyway"),
+                        ),
+                      ],
+                    ),
+                  );
+              }
+              
+              if (proceed == null){
+                return;
+              }
+
+              if (proceed == false){
+                return;
+              }
               
               globals.nonReservable = space;
               space.getDailyOrMonthly!.compareTo("Monthly") == 0
@@ -1024,7 +1127,7 @@ class TopSpacesGridState extends State<TopSpacesGrid> {
                         space: space,
                       ))
                   .toList(),
-            ) : const NoTopParkingSpaces() ;
+            ) : const NoTopParkingSpaces();
   }
 
   void getTopParkingSpaces() async {
@@ -1034,7 +1137,9 @@ class TopSpacesGridState extends State<TopSpacesGrid> {
     spaces.clear();
     await FirebaseServices.getTop5ParkingSpace().then((value) {
       value.docs.forEach((space) {
-        spaces.add(ParkingSpace.fromJson(space.data()));
+        if (space.data()["disabled"] == false){
+          spaces.add(ParkingSpace.fromJson(space.data()));
+        }
       });
       setState(() {
         loading = false;
@@ -1100,13 +1205,21 @@ class TopSpace extends StatelessWidget {
                 if (await FirebaseServices.spaceExists(space.getSpaceId!) == false){
                   showAlertDialog(context, "Something went wrong. Pull down to refresh the app");
                   return;
-                } 
+                }
+
+                if (await FirebaseServices.spaceDisabled(space.getSpaceId!) == true){
+                  showAlertDialog(context, "Something went wrong. Pull down to refresh the app");
+                  return;
+                }
+
+                bool verified = await ParkingSpaceServices.isVerified(space.getSpaceId!);
 
                 Navigator.push(
                   context,
                   MaterialPageRoute(
                     builder: (context) => ParkingAreaInformation(
                       parkingSpace: space,
+                      verified: verified && space.getRating! >= 4,
                     ),
                   ),
                 );
@@ -1291,7 +1404,9 @@ class MonthlyParkingSpaceGridState extends State<MonthlyParkingSpaceGrid> {
     spaces.clear();
     await FirebaseServices.getMonthlyParkingSpaces().then((value) {
       value.docs.forEach((space) {
-        spaces.add(ParkingSpace.fromJson(space.data()));
+        if (space.data()["disabled"] == false){
+          spaces.add(ParkingSpace.fromJson(space.data()));  
+        }
       });
       setState(() {
         loading = false;
@@ -1381,16 +1496,25 @@ class MonthlyParkingSpaceCard extends StatelessWidget {
                     if (await FirebaseServices.spaceExists(space.getSpaceId!) == false){
                       showAlertDialog(context, "Something went wrong. Pull down to refresh the app");
                       return;
-                    } 
+                    }
+
+                    if (await FirebaseServices.spaceDisabled(space.getSpaceId!) == true){
+                      showAlertDialog(context, "Something went wrong. Pull down to refresh the app");
+                      return;
+                    }
+
+                    bool verified = await ParkingSpaceServices.isVerified(space.getSpaceId!);
+
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        fullscreenDialog: true,
                         builder: (context) => ParkingAreaInformation(
                           parkingSpace: space,
+                          verified: verified && space.getRating! >= 4,
                         ),
                       ),
                     );
+
                   },
                   child: const Text("View space"),
                   style: OutlinedButton.styleFrom(

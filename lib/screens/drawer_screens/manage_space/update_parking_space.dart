@@ -23,7 +23,8 @@ import 'parking_space_modifier/caretaker_number_modifier.dart';
 
 class UpdateParkingSpace extends StatefulWidget {
   final ParkingSpace space;
-  const UpdateParkingSpace({Key? key, required this.space}) : super(key: key);
+  final bool verified;
+  const UpdateParkingSpace({Key? key, required this.space, required this.verified}) : super(key: key);
 
   @override
   State<UpdateParkingSpace> createState() => _UpdateParkingSpaceState();
@@ -34,10 +35,12 @@ class _UpdateParkingSpaceState extends State<UpdateParkingSpace> {
     color: Colors.black45,
   );
   late ParkingSpace space;
+  bool verified = false;
 
   @override
   void initState() {
     space = widget.space;
+    verified = widget.verified;
     super.initState();
   }
 
@@ -48,7 +51,7 @@ class _UpdateParkingSpaceState extends State<UpdateParkingSpace> {
         title: Column(
           children: const [
             Text(
-              "Update Space 1",
+              "Update Space",
               style: TextStyle(
                 color: Colors.black,
               ),
@@ -118,13 +121,32 @@ class _UpdateParkingSpaceState extends State<UpdateParkingSpace> {
                 ],
               ),
               const SizedBox(height: 15),
-              const Text(
-                "Blah blah blah",
-                style: TextStyle(
-                  color: Colors.blue,
-                  fontSize: 16,
-                ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    widget.verified ? "Verified" : "Not verified",
+                    style: TextStyle(
+                      color: Colors.blue,
+                      fontSize: 16,
+                    ),
+                  ),
+                  const SizedBox(width: 2),
+                  GestureDetector(
+                    onTap: (){
+                      showAlertDialog(
+                        "A verified space makes it more credible. To get your spaces verified, reach the following requirements:\n\n• Get 50 parking bookings\n• Get 50 points\n• Achieve 4-5 stars",
+                      );
+                    },
+                    child: Icon(
+                      Icons.help,
+                      color: Colors.grey,
+                      size: 14,
+                    ), 
+                  ),
+                ],
               ),
+              
               const SizedBox(height: 15),
               const Text(
                 "Parking space Information",
@@ -861,6 +883,73 @@ class _UpdateParkingSpaceState extends State<UpdateParkingSpace> {
       direction: Axis.horizontal,
       runSpacing: 10,
       children: newChildren,
+    );
+  }
+
+  void showAlertDialog(String message) {
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: Center(
+          child: Image.asset(
+            "assets/logo/app_icon.png",
+            scale: 20,
+          ),
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              verified ? "Space is verified" : "Space is not yet verified",
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: Colors.blue,
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 10),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.blue[50],
+                borderRadius: const BorderRadius.all(Radius.circular(8)),
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.info,
+                    color: Colors.blue.shade700,
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      message,
+                      style: const TextStyle(
+                        fontSize: 15,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+            },
+            child: const Text("Close"),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+            },
+            child: const Text("Learn more"),
+          ),
+        ],
+      ),
     );
   }
 }

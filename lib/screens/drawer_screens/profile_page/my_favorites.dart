@@ -134,12 +134,16 @@ class MyFavoritesState extends State<MyFavorites> {
                               ),
                               const SizedBox(width: 10),
                               GestureDetector(
-                                onTap: () {
+                                onTap: () async {
+
+                                  bool verified = await ParkingSpaceServices.isVerified(_favorites[index].getSpaceId!);
+
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
                                       builder: (context) => ParkingAreaInformation(
                                         parkingSpace: _favorites[index],
+                                        verified: verified && _favorites[index].getRating! >= 4,
                                       ),
                                     ),
                                   ).then((value) {

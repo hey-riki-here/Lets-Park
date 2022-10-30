@@ -164,15 +164,18 @@ class FirebaseServices {
     Map<ParkingSpace, double> _map = {};
 
     spaces.forEach((parkingSpace) {
-      double distance = calculateDistance(
-        userLocation.latitude,
-        userLocation.longitude,
-        parkingSpace.getLatLng!.latitude,
-        parkingSpace.getLatLng!.longitude,
-      );
 
-      if (distance <= 10) {
-        _map[parkingSpace] = distance;
+      if (!parkingSpace.isDisabled!){
+        double distance = calculateDistance(
+          userLocation.latitude,
+          userLocation.longitude,
+          parkingSpace.getLatLng!.latitude,
+          parkingSpace.getLatLng!.longitude,
+        );
+
+        if (distance <= 10) {
+          _map[parkingSpace] = distance;
+        }
       }
     });
 
@@ -272,7 +275,20 @@ class FirebaseServices {
         });
 
     return exists;
-  } 
+  }
+
+  static Future<bool> spaceDisabled(String spaceId) async {
+    bool disabled = false;
+    await FirebaseFirestore.instance
+        .collection('parking-spaces')
+        .doc(spaceId)
+        .get()
+        .then((value) {
+          disabled = value.data()!["disabled"];
+        });
+
+    return disabled;
+  }
 
   static double calculateDistance(lat1, lon1, lat2, lon2) {
     var p = 0.017453292519943295;

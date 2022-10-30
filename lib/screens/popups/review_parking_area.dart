@@ -189,19 +189,19 @@ class _ReviewParkingAreaState extends State<ReviewParkingArea> {
                     "Clean Parking",
                     "Easy to find",
                   ]
-                      .map(
-                        (tag) => QuickReviewTile(
-                          label: tag,
-                          onTagSelected: (tagSelected) {
-                            if (tagSelected) {
-                              selectedTags.add(tag);
-                            } else {
-                              selectedTags.remove(tag);
-                            }
-                          },
-                        ),
-                      )
-                      .toList(),
+                  .map(
+                    (tag) => QuickReviewTile(
+                      label: tag,
+                      onTagSelected: (tagSelected) {
+                        if (tagSelected) {
+                          selectedTags.add(tag);
+                        } else {
+                          selectedTags.remove(tag);
+                        }
+                      },
+                    ),
+                  )
+                  .toList(),
                 ),
               ),
               const SizedBox(height: 20),
@@ -225,77 +225,69 @@ class _ReviewParkingAreaState extends State<ReviewParkingArea> {
             horizontal: 80,
           ),
           child: ElevatedButton(
-            onPressed: rate == 0
-                ? null
-                : () async {
+            onPressed: rate == 0 ? null : () async {
+                    int points = 0;
 
-                  showDialog(
-                    context: context,
-                    barrierDismissible: false,
-                    builder: (context) => WillPopScope(
-                      onWillPop: () async => false,
-                      child: const NoticeDialog(
-                        imageLink: "assets/logo/lets-park-logo.png",
-                        message: "Saving review...",
-                        forLoading: true,
+                    showDialog(
+                      context: context,
+                      barrierDismissible: false,
+                      builder: (context) => WillPopScope(
+                        onWillPop: () async => false,
+                        child: const NoticeDialog(
+                          imageLink: "assets/logo/lets-park-logo.png",
+                          message: "Saving review...",
+                          forLoading: true,
+                        ),
                       ),
-                    ),
-                  );
+                    );
 
-                  UserServices.updateReviewNotificationStatus(
-                    FirebaseAuth.instance.currentUser!.uid,
-                    widget.notificationId,
-                  );
+                    if (rate == 5){
+                      selectedTags.isNotEmpty ? points = 3 : points = 2;
+                      
+                    } else if (rate == 4){
+                      selectedTags.isNotEmpty ? points = 2 : points = 1;
+                    }
 
-                  await ParkingSpaceServices.updateParkingReviews(
-                    widget.spaceId,
-                    Review(
-                      FirebaseAuth.instance.currentUser!.photoURL,
-                      FirebaseAuth.instance.currentUser!.displayName,
+                    UserServices.updateReviewNotificationStatus(
+                      FirebaseAuth.instance.currentUser!.uid,
+                      widget.notificationId,
+                    );
+
+                    await ParkingSpaceServices.updateParkingReviews(
+                      widget.spaceId,
+                      Review(
+                        FirebaseAuth.instance.currentUser!.photoURL,
+                        FirebaseAuth.instance.currentUser!.displayName,
+                        rate,
+                        _infoController.text.trim(),
+                        selectedTags,
+                      ),
+                    );
+
+                    await ParkingSpaceServices.updateParkingSpaceRating(
+                      widget.spaceId,
                       rate,
-                      _infoController.text.trim(),
-                      selectedTags,
-                    ),
-                  );
+                    );
 
-                  await ParkingSpaceServices.updateParkingSpaceRating(
-                    widget.spaceId,
-                    rate,
-                  );
-
-                  if (rate >= 4){
-                    DateTime now = DateTime(0, 0, 0, 0, 0);
-                    await WorldTimeServices.getDateTimeNow().then((time) {
-                      now = DateTime(
-                        time.year,
-                        time.month,
-                        time.day,
-                        time.hour,
-                        time.minute,
-                      );
-                    });
-
-                    Report report = Report("", FirebaseAuth.instance.currentUser!.displayName!, "Reviewed 4-5 star", now.millisecondsSinceEpoch, "Merit");
-                
-                    await ParkingSpaceServices.addReport(widget.spaceId, report);
-
-                    await ParkingSpaceServices.updateCreditScore(widget.spaceId, 1);
-                  }
-
-                  navigatorKey.currentState!.popUntil((route) => route.isFirst);
-                  showDialog(
-                    context: context,
-                    barrierDismissible: false,
-                    builder: (context) => WillPopScope(
-                      onWillPop: () async => false,
-                      child: const NoticeDialog(
-                        imageLink: "assets/logo/lets-park-logo.png",
-                        message:
-                            "Thanks for reviewing!\nYour review will help others to choose a better parking.",
-                        forLoading: false,
+                    await ParkingSpaceServices.updatePoints(
+                      widget.spaceId,
+                      points,
+                    );
+                    
+                    navigatorKey.currentState!.popUntil((route) => route.isFirst);
+                    showDialog(
+                      context: context,
+                      barrierDismissible: false,
+                      builder: (context) => WillPopScope(
+                        onWillPop: () async => false,
+                        child: const NoticeDialog(
+                          imageLink: "assets/logo/lets-park-logo.png",
+                          message:
+                              "Thanks for reviewing!\nYour review will help others to choose a better parking.",
+                          forLoading: false,
+                        ),
                       ),
-                    ),
-                  );
+                    );
                   },
             child: const Text(
               "Submit",

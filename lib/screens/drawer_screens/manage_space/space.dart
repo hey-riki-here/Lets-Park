@@ -14,11 +14,12 @@ import 'package:lets_park/shared/shared_widgets.dart';
 import 'package:lets_park/models/review.dart';
 import 'package:lets_park/globals/globals.dart' as globals;
 import 'package:lets_park/screens/drawer_screens/manage_space/credit_score_page.dart';
+import 'package:percent_indicator/percent_indicator.dart';
 
 class Space extends StatefulWidget {
   final ParkingSpace space;
   final String title;
-  const Space({Key? key, required this.space, required this.title})
+  const Space({Key? key, required this.space, required this.title,})
       : super(key: key);
 
   @override
@@ -574,17 +575,41 @@ class _SpaceState extends State<Space> {
                                     space.getSpaceId!)
                                 .then((canModify) => canModify);
                             if (result) {
+                              
+                              showDialog(
+                                context: context,
+                                barrierDismissible: false,
+                                builder: (context) => WillPopScope(
+                                  onWillPop: () async => false,
+                                  child: const NoticeDialog(
+                                    imageLink:
+                                        "assets/logo/lets-park-logo.png",
+                                    message:
+                                        "Loading, please wait...",
+                                    forLoading: true,
+                                  ),
+                                ),
+                              );
+                              bool flag = await ParkingSpaceServices.isVerified(space.getSpaceId!);
+
+                              bool verified = flag && space.getRating! >= 4;
+
+                              Navigator.pop(context);
+                              
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
                                   builder: (BuildContext context) =>
                                       UpdateParkingSpace(
                                     space: space,
+                                    verified: verified,
                                   ),
                                 ),
                               ).then((value) {
                                 setState(() {});
                               });
+
+                              
                             } else {
                               showDialog(
                                 context: context,
@@ -600,20 +625,6 @@ class _SpaceState extends State<Space> {
                             }
                           },
                           child: const Text("Update parking space"),
-                        ),
-                        TextButton(
-                          onPressed: (){
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (BuildContext context) => CreditScorePage(
-                                  spaceId: widget.space.getSpaceId!,
-                                  creditScore: widget.space.getCreditScore!,
-                                ),
-                              ),
-                            );
-                          },
-                          child: const Text("Credit score"),
                         ),
                         TextButton(
                           style: TextButton.styleFrom(
@@ -1027,4 +1038,173 @@ class _SpaceState extends State<Space> {
     }
     return Row(children: newChildren);
   }
+
+  double sessionsPercentage(int sessions){
+    return sessions / 50;
+  }
+
+  double pointsPercentage(int points){
+    return points / 50;
+  }
+
+  double ratingsPercentage(double rating){
+    return rating / 5;
+  }
 }
+
+
+// const SizedBox(height: 10),
+//                 const Text(
+//                   "Verified Status",
+//                   style: TextStyle(
+//                     color: Colors.blue,
+//                   ),
+//                 ),
+//                 const SizedBox(height: 10),
+//                 Card(
+//                   elevation: 2,
+//                   shape: const RoundedRectangleBorder(
+//                     borderRadius: BorderRadius.all(
+//                       Radius.circular(12),
+//                     ),
+//                   ),
+//                   child: Padding(
+//                     padding: const EdgeInsets.all(16),
+//                     child: Column(
+//                       crossAxisAlignment: CrossAxisAlignment.start,
+//                       children: [
+//                         Text(
+//                           "50 parking bookings",
+//                           style: TextStyle(
+//                             color: Colors.blue[700],
+//                             fontSize: 18,
+//                             fontWeight: FontWeight.bold,
+//                           ),
+//                         ),
+//                         const SizedBox(height: 5),
+//                         const Text(
+//                           "Complete 50 parking bookings on this space.",
+//                           style: TextStyle(
+//                             color: Colors.black26,
+//                           ),
+//                         ),
+//                         const SizedBox(height: 5),
+//                         Row(
+//                           children: [
+//                             Expanded(
+//                             child: LinearPercentIndicator(
+//                                 padding: EdgeInsets.symmetric(horizontal: 0),
+//                                 animation: true,
+//                                 lineHeight: 5,
+//                                 animationDuration: 2000,
+//                                 percent: sessionsPercentage(sessions),
+//                                 backgroundColor: Colors.grey[100],
+//                                 progressColor: Colors.blue,
+//                               ),
+//                             ),
+//                           ],
+//                         ),
+//                         const SizedBox(height: 5),
+//                         Row(
+//                           mainAxisAlignment: MainAxisAlignment.end,
+//                           children: [
+//                             Text(
+//                               "$sessions/50",
+//                               style: TextStyle(
+//                                 color: Colors.black26,
+//                               ),
+//                             ),
+//                           ],
+//                         ),
+//                         const SizedBox(height: 10),
+//                         Text(
+//                           "50 points",
+//                           style: TextStyle(
+//                             color: Colors.green[700],
+//                             fontSize: 18,
+//                             fontWeight: FontWeight.bold,
+//                           ),
+//                         ),
+//                         const SizedBox(height: 5),
+//                         const Text(
+//                           "Earn 50 points on this space.",
+//                           style: TextStyle(
+//                             color: Colors.black26,
+//                           ),
+//                         ),
+//                         const SizedBox(height: 5),
+//                         Row(
+//                           children: [
+//                             Expanded(
+//                             child: LinearPercentIndicator(
+//                                 padding: EdgeInsets.symmetric(horizontal: 0),
+//                                 animation: true,
+//                                 lineHeight: 5,
+//                                 animationDuration: 2000,
+//                                 percent: pointsPercentage(space.getSpacePoints!),
+//                                 backgroundColor: Colors.grey[100],
+//                                 progressColor: Colors.green,
+//                               ),
+//                             ),
+//                           ],
+//                         ),
+//                         const SizedBox(height: 5),
+//                         Row(
+//                           mainAxisAlignment: MainAxisAlignment.end,
+//                           children: [
+//                             Text(
+//                               "${space.getSpacePoints!}/50",
+//                               style: TextStyle(
+//                                 color: Colors.black26,
+//                               ),
+//                             ),
+//                           ],
+//                         ),
+//                         const SizedBox(height: 10),
+//                         Text(
+//                           "People's choice",
+//                           style: TextStyle(
+//                             color: Colors.yellow[700],
+//                             fontSize: 18,
+//                             fontWeight: FontWeight.bold,
+//                           ),
+//                         ),
+//                         const SizedBox(height: 5),
+//                         const Text(
+//                           "Get 4 to 5 stars on this space",
+//                           style: TextStyle(
+//                             color: Colors.black26,
+//                           ),
+//                         ),
+//                         const SizedBox(height: 5),
+//                         Row(
+//                           children: [
+//                             Expanded(
+//                             child: LinearPercentIndicator(
+//                                 padding: EdgeInsets.symmetric(horizontal: 0),
+//                                 animation: true,
+//                                 lineHeight: 5,
+//                                 animationDuration: 2000,
+//                                 percent: ratingsPercentage(space.getRating!),
+//                                 backgroundColor: Colors.grey[100],
+//                                 progressColor: Colors.yellow[600],
+//                               ),
+//                             ),
+//                           ],
+//                         ),
+//                         const SizedBox(height: 5),
+//                         Row(
+//                           mainAxisAlignment: MainAxisAlignment.end,
+//                           children: [
+//                             Text(
+//                               "${space.getRating!}/5",
+//                               style: TextStyle(
+//                                 color: Colors.black26,
+//                               ),
+//                             ),
+//                           ],
+//                         ),
+//                       ],
+//                     ),
+//                   ),
+//                 ),

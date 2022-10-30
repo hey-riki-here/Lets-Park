@@ -23,6 +23,7 @@ class ParkingSpace {
   List<String>? _certificates = [];
   bool? _disabled = false;
   int? _creditScore = 10;
+  int? _spacePoints = 0;
 
   ParkingSpace();
 
@@ -48,6 +49,7 @@ class ParkingSpace {
     bool? disabled,
     List<String>? certificates,
     int? creditScore,
+    int? spacePoints,
   ) {
     _id = id;
     _ownerId = ownerId;
@@ -70,6 +72,7 @@ class ParkingSpace {
     _disabled = disabled;
     _certificates = certificates;
     _creditScore = creditScore;
+    _spacePoints = spacePoints;
   }
 
   String? get getSpaceId => _id;
@@ -204,6 +207,9 @@ class ParkingSpace {
     _creditScore = creditScore;
   }
 
+  int? get getSpacePoints => _spacePoints;
+
+
   @override
   String toString() {
     return "ParkingSpace [ $_ownerId , $_imageUrl , $_address, $_latLng , $_capacity , $_rating , $_info , $_verticalClearance, $_type , $_features, $_isFull]";
@@ -231,6 +237,7 @@ class ParkingSpace {
         'disabled': _disabled,
         'certificates' : _certificates,
         'creditScore' : _creditScore,
+        'spacePoints' : _spacePoints,
       };
 
   static ParkingSpace fromJson(Map<String, dynamic> json) {
@@ -264,6 +271,7 @@ class ParkingSpace {
       json['disabled'],
       certificates,
       json['creditScore'],
+      json['spacePoints'],
     );
   }
 }

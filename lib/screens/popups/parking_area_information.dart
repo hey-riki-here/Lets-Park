@@ -19,9 +19,11 @@ import 'package:url_launcher/url_launcher.dart' as launcher;
 
 class ParkingAreaInformation extends StatefulWidget {
   final ParkingSpace parkingSpace;
+  final bool verified;
   const ParkingAreaInformation({
     Key? key,
     required this.parkingSpace,
+    required this.verified,
   }) : super(key: key);
 
   @override
@@ -125,7 +127,7 @@ class _ParkingAreaInformationState extends State<ParkingAreaInformation> {
                   fit: StackFit.expand,
                   children: <Widget>[
                     Image.network(
-                      "https://firebasestorage.googleapis.com/v0/b/let-s-park-5c05c.appspot.com/o/parking-area-images%2Farca%20north-maysan-ps102020222212321?alt=media&token=cc3da947-c8a1-48cc-88cd-72e5c83bf21c",
+                      widget.parkingSpace.getImageUrl!,
                       fit: BoxFit.cover,
                     ),
                     const DecoratedBox(
@@ -188,6 +190,7 @@ class _ParkingAreaInformationState extends State<ParkingAreaInformation> {
                     padding: const EdgeInsets.all(16.0),
                     child: Header(
                       space: widget.parkingSpace,
+                      verified: widget.verified,
                     ),
                   ),
                   PriceAndDistance(
@@ -272,6 +275,84 @@ class _ParkingAreaInformationState extends State<ParkingAreaInformation> {
               );
               return;
             }
+
+            bool? proceed = true; 
+
+            if (!widget.verified){
+                proceed = await showDialog<bool>(
+                  context: context,
+                  builder: (_) => AlertDialog(
+                    title: Center(
+                      child: Image.asset(
+                        "assets/logo/app_icon.png",
+                        scale: 20,
+                      ),
+                    ),
+                    content: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Text(
+                          "Unverified parking space",
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: Colors.blue,
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                        Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: Colors.blue[50],
+                            borderRadius: const BorderRadius.all(Radius.circular(8)),
+                          ),
+                          child: Row(
+                            children: [
+                              Icon(
+                                Icons.info,
+                                color: Colors.blue.shade700,
+                              ),
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: Text(
+                                  "Please be advied that you are about to rent a parking space that is not yet verified.",
+                                  style: const TextStyle(
+                                    fontSize: 15,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                    actions: [
+                      TextButton(
+                        onPressed: () {
+                          Navigator.pop(context, false);
+                        },
+                        child: const Text("Cancel"),
+                      ),
+                      TextButton(
+                        onPressed: () {
+                          Navigator.pop(context, true);
+                        },
+                        child: const Text("Proceed anyway"),
+                      ),
+                    ],
+                  ),
+                );
+            }
+            
+            if (proceed == null){
+              return;
+            }
+
+            if (proceed == false){
+              return;
+            }
+
             globals.nonReservable = widget.parkingSpace;
             widget.parkingSpace.getDailyOrMonthly!.compareTo("Monthly") == 0
                 ? Navigator.push(
@@ -470,9 +551,11 @@ class _ParkingAreaInformationState extends State<ParkingAreaInformation> {
 
 class Header extends StatefulWidget {
   final ParkingSpace space;
+  final bool verified;
   const Header({
     Key? key,
     required this.space,
+    required this.verified,
   }) : super(key: key);
 
   @override
@@ -503,13 +586,22 @@ class _HeaderState extends State<Header> {
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  widget.space.getAddress!,
-                  style: const TextStyle(
-                    color: Colors.black54,
-                    fontWeight: FontWeight.w400,
-                    fontSize: 18,
-                  ),
+                Row(
+                  children: [
+                    Text(
+                      widget.space.getAddress!,
+                      style: const TextStyle(
+                        color: Colors.black54,
+                        fontWeight: FontWeight.w400,
+                        fontSize: 18,
+                      ),
+                    ),
+                    widget.verified ? Icon(
+                      Icons.verified,
+                      color: Colors.blue,
+                      size: 14,
+                    ) : const SizedBox(),
+                  ],
                 ),
                 const SizedBox(height: 2),
                 Row(

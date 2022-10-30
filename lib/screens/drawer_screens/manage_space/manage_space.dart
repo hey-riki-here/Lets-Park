@@ -360,13 +360,14 @@ class _SpaceCardState extends State<SpaceCard> {
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 TextButton(
-                  onPressed: () {
+                  onPressed: () async {
+                    int qty = await ParkingSpaceServices.getParkingSessionQuantity(space.getSpaceId!);
                     Navigator.push(
                       context,
                       MaterialPageRoute(
                         builder: (context) => Space(
                           space: space,
-                          title: "Space ${index + 1}",
+                          title: "${index + 1}",
                         ),
                       ),
                     );

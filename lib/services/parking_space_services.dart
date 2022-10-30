@@ -627,4 +627,30 @@ class ParkingSpaceServices {
     });
   }
 
+  static Future<void> updatePoints(String spaceId, int addPoint) async {
+    final docRef = FirebaseFirestore.instance
+      .collection("parking-spaces")
+      .doc(spaceId);
+
+    int spacePoints = await docRef.get().then((value) => value.data()!["spacePoints"]);
+    
+    spacePoints += addPoint;
+
+    await docRef.update({
+      'spacePoints': spacePoints,
+    });
+  }
+
+  static Future<bool> isVerified(String spaceId) async {
+
+    int sessions = await getParkingSessionQuantity(spaceId);
+
+    final docRef = FirebaseFirestore.instance
+      .collection("parking-spaces")
+      .doc(spaceId);
+
+    int spacePoints = await docRef.get().then((value) => value.data()!["spacePoints"]);
+
+    return sessions >= 50 && spacePoints >= 50;
+  }
 }
