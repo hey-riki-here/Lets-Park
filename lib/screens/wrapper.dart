@@ -17,8 +17,7 @@ class Wrapper extends StatelessWidget {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const CircularProgressIndicator();
           } else if (snapshot.hasData) {
-            print("Called");
-            return FirebaseAuth.instance.currentUser!.phoneNumber != null ? const HomeScreen() : const PhoneNumber();
+            return const HomeScreen();
           } else {
             return const SignInOrRegister();
           }

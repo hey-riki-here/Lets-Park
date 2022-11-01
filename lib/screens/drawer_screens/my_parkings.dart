@@ -242,7 +242,7 @@ class InProgressState extends State<InProgress> {
                           ),
                           const SizedBox(height: 5),
                           Text(
-                            parkings[index].getPrice!.toString(),
+                            "${"${parkings[index].getPrice!.toString()}"}.00",
                             style: textStyle,
                           ),
                         ],
@@ -259,7 +259,7 @@ class InProgressState extends State<InProgress> {
                                 color: Colors.white,
                                 borderRadius: BorderRadius.circular(12),
                               ),
-                              height: 320,
+                              height: 300,
                               margin: const EdgeInsets.all(12),
                               padding: const EdgeInsets.all(12),
                               child: Column(
@@ -291,37 +291,6 @@ class InProgressState extends State<InProgress> {
                                       fontSize: 16,
                                       fontWeight: FontWeight.w500,
                                     ),
-                                  ),
-                                  const SizedBox(height: 5),
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Icon(
-                                        Icons.star,
-                                        color: Colors.yellow.shade600,
-                                        size: 15,
-                                      ),
-                                      Icon(
-                                        Icons.star,
-                                        color: Colors.yellow.shade600,
-                                        size: 15,
-                                      ),
-                                      Icon(
-                                        Icons.star,
-                                        color: Colors.yellow.shade600,
-                                        size: 15,
-                                      ),
-                                      Icon(
-                                        Icons.star,
-                                        color: Colors.yellow.shade600,
-                                        size: 15,
-                                      ),
-                                      Icon(
-                                        Icons.star,
-                                        color: Colors.yellow.shade600,
-                                        size: 15,
-                                      ),
-                                    ],
                                   ),
                                   const SizedBox(height: 10),
                                   Row(
@@ -580,23 +549,23 @@ class InProgressState extends State<InProgress> {
                                               ),
                                             ],
                                           ),
-                                          Column(
-                                            children: [
-                                              IconButton(
-                                                onPressed: () {},
-                                                icon: const Icon(
-                                                  Icons.location_on_outlined,
-                                                  color: Colors.blue,
-                                                ),
-                                              ),
-                                              const Text(
-                                                "Location",
-                                                style: TextStyle(
-                                                  color: Colors.black54,
-                                                ),
-                                              ),
-                                            ],
-                                          ),
+                                          // Column(
+                                          //   children: [
+                                          //     IconButton(
+                                          //       onPressed: () {},
+                                          //       icon: const Icon(
+                                          //         Icons.location_on_outlined,
+                                          //         color: Colors.blue,
+                                          //       ),
+                                          //     ),
+                                          //     const Text(
+                                          //       "Location",
+                                          //       style: TextStyle(
+                                          //         color: Colors.black54,
+                                          //       ),
+                                          //     ),
+                                          //   ],
+                                          // ),
                                         ],
                                       ),
                                     ),
@@ -812,7 +781,7 @@ class _UpcomingState extends State<Upcoming> {
                           ),
                           const SizedBox(height: 5),
                           Text(
-                            parkings[index].getPrice!.toString(),
+                            "${parkings[index].getPrice!.toString()}.00",
                             style: textStyle,
                           ),
                         ],
@@ -829,7 +798,7 @@ class _UpcomingState extends State<Upcoming> {
                                 color: Colors.white,
                                 borderRadius: BorderRadius.circular(12),
                               ),
-                              height: 320,
+                              height: 300,
                               margin: const EdgeInsets.all(12),
                               padding: const EdgeInsets.all(12),
                               child: Column(
@@ -862,13 +831,10 @@ class _UpcomingState extends State<Upcoming> {
                                       fontWeight: FontWeight.w500,
                                     ),
                                   ),
-                                  const SizedBox(height: 5),
-                                  ParkingSpaceServices.getStars(
-                                      parkings[index].getStars!.toDouble()),
                                   const SizedBox(height: 10),
                                   Row(
                                     mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
+                                        MainAxisAlignment.spaceEvenly,
                                     children: [
                                       const Text(
                                         "Parking space owner",
@@ -943,23 +909,23 @@ class _UpcomingState extends State<Upcoming> {
                                               ),
                                             ],
                                           ),
-                                          Column(
-                                            children: [
-                                              IconButton(
-                                                onPressed: () {},
-                                                icon: Icon(
-                                                  Icons.cancel_outlined,
-                                                  color: Colors.red.shade300,
-                                                ),
-                                              ),
-                                              const Text(
-                                                "Cancel booking",
-                                                style: TextStyle(
-                                                  color: Colors.black54,
-                                                ),
-                                              ),
-                                            ],
-                                          ),
+                                          // Column(
+                                          //   children: [
+                                          //     IconButton(
+                                          //       onPressed: () {},
+                                          //       icon: Icon(
+                                          //         Icons.cancel_outlined,
+                                          //         color: Colors.red.shade300,
+                                          //       ),
+                                          //     ),
+                                          //     const Text(
+                                          //       "Cancel booking",
+                                          //       style: TextStyle(
+                                          //         color: Colors.black54,
+                                          //       ),
+                                          //     ),
+                                          //   ],
+                                          // ),
                                         ],
                                       ),
                                     ),
@@ -1160,7 +1126,7 @@ class _HistoryState extends State<History> {
                             ),
                             const SizedBox(height: 5),
                             Text(
-                              parkings[index].getPrice!.toString(),
+                              "${parkings[index].getPrice!.toString()}.00",
                               style: textStyle,
                             ),
                           ],

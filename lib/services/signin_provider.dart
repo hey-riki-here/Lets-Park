@@ -83,6 +83,9 @@ class SignInProvider extends ChangeNotifier {
         accessToken: googleAuth.accessToken,
         idToken: googleAuth.idToken,
       );
+      
+      globals.authCredential = credential;
+
       final UserCredential authResult =
           await _auth.signInWithCredential(credential);
 

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:lets_park/shared/shared_widgets.dart';
 import 'package:lets_park/screens/signin_register/otp_verification.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class PhoneNumber extends StatefulWidget {
   const PhoneNumber({
@@ -44,6 +45,27 @@ class _PhoneNumberState extends State<PhoneNumber> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
+            CircleAvatar(
+              backgroundColor: Colors.blue[100],
+              radius: 50,
+              child: CircleAvatar(
+                backgroundImage: NetworkImage(
+                  FirebaseAuth.instance.currentUser!.photoURL!,
+                ),
+                radius: 47,
+              ),
+            ),
+            const SizedBox(height: 10),
+            Text(
+              FirebaseAuth.instance.currentUser!.displayName!,
+              style: const TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 20,
+              ),
+            ),
+            const SizedBox(height: 5),
+            Text(FirebaseAuth.instance.currentUser!.email!),
+            const SizedBox(height: 40),
             Row(
               children: const [
                 Text(

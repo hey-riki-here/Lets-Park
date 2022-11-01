@@ -7,6 +7,7 @@ import 'package:lets_park/screens/drawer_screens/profile_page/update_profile_inf
 import 'package:lets_park/services/signin_provider.dart';
 import 'package:lets_park/shared/navigation_drawer.dart';
 import 'package:provider/provider.dart';
+import 'package:lets_park/screens/signin_register/forgot_password.dart';
 
 class Profile extends StatefulWidget {
   final int _pageId = 1;
@@ -242,10 +243,10 @@ class Menu extends StatelessWidget {
                 },
               ),
               buildMenuItem(
-                icon: Icons.credit_card_rounded,
+                icon: Icons.paypal_rounded,
                 iconSize: 20,
-                iconColor: Colors.tealAccent[700]!,
-                label: "Linked Cards",
+                iconColor: Colors.blue[700]!,
+                label: "Paypal accounts",
                 insets: const EdgeInsets.all(15),
                 borderRadius: const BorderRadius.all(Radius.zero),
                 onTap: ()  {},
@@ -257,7 +258,12 @@ class Menu extends StatelessWidget {
                 label: "Reset password",
                 insets: const EdgeInsets.all(15),
                 borderRadius: const BorderRadius.all(Radius.zero),
-                onTap: () {},
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => ForgotPassword(email: FirebaseAuth.instance.currentUser!.email!)),
+                  );
+                },
               ),
               buildMenuItem(
                 icon: Icons.logout_rounded,
@@ -351,10 +357,7 @@ class MenuTD extends StatelessWidget {
           child: Column(
             children: [
               buildMenuItem(
-                icon: FontAwesomeIcons.info,
-                iconSize: 17,
-                iconColor: Colors.grey[600]!,
-                label: "Terms of services",
+                label: "Privacy policy",
                 insets: const EdgeInsets.all(15),
                 borderRadius: const BorderRadius.only(
                   topRight: Radius.circular(12),
@@ -363,10 +366,13 @@ class MenuTD extends StatelessWidget {
                 onTap: () {},
               ),
               buildMenuItem(
-                icon: Icons.policy,
-                iconSize: 20,
-                iconColor: Colors.blue[700]!,
-                label: "Data policy",
+                label: "Terms and conditions",
+                insets: const EdgeInsets.all(15),
+                borderRadius: const BorderRadius.all(Radius.zero),
+                onTap: () {},
+              ),
+              buildMenuItem(
+                label: "Guidelines",
                 insets: const EdgeInsets.all(15),
                 borderRadius: const BorderRadius.only(
                   bottomRight: Radius.circular(12),
@@ -386,9 +392,6 @@ class MenuTD extends StatelessWidget {
   }
 
   Widget buildMenuItem({
-    required IconData icon,
-    required double iconSize,
-    required Color iconColor,
     required String label,
     required EdgeInsets insets,
     required BorderRadius borderRadius,
@@ -404,12 +407,6 @@ class MenuTD extends StatelessWidget {
           children: [
             Row(
               children: [
-                Icon(
-                  icon,
-                  color: iconColor,
-                  size: iconSize,
-                ),
-                const SizedBox(width: 10),
                 Text(
                   label,
                   style: const TextStyle(

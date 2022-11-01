@@ -3,6 +3,7 @@ import 'package:pinput/pinput.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:lets_park/screens/logged_in_screens/home_screen.dart';
 import 'package:lets_park/main.dart';
+import 'package:lets_park/globals/globals.dart' as globals;
 
 class OTPVerification extends StatefulWidget {
   final String phoneNumber;
@@ -19,12 +20,18 @@ class OTPVerificationState extends State<OTPVerification> {
   bool visible = false;
   bool canResend = false;
   String message = "";
+  final controller = TextEditingController();
   @override
   initState(){
 
     verifyPhoneNumber();
     wait();
     super.initState();
+  }
+
+  @override
+  dispose(){
+    super.dispose();
   }
 
   @override
@@ -136,6 +143,7 @@ class OTPVerificationState extends State<OTPVerification> {
 
     return Pinput(
       length: 6,
+      androidSmsAutofillMethod:  AndroidSmsAutofillMethod.smsRetrieverApi,
       defaultPinTheme: defaultPinTheme,
       focusedPinTheme: focusedPinTheme,
       submittedPinTheme: submittedPinTheme,
@@ -152,11 +160,9 @@ class OTPVerificationState extends State<OTPVerification> {
         );
 
         try {
-          UserCredential result = await FirebaseAuth.instance.currentUser!.linkWithCredential(PhoneAuthProvider.credential(verificationId: verifId, smsCode: pin));
-          await FirebaseAuth.instance.signOut();
-          await FirebaseAuth.instance.signInWithCredential(PhoneAuthProvider.credential(verificationId: verifId, smsCode: pin));
+          await FirebaseAuth.instance.currentUser!.linkWithCredential(PhoneAuthProvider.credential(verificationId: verifId, smsCode: pin));
           Navigator.pop(context);
-          Navigator.pop(context);
+          Navigator.pop(context, "non-null-callback");
         } on FirebaseAuthException catch (e) {
           setState((){
            
@@ -164,6 +170,8 @@ class OTPVerificationState extends State<OTPVerification> {
               message = "Invalid verification code.";
             } else if (e.code == 'credential-already-in-use'){
               message = "Phone number is already linked to different account.";
+            } else {
+              print("Err: ${e.code}:${e.message}");
             }
             visible = true;
           });
@@ -178,11 +186,18 @@ class OTPVerificationState extends State<OTPVerification> {
     await FirebaseAuth.instance.verifyPhoneNumber(
       phoneNumber: '${widget.phoneNumber}',
       timeout: const Duration(minutes: 2),
-      verificationCompleted: (PhoneAuthCredential credential) async {
-
-      },
+      verificationCompleted: (PhoneAuthCredential credential) async {},
       verificationFailed: (FirebaseAuthException e) async {
-
+        setState((){ 
+          if (e.code == 'invalid-verification-code'){
+            message = "Invalid verification code.";
+          } else if (e.code == 'credential-already-in-use'){
+            message = "Phone number is already linked to different account.";
+          } else {
+            print("Pakyu error");
+          }
+          visible = true;
+        });
       },
       codeSent: (String verificationId, int? resendToken) {
         verifId = verificationId;
@@ -194,16 +209,18 @@ class OTPVerificationState extends State<OTPVerification> {
   }
 
   Future<void> wait() async {
-    setState((){
-      canResend = false;
-    });
+    if (mounted){
+      setState((){
+        canResend = false;
+      });
 
-    await Future.delayed(
-      const Duration(seconds: 20),
-    );
+      await Future.delayed(
+        const Duration(seconds: 20),
+      );
 
-    setState((){
-      canResend = true;
-    });
+      setState((){
+        canResend = true;
+      });
+    }
   }
 }

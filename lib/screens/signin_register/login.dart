@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:lets_park/services/signin_provider.dart';
 import 'package:lets_park/shared/shared_widgets.dart';
+import 'package:lets_park/screens/signin_register/forgot_password.dart';
 import 'package:provider/provider.dart';
 
 class Login extends StatefulWidget {
@@ -89,9 +90,15 @@ class _LoginState extends State<Login> {
                     style: TextStyle(
                       fontSize: 16,
                       color: Colors.blue,
+                      decoration: TextDecoration.underline,
                     ),
                   ),
-                  onTap: () {},
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const ForgotPassword()),
+                    );
+                  },
                 ),
               ],
             ),

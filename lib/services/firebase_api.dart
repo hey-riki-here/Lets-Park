@@ -11,7 +11,8 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:lets_park/globals/globals.dart' as globals;
 import 'package:lets_park/models/parking_space.dart';
-import 'package:lets_park/screens/popups/parking_area_info.dart';
+import 'package:lets_park/screens/popups/parking_area_information.dart';
+import 'package:lets_park/services/parking_space_services.dart';
 
 class FirebaseServices {
   late Stream<List<ParkingSpace>> _spaces;
@@ -32,7 +33,7 @@ class FirebaseServices {
     final docUser = FirebaseFirestore.instance
         .collection('parking-spaces')
         .doc('PS$time$id');
-
+    globals.userData.getOwnedParkingSpaces!.add(globals.parkingSpace);
     await docUser.set(globals.parkingSpace.toJson());
   }
 
@@ -101,17 +102,21 @@ class FirebaseServices {
     await _spaces.first.then((value) {
       globals.parkinSpaceQuantity = value.length;
       globals.currentParkingSpaces = value;
-      value.forEach((parkingSpace) {
+      value.forEach((parkingSpace) async {
         if (parkingSpace.isDisabled == false) {
+
           markers.add(
             Marker(
-              onTap: () {
+              onTap: () async {
+
+                bool verified = await ParkingSpaceServices.isVerified(parkingSpace.getSpaceId!);
+
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    fullscreenDialog: true,
-                    builder: (context) => ParkingAreaInfo(
+                    builder: (context) => ParkingAreaInformation(
                       parkingSpace: parkingSpace,
+                      verified: verified && parkingSpace.getRating! >= 4,
                     ),
                   ),
                 );

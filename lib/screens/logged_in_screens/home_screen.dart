@@ -28,6 +28,7 @@ import 'package:lets_park/screens/drawer_screens/my_parkings.dart';
 import 'package:lets_park/services/parking_space_services.dart';
 import 'package:lets_park/screens/signin_register/otp_verification.dart';
 import 'package:lets_park/screens/signin_register/phone_number.dart';
+import 'package:lets_park/shared/shared_widgets.dart';
 
 class HomeScreen extends StatefulWidget {
   final int _pageId = 0;
@@ -40,6 +41,9 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  final formKey = GlobalKey<FormState>();
+  late TextEditingController numberController;
+  final SharedWidget _sharedWidget = SharedWidget();
   final _scaffoldKey = GlobalKey<ScaffoldState>();
   final user = FirebaseAuth.instance.currentUser;
   final UserServices _userServices = UserServices();
@@ -49,6 +53,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   void initState(){
+    numberController = TextEditingController();
     initDateNow();
     UserServices.getFavorites(user!.uid);
 
@@ -64,6 +69,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   void dispose() {
+    print("Disposed");
     _userServices.getParkingSessionsStream.cancel();
     _userServices.getOwnedParkingSessionsStream.cancel();
     super.dispose();
@@ -81,7 +87,7 @@ class _HomeScreenState extends State<HomeScreen> {
       NotificationServices.startListening(context);
     } catch (e) {}
 
-    return Scaffold(
+    return FirebaseAuth.instance.currentUser!.phoneNumber != null ? Scaffold(
       key: _scaffoldKey,
       appBar:  AppBar(
           backgroundColor: Colors.blue,
@@ -139,7 +145,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             onTap: (){
                               Navigator.push(
                                 context,
-                                MaterialPageRoute(builder: (context) => const PhoneNumber()),
+                                MaterialPageRoute(builder: (context) => const Notifications()),
                               );
                             },
                             child: const Icon(
@@ -252,6 +258,110 @@ class _HomeScreenState extends State<HomeScreen> {
             }
           ),
         ),
+    ) : Scaffold(
+      appBar: AppBar(
+        automaticallyImplyLeading: false,
+        elevation: 0,
+        backgroundColor: Colors.white,
+        foregroundColor: Colors.black,
+        actions: [
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Image.asset("assets/logo/app_icon.png"),
+          ),
+        ],
+      ),
+      backgroundColor: Colors.white,
+      body: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Row(
+              children: const [
+                Text(
+                  "We are almost there...",
+                  style: TextStyle(
+                    fontSize: 22,
+                    fontStyle: FontStyle.italic,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 40),
+            Row(
+              children: const [
+                Text(
+                  "Enter your phone number here",
+                  style: TextStyle(
+                    color: Colors.black54,
+                    fontSize: 18,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 15),
+            Form(
+              key: formKey,
+              child: _sharedWidget.textFormField(
+                action: TextInputAction.done,
+                textInputType: TextInputType.number,
+                controller: numberController,
+                hintText: "9182083028",
+                obscure: false,
+                icon: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.min,
+                  children: const [
+                    Text(
+                      "+63",
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: Colors.grey,
+                      ),
+                    ),
+                  ],
+                ),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return "Enter phone number";
+                  } else if (value.length < 10) {
+                    return "Invalid phone number";
+                  }
+                  return null;
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        child: const Icon(
+          Icons.forward,
+        ),
+        onPressed: () async {
+          if (formKey.currentState!.validate()){
+            await Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => OTPVerification(phoneNumber: "+63${numberController.text.trim()}")),
+            ).then((value){
+
+              if (value != null){
+                showDialog(
+                  context: context,
+                  builder: (context) {
+                    return (NoticeDialog(
+                      imageLink: "assets/logo/lets-park-logo.png",
+                      message: "Thank you for verifying your phone number. Please enjoy the app!",
+                    ));
+                  },
+                );
+              }
+              setState((){});
+            });
+          }
+        },
+      ),
     );
   }
 
