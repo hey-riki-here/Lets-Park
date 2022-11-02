@@ -155,6 +155,7 @@ class _CheckoutState extends State<Checkout> {
               FirebaseAuth.instance.currentUser!.displayName,
               FirebaseAuth.instance.currentUser!.uid,
               FirebaseAuth.instance.currentUser!.photoURL,
+              FirebaseAuth.instance.currentUser!.phoneNumber!,
               widget.parkingSpace.getRating!.toInt(),
               widget.parkingSpace.getAddress,
               [
@@ -231,9 +232,7 @@ class _CheckoutState extends State<Checkout> {
                       ),
                     )..headers.addAll({
                         HttpHeaders.contentTypeHeader: "application/json",
-                    });
-
-                    print("Under request var");
+                      });
 
                     DateTime now = DateTime(0, 0, 0, 0, 0);
                     await WorldTimeServices.getDateTimeNow().then((time) {
@@ -245,8 +244,6 @@ class _CheckoutState extends State<Checkout> {
                         time.minute,
                       );
                     });
-
-                    print("Under datetime now var");
 
                     // int notifLength =
                     //     await UserServices.getUserNotificationLength(
@@ -275,8 +272,6 @@ class _CheckoutState extends State<Checkout> {
                       0.0,
                     );
 
-                    print("Under userNotif var");
-
                     var params = {
                       "parking": newParking.toJson(),
                       "notification": {
@@ -286,19 +281,12 @@ class _CheckoutState extends State<Checkout> {
                       },
                     };
 
-                    print("Under params var");
-
                     request.body = jsonEncode(params);
-
-                    print("Under request.body");
 
                     await request.send();
 
-                    print("Under request.send var");
-
-                    await UserServices.setPayedToFalse(FirebaseAuth.instance.currentUser!.uid);
-
-                    print("Under setPayedToFalse var");
+                    await UserServices.setPayedToFalse(
+                        FirebaseAuth.instance.currentUser!.uid);
 
                     Navigator.pop(context);
                     Navigator.push(

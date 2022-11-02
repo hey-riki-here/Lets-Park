@@ -1,3 +1,5 @@
+// ignore_for_file: import_of_legacy_library_into_null_safe, avoid_function_literals_in_foreach_calls
+
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -7,7 +9,6 @@ import 'package:shimmer/shimmer.dart';
 import 'package:lets_park/services/firebase_api.dart';
 import 'package:location/location.dart';
 import 'package:geolocator/geolocator.dart' as geolocator;
-import 'package:lets_park/screens/popups/parking_area_info.dart';
 import 'package:lets_park/screens/popups/parking_area_information.dart';
 import 'package:lets_park/globals/globals.dart' as globals;
 import 'package:lets_park/screens/popups/checkout.dart';
@@ -27,7 +28,6 @@ import 'package:lets_park/screens/drawer_screens/profile.dart';
 import 'package:lets_park/screens/drawer_screens/my_parkings.dart';
 import 'package:lets_park/services/parking_space_services.dart';
 import 'package:lets_park/screens/signin_register/otp_verification.dart';
-import 'package:lets_park/screens/signin_register/phone_number.dart';
 import 'package:lets_park/shared/shared_widgets.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -49,10 +49,11 @@ class _HomeScreenState extends State<HomeScreen> {
   final UserServices _userServices = UserServices();
   final GlobalKey<NearbySpacesViewState> nearbySpacesViewState = GlobalKey();
   final GlobalKey<TopSpacesGridState> topSpacesGridState = GlobalKey();
-  final GlobalKey<MonthlyParkingSpaceGridState> monthlyParkingSpaceGridState = GlobalKey();
+  final GlobalKey<MonthlyParkingSpaceGridState> monthlyParkingSpaceGridState =
+      GlobalKey();
 
   @override
-  void initState(){
+  void initState() {
     numberController = TextEditingController();
     initDateNow();
     UserServices.getFavorites(user!.uid);
@@ -64,12 +65,10 @@ class _HomeScreenState extends State<HomeScreen> {
     });
 
     super.initState();
-
   }
 
   @override
   void dispose() {
-    print("Disposed");
     _userServices.getParkingSessionsStream.cancel();
     _userServices.getOwnedParkingSessionsStream.cancel();
     super.dispose();
@@ -85,284 +84,295 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     try {
       NotificationServices.startListening(context);
+      // ignore: empty_catches
     } catch (e) {}
 
-    return FirebaseAuth.instance.currentUser!.phoneNumber != null ? Scaffold(
-      key: _scaffoldKey,
-      appBar:  AppBar(
-          backgroundColor: Colors.blue,
-          leading: IconButton(
-            icon: const Icon(Icons.menu, color: Colors.white),
-            onPressed: () {
-              _scaffoldKey.currentState!.openDrawer();
-            },
-          ),
-          elevation: 0,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.vertical(
-              bottom: Radius.circular(30),
-            ),
-          ),
-          bottom: PreferredSize(
-              child: Container(
-              height: 70,
-              width: double.infinity,
-              decoration: BoxDecoration(
-                color: Colors.blue,
-                borderRadius: BorderRadius.circular(15),
+    return FirebaseAuth.instance.currentUser!.phoneNumber != null
+        ? Scaffold(
+            key: _scaffoldKey,
+            appBar: AppBar(
+              backgroundColor: Colors.blue,
+              leading: IconButton(
+                icon: const Icon(Icons.menu, color: Colors.white),
+                onPressed: () {
+                  _scaffoldKey.currentState!.openDrawer();
+                },
               ),
-              child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: 20,), 
-                  child: Row(
-                  children: [
-                    Text(
-                      "Good day, ${FirebaseAuth.instance.currentUser!.displayName!.split(" ")[0]}!",
-                      style: const TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
-                    ),
-                    Expanded(
-                      child: Row(
-                        mainAxisSize: MainAxisSize.max,
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
-                          GestureDetector(
-                            onTap: (){
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(builder: (context) => const Messages()),
-                              );
-                            },
-                            child: const Icon(
-                              Icons.message,
-                              color: Colors.white,
-                            ),
-                          ),
-                          const SizedBox(width: 20),
-                          GestureDetector(
-                            onTap: (){
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(builder: (context) => const Notifications()),
-                              );
-                            },
-                            child: const Icon(
-                              Icons.notifications_rounded,
-                              color: Colors.white,
-                            ),
-                          ),
-                          const SizedBox(width: 20),
-                          GestureDetector(
-                            onTap: (){
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(builder: (context) => const Profile()),
-                              );
-                            },
-                            child: CircleAvatar(
-                              backgroundColor: Colors.blue[100],
-                              radius: 20,
-                              child: CircleAvatar(
-                                backgroundImage: NetworkImage(
-                                  FirebaseAuth.instance.currentUser!.photoURL!,
-                                ),
-                                radius: 17,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    
-                  ],
+              elevation: 0,
+              shape: const RoundedRectangleBorder(
+                borderRadius: BorderRadius.vertical(
+                  bottom: Radius.circular(30),
                 ),
               ),
-            ),
-            preferredSize: const Size.fromHeight(70),
-          ),
-        ),
-        drawer: NavigationDrawer(currentPage: widget._pageId),
-        body: RefreshIndicator(
-          onRefresh: refreshPage,
-          child: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-          stream: _userServices.getUserParkingData()!,
-          builder: (context, snapshot) {
-              if (snapshot.hasData) {
-                  List<Parking> parkings = [];
-                  snapshot.data!.docs.forEach((element) {
-                    parkings.add(Parking.fromJson(element.data()));
-                  });
-                  globals.userData.setParkings = parkings;
-              }
-
-              return ScrollConfiguration(
-                behavior: ScrollWithoutGlowBehavior(),
-                  child: SingleChildScrollView(
+              bottom: PreferredSize(
+                child: Container(
+                  height: 70,
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    color: Colors.blue,
+                    borderRadius: BorderRadius.circular(15),
+                  ),
                   child: Padding(
-                    padding: EdgeInsets.all(16), 
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                    ),
+                    child: Row(
                       children: [
                         Text(
-                          "Park",
-                          style: TextStyle(
+                          "Good day, ${FirebaseAuth.instance.currentUser!.displayName!.split(" ")[0]}!",
+                          style: const TextStyle(
+                            fontSize: 20,
                             fontWeight: FontWeight.bold,
-                            color: Colors.black54,
+                            color: Colors.white,
                           ),
                         ),
-                        SizedBox(height: 15),
-                        QuickActions(),
-                        SizedBox(height: 30),
-                        Text(
-                          "Nearby spaces",
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black54,
+                        Expanded(
+                          child: Row(
+                            mainAxisSize: MainAxisSize.max,
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: [
+                              GestureDetector(
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) => const Messages()),
+                                  );
+                                },
+                                child: const Icon(
+                                  Icons.message,
+                                  color: Colors.white,
+                                ),
+                              ),
+                              const SizedBox(width: 20),
+                              GestureDetector(
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) =>
+                                            const Notifications()),
+                                  );
+                                },
+                                child: const Icon(
+                                  Icons.notifications_rounded,
+                                  color: Colors.white,
+                                ),
+                              ),
+                              const SizedBox(width: 20),
+                              GestureDetector(
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) => const Profile()),
+                                  );
+                                },
+                                child: CircleAvatar(
+                                  backgroundColor: Colors.blue[100],
+                                  radius: 20,
+                                  child: CircleAvatar(
+                                    backgroundImage: NetworkImage(
+                                      FirebaseAuth
+                                          .instance.currentUser!.photoURL!,
+                                    ),
+                                    radius: 17,
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                         ),
-                        Text(
-                          "Listed below are the parking space(s) near your area.",
-                          style: TextStyle(
-                            color: Colors.black45,
-                          ),
-                        ),
-                        SizedBox(height: 30),
-                        NearbySpacesView(key: nearbySpacesViewState),
-                        SizedBox(height: 30),
-                        Text(
-                          "Top parking spaces",
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black54,
-                          ),
-                        ),
-                        SizedBox(height: 15),
-                        TopSpacesGrid(key: topSpacesGridState),
-                        SizedBox(height: 30),
-                        Text(
-                          "Monthly parking spaces",
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black54,
-                          ),
-                        ),
-                        SizedBox(height: 15),
-                        MonthlyParkingSpaceGrid(key: monthlyParkingSpaceGridState),
                       ],
                     ),
                   ),
                 ),
-              );
-            }
-          ),
-        ),
-    ) : Scaffold(
-      appBar: AppBar(
-        automaticallyImplyLeading: false,
-        elevation: 0,
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black,
-        actions: [
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Image.asset("assets/logo/app_icon.png"),
-          ),
-        ],
-      ),
-      backgroundColor: Colors.white,
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Row(
-              children: const [
-                Text(
-                  "We are almost there...",
-                  style: TextStyle(
-                    fontSize: 22,
-                    fontStyle: FontStyle.italic,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 40),
-            Row(
-              children: const [
-                Text(
-                  "Enter your phone number here",
-                  style: TextStyle(
-                    color: Colors.black54,
-                    fontSize: 18,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 15),
-            Form(
-              key: formKey,
-              child: _sharedWidget.textFormField(
-                action: TextInputAction.done,
-                textInputType: TextInputType.number,
-                controller: numberController,
-                hintText: "9182083028",
-                obscure: false,
-                icon: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  mainAxisSize: MainAxisSize.min,
-                  children: const [
-                    Text(
-                      "+63",
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: Colors.grey,
-                      ),
-                    ),
-                  ],
-                ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return "Enter phone number";
-                  } else if (value.length < 10) {
-                    return "Invalid phone number";
-                  }
-                  return null;
-                },
+                preferredSize: const Size.fromHeight(70),
               ),
             ),
-          ],
-        ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        child: const Icon(
-          Icons.forward,
-        ),
-        onPressed: () async {
-          if (formKey.currentState!.validate()){
-            await Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => OTPVerification(phoneNumber: "+63${numberController.text.trim()}")),
-            ).then((value){
+            drawer: NavigationDrawer(currentPage: widget._pageId),
+            body: RefreshIndicator(
+              onRefresh: refreshPage,
+              child: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+                  stream: _userServices.getUserParkingData()!,
+                  builder: (context, snapshot) {
+                    if (snapshot.hasData) {
+                      List<Parking> parkings = [];
+                      snapshot.data!.docs.forEach((element) {
+                        parkings.add(Parking.fromJson(element.data()));
+                      });
+                      globals.userData.setParkings = parkings;
+                    }
 
-              if (value != null){
-                showDialog(
-                  context: context,
-                  builder: (context) {
-                    return (NoticeDialog(
-                      imageLink: "assets/logo/lets-park-logo.png",
-                      message: "Thank you for verifying your phone number. Please enjoy the app!",
-                    ));
-                  },
-                );
-              }
-              setState((){});
-            });
-          }
-        },
-      ),
-    );
+                    return ScrollConfiguration(
+                      behavior: ScrollWithoutGlowBehavior(),
+                      child: SingleChildScrollView(
+                        child: Padding(
+                          padding: const EdgeInsets.all(16),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text(
+                                "Park",
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.black54,
+                                ),
+                              ),
+                              const SizedBox(height: 15),
+                              const QuickActions(),
+                              const SizedBox(height: 30),
+                              const Text(
+                                "Nearby spaces",
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.black54,
+                                ),
+                              ),
+                              const Text(
+                                "Listed below are the parking space(s) near your area.",
+                                style: TextStyle(
+                                  color: Colors.black45,
+                                ),
+                              ),
+                              const SizedBox(height: 30),
+                              NearbySpacesView(key: nearbySpacesViewState),
+                              const SizedBox(height: 30),
+                              const Text(
+                                "Top parking spaces",
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.black54,
+                                ),
+                              ),
+                              const SizedBox(height: 15),
+                              TopSpacesGrid(key: topSpacesGridState),
+                              const SizedBox(height: 30),
+                              const Text(
+                                "Monthly parking spaces",
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.black54,
+                                ),
+                              ),
+                              const SizedBox(height: 15),
+                              MonthlyParkingSpaceGrid(
+                                  key: monthlyParkingSpaceGridState),
+                            ],
+                          ),
+                        ),
+                      ),
+                    );
+                  }),
+            ),
+          )
+        : Scaffold(
+            appBar: AppBar(
+              automaticallyImplyLeading: false,
+              elevation: 0,
+              backgroundColor: Colors.white,
+              foregroundColor: Colors.black,
+              actions: [
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Image.asset("assets/logo/app_icon.png"),
+                ),
+              ],
+            ),
+            backgroundColor: Colors.white,
+            body: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Row(
+                    children: const [
+                      Text(
+                        "We are almost there...",
+                        style: TextStyle(
+                          fontSize: 22,
+                          fontStyle: FontStyle.italic,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 40),
+                  Row(
+                    children: const [
+                      Text(
+                        "Enter your phone number here",
+                        style: TextStyle(
+                          color: Colors.black54,
+                          fontSize: 18,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 15),
+                  Form(
+                    key: formKey,
+                    child: _sharedWidget.textFormField(
+                      action: TextInputAction.done,
+                      textInputType: TextInputType.number,
+                      controller: numberController,
+                      hintText: "9182083028",
+                      obscure: false,
+                      icon: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        mainAxisSize: MainAxisSize.min,
+                        children: const [
+                          Text(
+                            "+63",
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: Colors.grey,
+                            ),
+                          ),
+                        ],
+                      ),
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return "Enter phone number";
+                        } else if (value.length < 10) {
+                          return "Invalid phone number";
+                        }
+                        return null;
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            floatingActionButton: FloatingActionButton(
+              child: const Icon(
+                Icons.forward,
+              ),
+              onPressed: () async {
+                if (formKey.currentState!.validate()) {
+                  await Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => OTPVerification(
+                            phoneNumber: "+63${numberController.text.trim()}")),
+                  ).then((value) {
+                    if (value != null) {
+                      showDialog(
+                        context: context,
+                        builder: (context) {
+                          return (const NoticeDialog(
+                            imageLink: "assets/logo/lets-park-logo.png",
+                            message:
+                                "Thank you for verifying your phone number. Please enjoy the app!",
+                          ));
+                        },
+                      );
+                    }
+                    setState(() {});
+                  });
+                }
+              },
+            ),
+          );
   }
 
   Future<void> refreshPage() async {
@@ -385,7 +395,7 @@ class QuickActions extends StatelessWidget {
           Column(
             children: [
               GestureDetector(
-                onTap: (){
+                onTap: () {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
@@ -399,20 +409,24 @@ class QuickActions extends StatelessWidget {
                   radius: 30,
                   child: CircleAvatar(
                     backgroundColor: Colors.blue[50],
-                    backgroundImage: AssetImage("assets/images/reserve.png"),
+                    backgroundImage:
+                        const AssetImage("assets/images/reserve.png"),
                     radius: 25,
                   ),
                 ),
               ),
               const SizedBox(height: 10),
-              Text("Reserve a\nparking", textAlign: TextAlign.center,),
+              const Text(
+                "Reserve a\nparking",
+                textAlign: TextAlign.center,
+              ),
             ],
           ),
           const SizedBox(width: 20),
           Column(
             children: [
               GestureDetector(
-                onTap: (){
+                onTap: () {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
@@ -426,26 +440,30 @@ class QuickActions extends StatelessWidget {
                   radius: 30,
                   child: CircleAvatar(
                     backgroundColor: Colors.blue[50],
-                    backgroundImage: AssetImage("assets/images/monthly.png"),
+                    backgroundImage:
+                        const AssetImage("assets/images/monthly.png"),
                     radius: 25,
                   ),
                 ),
               ),
               const SizedBox(height: 10),
-              Text("Monthly\nparking", textAlign: TextAlign.center,),
+              const Text(
+                "Monthly\nparking",
+                textAlign: TextAlign.center,
+              ),
             ],
           ),
           const SizedBox(width: 20),
           Column(
             children: [
               GestureDetector(
-                onTap: (){
+                onTap: () {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => MyParkings(
-                            initialIndex: 0,
-                          )),
+                        builder: (context) => const MyParkings(
+                              initialIndex: 0,
+                            )),
                   );
                 },
                 child: CircleAvatar(
@@ -453,24 +471,28 @@ class QuickActions extends StatelessWidget {
                   radius: 30,
                   child: CircleAvatar(
                     backgroundColor: Colors.blue[50],
-                    backgroundImage: AssetImage("assets/images/in_progress.png"),
+                    backgroundImage:
+                        const AssetImage("assets/images/in_progress.png"),
                     radius: 25,
                   ),
                 ),
               ),
               const SizedBox(height: 10),
-              Text("In progress\nparking", textAlign: TextAlign.center,),
+              const Text(
+                "In progress\nparking",
+                textAlign: TextAlign.center,
+              ),
             ],
           ),
           const SizedBox(width: 20),
           Column(
             children: [
               GestureDetector(
-                onTap: (){
+                onTap: () {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                        builder: (context) => MyParkings(
+                        builder: (context) => const MyParkings(
                               initialIndex: 1,
                             )),
                   );
@@ -480,24 +502,27 @@ class QuickActions extends StatelessWidget {
                   radius: 30,
                   child: CircleAvatar(
                     backgroundColor: Colors.blue[50],
-                    backgroundImage: AssetImage("assets/images/upcoming.png"),
+                    backgroundImage: const AssetImage("assets/images/upcoming.png"),
                     radius: 25,
                   ),
                 ),
               ),
               const SizedBox(height: 10),
-              Text("Upcoming\nparking", textAlign: TextAlign.center,),
+              const Text(
+                "Upcoming\nparking",
+                textAlign: TextAlign.center,
+              ),
             ],
           ),
           const SizedBox(width: 20),
           Column(
             children: [
               GestureDetector(
-                onTap: (){
+                onTap: () {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                        builder: (context) => MyParkings(
+                        builder: (context) => const MyParkings(
                               initialIndex: 2,
                             )),
                   );
@@ -507,13 +532,16 @@ class QuickActions extends StatelessWidget {
                   radius: 30,
                   child: CircleAvatar(
                     backgroundColor: Colors.blue[50],
-                    backgroundImage: AssetImage("assets/images/history.png"),
+                    backgroundImage: const AssetImage("assets/images/history.png"),
                     radius: 25,
                   ),
                 ),
               ),
               const SizedBox(height: 10),
-              Text("Parking\nhistory", textAlign: TextAlign.center,),
+              const Text(
+                "Parking\nhistory",
+                textAlign: TextAlign.center,
+              ),
             ],
           ),
         ],
@@ -561,18 +589,20 @@ class NearbySpacesViewState extends State<NearbySpacesView> {
                   baseColor: Colors.grey.shade300,
                   highlightColor: Colors.grey.shade100,
                 )
-              : nearbySpaces.isNotEmpty ? SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: nearbySpaces.entries.map((entry) {
-                      return NearbySpaces(
-                        space: entry.key,
-                        distance: entry.value,
-                      );
-                    }).toList(),
-                  ),
-                ) : const NoNearbySpaces()
+              : nearbySpaces.isNotEmpty
+                  ? SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: nearbySpaces.entries.map((entry) {
+                          return NearbySpaces(
+                            space: entry.key,
+                            distance: entry.value,
+                          );
+                        }).toList(),
+                      ),
+                    )
+                  : const NoNearbySpaces()
           : EnableLocationService(
               getNearbySpaces: getNearbySpaces,
             ),
@@ -581,8 +611,8 @@ class NearbySpacesViewState extends State<NearbySpacesView> {
 
   void getNearbySpaces() async {
     setState(() {
-        loading = true;
-      });
+      loading = true;
+    });
     FirebaseServices _firebaseServices = FirebaseServices();
     Location location = Location();
 
@@ -610,9 +640,8 @@ class NearbySpacesViewState extends State<NearbySpacesView> {
 
       List<ParkingSpace> parkingSpaces = [];
       List<ParkingSpace> ownedSpaces = [];
-      
 
-      await FirebaseServices.getParkingSpaces().then((spaces){
+      await FirebaseServices.getParkingSpaces().then((spaces) {
         spaces.docs.forEach((space) {
           parkingSpaces.add(ParkingSpace.fromJson(space.data()));
         });
@@ -854,18 +883,22 @@ class NearbySpaces extends StatelessWidget {
             ),
             child: GestureDetector(
               onTap: () async {
-
-                if (await FirebaseServices.spaceExists(space.getSpaceId!) == false){
-                  showAlertDialog(context, "Something went wrong. Pull down to refresh the app");
+                if (await FirebaseServices.spaceExists(space.getSpaceId!) ==
+                    false) {
+                  showAlertDialog(context,
+                      "Something went wrong. Pull down to refresh the app");
                   return;
                 }
 
-                if (await FirebaseServices.spaceDisabled(space.getSpaceId!) == true){
-                  showAlertDialog(context, "Something went wrong. Pull down to refresh the app");
+                if (await FirebaseServices.spaceDisabled(space.getSpaceId!) ==
+                    true) {
+                  showAlertDialog(context,
+                      "Something went wrong. Pull down to refresh the app");
                   return;
                 }
 
-                bool verified = await ParkingSpaceServices.isVerified(space.getSpaceId!);
+                bool verified =
+                    await ParkingSpaceServices.isVerified(space.getSpaceId!);
 
                 Navigator.push(
                   context,
@@ -902,18 +935,22 @@ class NearbySpaces extends StatelessWidget {
               child: InkWell(
                 borderRadius: const BorderRadius.all(Radius.circular(8)),
                 onTap: () async {
-
-                  if (await FirebaseServices.spaceExists(space.getSpaceId!) == false){
-                    showAlertDialog(context, "Something went wrong. Pull down to refresh the app");
+                  if (await FirebaseServices.spaceExists(space.getSpaceId!) ==
+                      false) {
+                    showAlertDialog(context,
+                        "Something went wrong. Pull down to refresh the app");
                     return;
                   }
 
-                  if (await FirebaseServices.spaceDisabled(space.getSpaceId!) == true){
-                    showAlertDialog(context, "Something went wrong. Pull down to refresh the app");
+                  if (await FirebaseServices.spaceDisabled(space.getSpaceId!) ==
+                      true) {
+                    showAlertDialog(context,
+                        "Something went wrong. Pull down to refresh the app");
                     return;
-                  } 
+                  }
 
-                  bool verified = await ParkingSpaceServices.isVerified(space.getSpaceId!);
+                  bool verified =
+                      await ParkingSpaceServices.isVerified(space.getSpaceId!);
 
                   Navigator.push(
                     context,
@@ -986,94 +1023,100 @@ class NearbySpaces extends StatelessWidget {
           ),
           OutlinedButton.icon(
             onPressed: () async {
-              if (await FirebaseServices.spaceExists(space.getSpaceId!) == false){
-                showAlertDialog(context, "Something went wrong. Pull down to refresh the app");
+              if (await FirebaseServices.spaceExists(space.getSpaceId!) ==
+                  false) {
+                showAlertDialog(context,
+                    "Something went wrong. Pull down to refresh the app");
                 return;
               }
 
-              if (await FirebaseServices.spaceDisabled(space.getSpaceId!) == true){
-                showAlertDialog(context, "Something went wrong. Pull down to refresh the app");
+              if (await FirebaseServices.spaceDisabled(space.getSpaceId!) ==
+                  true) {
+                showAlertDialog(context,
+                    "Something went wrong. Pull down to refresh the app");
                 return;
               }
 
-              bool verified = await ParkingSpaceServices.isVerified(space.getSpaceId!);
-              bool? proceed = true; 
+              bool verified =
+                  await ParkingSpaceServices.isVerified(space.getSpaceId!);
+              bool? proceed = true;
 
-              if (!(verified && space.getRating! >= 4)){
-                  proceed = await showDialog<bool>(
-                    context: context,
-                    builder: (_) => AlertDialog(
-                      title: Center(
-                        child: Image.asset(
-                          "assets/logo/app_icon.png",
-                          scale: 20,
-                        ),
+              if (!(verified && space.getRating! >= 4)) {
+                proceed = await showDialog<bool>(
+                  context: context,
+                  builder: (_) => AlertDialog(
+                    title: Center(
+                      child: Image.asset(
+                        "assets/logo/app_icon.png",
+                        scale: 20,
                       ),
-                      content: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const Text(
-                            "Unverified parking space",
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              color: Colors.blue,
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                            ),
+                    ),
+                    content: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Text(
+                          "Unverified parking space",
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: Colors.blue,
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
                           ),
-                          const SizedBox(height: 10),
-                          Container(
-                            padding: const EdgeInsets.all(12),
-                            decoration: BoxDecoration(
-                              color: Colors.blue[50],
-                              borderRadius: const BorderRadius.all(Radius.circular(8)),
-                            ),
-                            child: Row(
-                              children: [
-                                Icon(
-                                  Icons.info,
-                                  color: Colors.blue.shade700,
-                                ),
-                                const SizedBox(width: 10),
-                                Expanded(
-                                  child: Text(
-                                    "Please be advised that you are about to rent a parking space that is not yet verified.",
-                                    style: const TextStyle(
-                                      fontSize: 15,
-                                    ),
+                        ),
+                        const SizedBox(height: 10),
+                        Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: Colors.blue[50],
+                            borderRadius:
+                                const BorderRadius.all(Radius.circular(8)),
+                          ),
+                          child: Row(
+                            children: [
+                              Icon(
+                                Icons.info,
+                                color: Colors.blue.shade700,
+                              ),
+                              const SizedBox(width: 10),
+                              const Expanded(
+                                child: Text(
+                                  "Please be advised that you are about to rent a parking space that is not yet verified.",
+                                  style: TextStyle(
+                                    fontSize: 15,
                                   ),
                                 ),
-                              ],
-                            ),
+                              ),
+                            ],
                           ),
-                        ],
-                      ),
-                      actions: [
-                        TextButton(
-                          onPressed: () {
-                            Navigator.pop(context, false);
-                          },
-                          child: const Text("Cancel"),
-                        ),
-                        TextButton(
-                          onPressed: () {
-                            Navigator.pop(context, true);
-                          },
-                          child: const Text("Proceed anyway"),
                         ),
                       ],
                     ),
-                  );
+                    actions: [
+                      TextButton(
+                        onPressed: () {
+                          Navigator.pop(context, false);
+                        },
+                        child: const Text("Cancel"),
+                      ),
+                      TextButton(
+                        onPressed: () {
+                          Navigator.pop(context, true);
+                        },
+                        child: const Text("Proceed anyway"),
+                      ),
+                    ],
+                  ),
+                );
               }
-              
-              if (proceed == null){
+
+              if (proceed == null) {
                 return;
               }
 
-              if (proceed == false){
+              if (proceed == false) {
                 return;
               }
-              
+
               globals.nonReservable = space;
               space.getDailyOrMonthly!.compareTo("Monthly") == 0
                   ? Navigator.push(
@@ -1181,75 +1224,77 @@ class TopSpacesGridState extends State<TopSpacesGrid> {
   @override
   Widget build(BuildContext context) {
     return loading
-          ? Shimmer.fromColors(
-              child: GridView.count(
-                physics: const NeverScrollableScrollPhysics(),
-                padding: const EdgeInsets.all(0),
-                crossAxisCount: 2,
-                mainAxisSpacing: 12,
-                crossAxisSpacing: 12,
-                shrinkWrap: true,
-                children: [
-                  Container(
-                    height: 200,
-                    width: 100,
-                    decoration: BoxDecoration(
-                      borderRadius: const BorderRadius.all(Radius.circular(8)),
-                      color: Colors.grey.shade300,
-                    ),
-                  ),
-                  Container(
-                    height: 200,
-                    width: 100,
-                    decoration: BoxDecoration(
-                      borderRadius: const BorderRadius.all(Radius.circular(8)),
-                      color: Colors.grey.shade300,
-                    ),
-                  ),
-                  Container(
-                    height: 200,
-                    width: 100,
-                    decoration: BoxDecoration(
-                      borderRadius: const BorderRadius.all(Radius.circular(8)),
-                      color: Colors.grey.shade300,
-                    ),
-                  ),
-                  Container(
-                    height: 200,
-                    width: 100,
-                    decoration: BoxDecoration(
-                      borderRadius: const BorderRadius.all(Radius.circular(8)),
-                      color: Colors.grey.shade300,
-                    ),
-                  ),
-                ],
-              ),
-              baseColor: Colors.grey.shade300,
-              highlightColor: Colors.grey.shade100,
-            )
-          : spaces.isNotEmpty ? GridView.count(
+        ? Shimmer.fromColors(
+            child: GridView.count(
               physics: const NeverScrollableScrollPhysics(),
               padding: const EdgeInsets.all(0),
               crossAxisCount: 2,
               mainAxisSpacing: 12,
               crossAxisSpacing: 12,
               shrinkWrap: true,
-              children: spaces
-                  .map((space) => TopSpace(
-                        space: space,
-                      ))
-                  .toList(),
-            ) : const NoTopParkingSpaces();
+              children: [
+                Container(
+                  height: 200,
+                  width: 100,
+                  decoration: BoxDecoration(
+                    borderRadius: const BorderRadius.all(Radius.circular(8)),
+                    color: Colors.grey.shade300,
+                  ),
+                ),
+                Container(
+                  height: 200,
+                  width: 100,
+                  decoration: BoxDecoration(
+                    borderRadius: const BorderRadius.all(Radius.circular(8)),
+                    color: Colors.grey.shade300,
+                  ),
+                ),
+                Container(
+                  height: 200,
+                  width: 100,
+                  decoration: BoxDecoration(
+                    borderRadius: const BorderRadius.all(Radius.circular(8)),
+                    color: Colors.grey.shade300,
+                  ),
+                ),
+                Container(
+                  height: 200,
+                  width: 100,
+                  decoration: BoxDecoration(
+                    borderRadius: const BorderRadius.all(Radius.circular(8)),
+                    color: Colors.grey.shade300,
+                  ),
+                ),
+              ],
+            ),
+            baseColor: Colors.grey.shade300,
+            highlightColor: Colors.grey.shade100,
+          )
+        : spaces.isNotEmpty
+            ? GridView.count(
+                physics: const NeverScrollableScrollPhysics(),
+                padding: const EdgeInsets.all(0),
+                crossAxisCount: 2,
+                mainAxisSpacing: 12,
+                crossAxisSpacing: 12,
+                shrinkWrap: true,
+                children: spaces
+                    .map((space) => TopSpace(
+                          space: space,
+                        ))
+                    .toList(),
+              )
+            : const NoTopParkingSpaces();
   }
 
   void getTopParkingSpaces() async {
     setState(() {
-        loading = true;
-      });
+      loading = true;
+    });
     spaces.clear();
     await FirebaseServices.getTop5ParkingSpace().then((value) {
       value.docs.forEach((space) {
-        if (space.data()["disabled"] == false){
+        if (space.data()["disabled"] == false) {
           spaces.add(ParkingSpace.fromJson(space.data()));
         }
       });
@@ -1314,17 +1359,22 @@ class TopSpace extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 5),
             child: OutlinedButton(
               onPressed: () async {
-                if (await FirebaseServices.spaceExists(space.getSpaceId!) == false){
-                  showAlertDialog(context, "Something went wrong. Pull down to refresh the app");
+                if (await FirebaseServices.spaceExists(space.getSpaceId!) ==
+                    false) {
+                  showAlertDialog(context,
+                      "Something went wrong. Pull down to refresh the app");
                   return;
                 }
 
-                if (await FirebaseServices.spaceDisabled(space.getSpaceId!) == true){
-                  showAlertDialog(context, "Something went wrong. Pull down to refresh the app");
+                if (await FirebaseServices.spaceDisabled(space.getSpaceId!) ==
+                    true) {
+                  showAlertDialog(context,
+                      "Something went wrong. Pull down to refresh the app");
                   return;
                 }
 
-                bool verified = await ParkingSpaceServices.isVerified(space.getSpaceId!);
+                bool verified =
+                    await ParkingSpaceServices.isVerified(space.getSpaceId!);
 
                 Navigator.push(
                   context,
@@ -1387,45 +1437,45 @@ class NoTopParkingSpaces extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-        decoration: BoxDecoration(
-          border: Border.all(
-            color: const Color.fromARGB(66, 26, 18, 18),
-            width: 1,
-          ),
-          borderRadius: BorderRadius.circular(8),
+      decoration: BoxDecoration(
+        border: Border.all(
+          color: const Color.fromARGB(66, 26, 18, 18),
+          width: 1,
         ),
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                Icons.star_rounded,
-                color: Colors.amber,
-                size: 25,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: const [
+            Icon(
+              Icons.star_rounded,
+              color: Colors.amber,
+              size: 25,
+            ),
+            SizedBox(height: 20),
+            Text(
+              "No parking space(s) has been rated yet.",
+              style: TextStyle(
+                color: Colors.black45,
+                fontWeight: FontWeight.bold,
+                fontSize: 20,
               ),
-              const SizedBox(height: 20),
-              const Text(
-                "No parking space(s) has been rated yet.",
-                style: TextStyle(
-                  color: Colors.black45,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 20,
-                ),
+            ),
+            SizedBox(height: 10),
+            Text(
+              "We are sorry but there are no currently reviewed parkings spaces at the moment.",
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: Colors.black45,
+                fontSize: 15,
               ),
-              const SizedBox(height: 10),
-              const Text(
-                "We are sorry but there are no currently reviewed parkings spaces at the moment.",
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: Colors.black45,
-                  fontSize: 15,
-                ),
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
-      );
+      ),
+    );
   }
 }
 
@@ -1433,7 +1483,8 @@ class MonthlyParkingSpaceGrid extends StatefulWidget {
   const MonthlyParkingSpaceGrid({Key? key}) : super(key: key);
 
   @override
-  State<MonthlyParkingSpaceGrid> createState() => MonthlyParkingSpaceGridState();
+  State<MonthlyParkingSpaceGrid> createState() =>
+      MonthlyParkingSpaceGridState();
 }
 
 class MonthlyParkingSpaceGridState extends State<MonthlyParkingSpaceGrid> {
@@ -1448,76 +1499,79 @@ class MonthlyParkingSpaceGridState extends State<MonthlyParkingSpaceGrid> {
 
   @override
   Widget build(BuildContext context) {
-    return loading ? Shimmer.fromColors(
-              child: GridView.count(
+    return loading
+        ? Shimmer.fromColors(
+            child: GridView.count(
+              physics: const NeverScrollableScrollPhysics(),
+              padding: const EdgeInsets.all(0),
+              crossAxisCount: 2,
+              mainAxisSpacing: 12,
+              crossAxisSpacing: 12,
+              shrinkWrap: true,
+              children: [
+                Container(
+                  height: 200,
+                  width: 100,
+                  decoration: BoxDecoration(
+                    borderRadius: const BorderRadius.all(Radius.circular(8)),
+                    color: Colors.grey.shade300,
+                  ),
+                ),
+                Container(
+                  height: 200,
+                  width: 100,
+                  decoration: BoxDecoration(
+                    borderRadius: const BorderRadius.all(Radius.circular(8)),
+                    color: Colors.grey.shade300,
+                  ),
+                ),
+                Container(
+                  height: 200,
+                  width: 100,
+                  decoration: BoxDecoration(
+                    borderRadius: const BorderRadius.all(Radius.circular(8)),
+                    color: Colors.grey.shade300,
+                  ),
+                ),
+                Container(
+                  height: 200,
+                  width: 100,
+                  decoration: BoxDecoration(
+                    borderRadius: const BorderRadius.all(Radius.circular(8)),
+                    color: Colors.grey.shade300,
+                  ),
+                ),
+              ],
+            ),
+            baseColor: Colors.grey.shade300,
+            highlightColor: Colors.grey.shade100,
+          )
+        : spaces.isNotEmpty
+            ? GridView.count(
                 physics: const NeverScrollableScrollPhysics(),
                 padding: const EdgeInsets.all(0),
                 crossAxisCount: 2,
                 mainAxisSpacing: 12,
                 crossAxisSpacing: 12,
                 shrinkWrap: true,
-                children: [
-                  Container(
-                    height: 200,
-                    width: 100,
-                    decoration: BoxDecoration(
-                      borderRadius: const BorderRadius.all(Radius.circular(8)),
-                      color: Colors.grey.shade300,
-                    ),
-                  ),
-                  Container(
-                    height: 200,
-                    width: 100,
-                    decoration: BoxDecoration(
-                      borderRadius: const BorderRadius.all(Radius.circular(8)),
-                      color: Colors.grey.shade300,
-                    ),
-                  ),
-                  Container(
-                    height: 200,
-                    width: 100,
-                    decoration: BoxDecoration(
-                      borderRadius: const BorderRadius.all(Radius.circular(8)),
-                      color: Colors.grey.shade300,
-                    ),
-                  ),
-                  Container(
-                    height: 200,
-                    width: 100,
-                    decoration: BoxDecoration(
-                      borderRadius: const BorderRadius.all(Radius.circular(8)),
-                      color: Colors.grey.shade300,
-                    ),
-                  ),
-                ],
-              ),
-              baseColor: Colors.grey.shade300,
-              highlightColor: Colors.grey.shade100,
-            ) : 
-            spaces.isNotEmpty ? GridView.count(
-            physics: const NeverScrollableScrollPhysics(),
-            padding: const EdgeInsets.all(0),
-            crossAxisCount: 2,
-            mainAxisSpacing: 12,
-            crossAxisSpacing: 12,
-            shrinkWrap: true,
-            children: spaces
-                .map((space) => MonthlyParkingSpaceCard(
-                      space: space,
-                    ))
-                .toList(),
-          ) : const NoMonthlyParkingsView();
+                children: spaces
+                    .map((space) => MonthlyParkingSpaceCard(
+                          space: space,
+                        ))
+                    .toList(),
+              )
+            : const NoMonthlyParkingsView();
   }
 
   void getMonthlyParkingSpaces() async {
     setState(() {
-        loading = true;
+      loading = true;
     });
     spaces.clear();
     await FirebaseServices.getMonthlyParkingSpaces().then((value) {
       value.docs.forEach((space) {
-        if (space.data()["disabled"] == false){
-          spaces.add(ParkingSpace.fromJson(space.data()));  
+        if (space.data()["disabled"] == false) {
+          spaces.add(ParkingSpace.fromJson(space.data()));
         }
       });
       setState(() {
@@ -1573,20 +1627,19 @@ class MonthlyParkingSpaceCard extends StatelessWidget {
                     const SizedBox(width: 5),
                     Expanded(
                       child: Text(
-                      "${space.getAddress!}",
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 14,
+                        space.getAddress!,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 14,
+                        ),
                       ),
                     ),
-                    ),
-                    
                   ],
                 ),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(
+                    const Icon(
                       Icons.star_rounded,
                       color: Colors.amber,
                       size: 20,
@@ -1605,17 +1658,23 @@ class MonthlyParkingSpaceCard extends StatelessWidget {
                 ),
                 OutlinedButton(
                   onPressed: () async {
-                    if (await FirebaseServices.spaceExists(space.getSpaceId!) == false){
-                      showAlertDialog(context, "Something went wrong. Pull down to refresh the app");
+                    if (await FirebaseServices.spaceExists(space.getSpaceId!) ==
+                        false) {
+                      showAlertDialog(context,
+                          "Something went wrong. Pull down to refresh the app");
                       return;
                     }
 
-                    if (await FirebaseServices.spaceDisabled(space.getSpaceId!) == true){
-                      showAlertDialog(context, "Something went wrong. Pull down to refresh the app");
+                    if (await FirebaseServices.spaceDisabled(
+                            space.getSpaceId!) ==
+                        true) {
+                      showAlertDialog(context,
+                          "Something went wrong. Pull down to refresh the app");
                       return;
                     }
 
-                    bool verified = await ParkingSpaceServices.isVerified(space.getSpaceId!);
+                    bool verified = await ParkingSpaceServices.isVerified(
+                        space.getSpaceId!);
 
                     Navigator.push(
                       context,
@@ -1626,7 +1685,6 @@ class MonthlyParkingSpaceCard extends StatelessWidget {
                         ),
                       ),
                     );
-
                   },
                   child: const Text("View space"),
                   style: OutlinedButton.styleFrom(
@@ -1673,7 +1731,6 @@ class MonthlyParkingSpaceCard extends StatelessWidget {
   }
 }
 
-
 class NoMonthlyParkingsView extends StatelessWidget {
   const NoMonthlyParkingsView({
     Key? key,
@@ -1682,44 +1739,44 @@ class NoMonthlyParkingsView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-        decoration: BoxDecoration(
-          border: Border.all(
-            color: const Color.fromARGB(66, 26, 18, 18),
-            width: 1,
-          ),
-          borderRadius: BorderRadius.circular(8),
+      decoration: BoxDecoration(
+        border: Border.all(
+          color: const Color.fromARGB(66, 26, 18, 18),
+          width: 1,
         ),
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Image.asset(
-                "assets/icons/parking-marker-monthly.png",
-                width: 40,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Image.asset(
+              "assets/icons/parking-marker-monthly.png",
+              width: 40,
+            ),
+            const SizedBox(height: 20),
+            const Text(
+              "No monthly parking spaces found",
+              style: TextStyle(
+                color: Colors.black45,
+                fontWeight: FontWeight.bold,
+                fontSize: 20,
               ),
-              const SizedBox(height: 20),
-              const Text(
-                "No monthly parking spaces found",
-                style: TextStyle(
-                  color: Colors.black45,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 20,
-                ),
+            ),
+            const SizedBox(height: 10),
+            const Text(
+              "We are sorry but there are no currently registered parkings spaces with monthly payment.",
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: Colors.black45,
+                fontSize: 15,
               ),
-              const SizedBox(height: 10),
-              const Text(
-                "We are sorry but there are no currently registered parkings spaces with monthly payment.",
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: Colors.black45,
-                  fontSize: 15,
-                ),
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
-      );
+      ),
+    );
   }
 }
 

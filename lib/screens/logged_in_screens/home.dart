@@ -1,31 +1,13 @@
 // ignore_for_file: avoid_function_literals_in_foreach_calls, empty_catches
 
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:community_material_icon/community_material_icon.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:lets_park/globals/globals.dart' as globals;
-import 'package:lets_park/models/notification.dart';
-import 'package:lets_park/models/parking.dart';
 import 'package:lets_park/models/parking_space.dart';
 import 'package:lets_park/screens/logged_in_screens/google_map_screen.dart';
-import 'package:lets_park/screens/popups/checkout.dart';
-import 'package:lets_park/screens/popups/checkout_monthly.dart';
-import 'package:lets_park/screens/popups/notice_dialog.dart';
-import 'package:lets_park/screens/popups/parking_area_info.dart';
 import 'package:lets_park/services/firebase_api.dart';
-import 'package:lets_park/services/notif_services.dart';
-import 'package:lets_park/services/user_services.dart';
 import 'package:lets_park/services/parking_space_services.dart';
-import 'package:lets_park/services/world_time_api.dart';
-import 'package:lets_park/shared/navigation_drawer.dart';
-import 'package:location/location.dart';
-import 'package:geolocator/geolocator.dart' as geolocator;
-import 'package:shimmer/shimmer.dart';
 
 class Home extends StatefulWidget {
-  final int _pageId = 2;
   const Home({Key? key}) : super(key: key);
 
   @override
@@ -83,7 +65,7 @@ class _HomeState extends State<Home> {
                       Column(
                         children: [
                           Row(
-                            children: [
+                            children: const [
                               DrawerButton(),
                             ],
                           ),
@@ -114,8 +96,7 @@ class DrawerButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final UserServices _userServices = UserServices();
-
+    
     return Material(
       borderRadius: const BorderRadius.all(Radius.circular(10)),
       elevation: 2,
@@ -138,7 +119,6 @@ class SearchBox extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final UserServices _userServices = UserServices();
     final _controller = TextEditingController();
 
     return Expanded(
@@ -200,7 +180,6 @@ class _FilterButtonsState extends State<FilterButtons> {
   bool monthlyCanShowModal = true;
   @override
   Widget build(BuildContext context) {
-    FirebaseServices _firebaseServices = FirebaseServices();
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,

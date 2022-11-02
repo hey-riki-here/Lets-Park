@@ -361,7 +361,6 @@ class _SpaceCardState extends State<SpaceCard> {
               children: [
                 TextButton(
                   onPressed: () async {
-                    int qty = await ParkingSpaceServices.getParkingSessionQuantity(space.getSpaceId!);
                     Navigator.push(
                       context,
                       MaterialPageRoute(
@@ -570,7 +569,7 @@ class Menu extends StatelessWidget {
                   ),
                   subLabel: "View all your spaces",
                   onTap: () {
-                    goToRoute(context, YourSpace());
+                    goToRoute(context, const YourSpace());
                   },
                 ),
                 Container(

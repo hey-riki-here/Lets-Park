@@ -266,7 +266,6 @@ class HTMLString {
             </td>
           </tr>
           <!-- end reeipt table -->
-
         </table>
         <!--[if (gte mso 9)|(IE)]>
         </td>

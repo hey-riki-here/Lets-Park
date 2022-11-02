@@ -393,8 +393,6 @@ class UserServices {
     });
   }
 
-  // TODO: Checkout NR, Checkout M - add await setPayedToFalse
-
   static Future<void> notifyUser(String userId, UserNotification notif) async {
     final docUser = FirebaseFirestore.instance
         .collection('user-data')

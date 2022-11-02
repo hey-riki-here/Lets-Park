@@ -11,14 +11,10 @@ import 'package:lets_park/screens/logged_in_screens/google_map_screen.dart';
 import 'package:lets_park/services/parking_space_services.dart';
 import 'package:lets_park/services/user_services.dart';
 import 'package:lets_park/shared/navigation_drawer.dart';
-import 'package:lets_park/shared/navigation_drawer.dart';
-import 'package:numberpicker/numberpicker.dart';
-import 'package:lets_park/screens/popups/report_space.dart';
 import 'package:lets_park/models/parking_space.dart';
 import 'package:lets_park/screens/popups/checkout.dart';
 import 'package:lets_park/screens/popups/checkout_monthly.dart';
 import 'package:lets_park/screens/popups/notice_dialog.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:lets_park/screens/popups/extend_parking.dart';
 
 class MyParkings extends StatefulWidget {
@@ -191,8 +187,6 @@ class InProgressState extends State<InProgress> {
   );
   final UserData userData = globals.userData;
   bool isLoading = false;
-  int _selectedHour = 0;
-  int _selectedMinute = 15;
 
   @override
   Widget build(BuildContext context) {
@@ -242,7 +236,7 @@ class InProgressState extends State<InProgress> {
                           ),
                           const SizedBox(height: 5),
                           Text(
-                            "${"${parkings[index].getPrice!.toString()}"}.00",
+                            "${parkings[index].getPrice!.toString()}.00",
                             style: textStyle,
                           ),
                         ],
@@ -1418,22 +1412,6 @@ class InfoPopup extends StatelessWidget {
 
         break;
     }
-  }
-
-  Future _showDialog(
-    BuildContext context,
-    String image,
-    String message,
-  ) async {
-    return showDialog(
-      context: context,
-      builder: (context) {
-        return (NoticeDialog(
-          imageLink: image,
-          message: message,
-        ));
-      },
-    );
   }
 
   String _getFormattedTime(DateTime time) {

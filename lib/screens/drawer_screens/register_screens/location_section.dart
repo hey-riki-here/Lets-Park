@@ -265,7 +265,6 @@ class LocationSectionState extends State<LocationSection> {
         setState(() => govId = imageTemp);
         certificates.add(govId!);
       }
-      print(certificates);
     } on Exception catch (e) {}
   }
 
@@ -323,7 +322,6 @@ class LocationSectionState extends State<LocationSection> {
                   certificates.remove(govId!);
                   setState(() => govId = null);
                 }
-                print(certificates);
               },
               child: Container(
                 alignment: Alignment.center,

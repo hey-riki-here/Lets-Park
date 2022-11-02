@@ -27,7 +27,7 @@ class PasswordResetSent extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: const [
-              const Icon(
+              Icon(
                 Icons.mark_email_read_outlined,
                 color: Colors.black54,
                 size: 50,

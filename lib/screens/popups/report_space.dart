@@ -3,13 +3,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/foundation.dart';
-import 'package:flutter_rating_bar/flutter_rating_bar.dart';
-import 'package:lets_park/models/review.dart';
 import 'package:lets_park/screens/popups/notice_dialog.dart';
-import 'package:lets_park/globals/globals.dart' as globals;
 import 'package:lets_park/services/parking_space_services.dart';
-import 'package:lets_park/services/user_services.dart';
 import 'package:lets_park/models/report.dart';
 import 'package:lets_park/services/world_time_api.dart';
 
@@ -32,7 +27,13 @@ class _ReportSpaceState extends State<ReportSpace> {
   double spaceRating = 0;
   double rate = 0;
   int reviewsQty = 0;
-  List<String> reasons = ["Space does not follow guidelines", "No parking attendant", "Attendant is piling may-ari ng parking space", "Reason 4", "Reason 5"];
+  List<String> reasons = [
+    "Space does not follow guidelines",
+    "No parking attendant",
+    "Attendant is piling may-ari ng parking space",
+    "Reason 4",
+    "Reason 5"
+  ];
   String selectedReason = "";
 
   @override
@@ -125,7 +126,7 @@ class _ReportSpaceState extends State<ReportSpace> {
               ],
             ),
             const SizedBox(height: 20),
-            Text(
+            const Text(
               "Tell us the reason why you want to report this parking space",
               style: TextStyle(
                 color: Colors.grey,
@@ -147,8 +148,8 @@ class _ReportSpaceState extends State<ReportSpace> {
           onPressed: selectedReason.isEmpty
               ? null
               : () async {
-                submitReport();
-               },
+                  submitReport();
+                },
           child: const Text(
             "Submit report",
             style: TextStyle(
@@ -167,23 +168,6 @@ class _ReportSpaceState extends State<ReportSpace> {
     );
   }
 
-  Future _showDialog(
-      {required String imageLink,
-      required String message,
-      bool? forConfirmation = false}) {
-    return showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) {
-        return NoticeDialog(
-          imageLink: imageLink,
-          message: message,
-          forConfirmation: forConfirmation!,
-        );
-      },
-    );
-  }
-
   void getParkingReviews() async {
     int qty =
         await ParkingSpaceServices.getParkingReviewsQuantity(widget.spaceId)
@@ -193,17 +177,16 @@ class _ReportSpaceState extends State<ReportSpace> {
     });
   }
 
-  RadioListTile buildRadioItem(String label){
+  RadioListTile buildRadioItem(String label) {
     return RadioListTile(
-        title: Text(label),
-        value: label, 
-        groupValue: selectedReason, 
-        onChanged: (value){
-          setState(() {
-              selectedReason = value.toString();
-              print(selectedReason);
-          });
-        },
+      title: Text(label),
+      value: label,
+      groupValue: selectedReason,
+      onChanged: (value) {
+        setState(() {
+          selectedReason = value.toString();
+        });
+      },
     );
   }
 
@@ -232,15 +215,19 @@ class _ReportSpaceState extends State<ReportSpace> {
       );
     });
 
-    Report report = Report("", FirebaseAuth.instance.currentUser!.displayName!, selectedReason, now.millisecondsSinceEpoch, "Demerit");
-    
+    Report report = Report("", FirebaseAuth.instance.currentUser!.displayName!,
+        selectedReason, now.millisecondsSinceEpoch, "Demerit");
+
     await ParkingSpaceServices.addReport(widget.spaceId, report);
 
-    await ParkingSpaceServices.setSpaceReported(FirebaseAuth.instance.currentUser!.uid, widget.spaceId, widget.parkingId);
+    await ParkingSpaceServices.setSpaceReported(
+        FirebaseAuth.instance.currentUser!.uid,
+        widget.spaceId,
+        widget.parkingId);
 
     await ParkingSpaceServices.updateCreditScore(widget.spaceId, -1);
 
-    Navigator.pop(context); 
+    Navigator.pop(context);
 
     Navigator.pop(context);
 
@@ -256,7 +243,6 @@ class _ReportSpaceState extends State<ReportSpace> {
           forLoading: false,
         ),
       ),
-    ); 
+    );
   }
 }
-

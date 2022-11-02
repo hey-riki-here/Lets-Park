@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:lets_park/services/signin_provider.dart';
 import 'package:lets_park/shared/shared_widgets.dart';
-import 'package:provider/provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:lets_park/screens/signin_register/email_sent.dart';
@@ -37,7 +35,7 @@ class _ForgotPasswordState extends State<ForgotPassword> {
         elevation: 0,
         title: Row(
           children: [
-            Container(
+            SizedBox(
               width: 20,
               height: 20,
               child: Image.asset("assets/logo/app_icon.png"),

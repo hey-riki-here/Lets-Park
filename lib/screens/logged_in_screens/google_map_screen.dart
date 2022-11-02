@@ -1,4 +1,4 @@
-// ignore_for_file: unused_catch_clause, empty_catches
+// ignore_for_file: unused_catch_clause, empty_catches, import_of_legacy_library_into_null_safe
 
 import 'dart:async';
 import 'dart:convert';
@@ -8,7 +8,6 @@ import 'package:geocoding/geocoding.dart' as geocoding;
 import 'package:geocoding/geocoding.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart' as geolocator;
-import 'package:lets_park/main.dart';
 import 'package:lets_park/models/parking_space.dart';
 import 'package:lets_park/screens/popups/notice_dialog.dart';
 import 'package:lets_park/services/firebase_api.dart';

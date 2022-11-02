@@ -1,10 +1,9 @@
+// ignore_for_file: avoid_function_literals_in_foreach_calls
+
 import 'package:flutter/material.dart';
 import 'package:lets_park/services/firebase_api.dart';
-import 'dart:async';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:lets_park/models/parking_space.dart';
-import 'package:shimmer/shimmer.dart';
 import 'package:lets_park/screens/popups/parking_area_info.dart';
 
 class MonthlyParkingsPage extends StatefulWidget {
@@ -41,7 +40,7 @@ class _MonthlyParkingsPageState extends State<MonthlyParkingsPage> {
         ),
         bottom: PreferredSize(
           child: Padding(
-            padding: EdgeInsets.all(16),
+            padding: const EdgeInsets.all(16),
             child: TextField(
               textAlign: TextAlign.start,
               maxLines: 1,
@@ -65,7 +64,7 @@ class _MonthlyParkingsPageState extends State<MonthlyParkingsPage> {
                     color: Colors.grey.shade200,
                   ),
                 ),
-                border: OutlineInputBorder(
+                border: const OutlineInputBorder(
                   borderSide: BorderSide.none,
                 ),
               ),
@@ -84,7 +83,7 @@ class _MonthlyParkingsPageState extends State<MonthlyParkingsPage> {
             });
             return SingleChildScrollView(
                 child: Padding(
-                padding: EdgeInsets.all(16),
+                padding: const EdgeInsets.all(16),
                 child: MonthlyParkingSpaceGrid(spaces: spaces),
               ),
             );
@@ -180,7 +179,7 @@ class MonthlyParkingSpaceCard extends StatelessWidget {
                     const SizedBox(width: 5),
                     Expanded(
                       child: Text(
-                      "${space.getAddress!}",
+                      space.getAddress!,
                       style: const TextStyle(
                         color: Colors.white,
                         fontSize: 14,
@@ -193,7 +192,7 @@ class MonthlyParkingSpaceCard extends StatelessWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(
+                    const Icon(
                       Icons.star_rounded,
                       color: Colors.amber,
                       size: 20,

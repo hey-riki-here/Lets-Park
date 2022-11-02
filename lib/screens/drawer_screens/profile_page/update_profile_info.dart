@@ -340,36 +340,5 @@ class _UpdateProfileState extends State<UpdateProfile> {
         ),
       ),
     );
-  }
-
-  TextFormField _buildFields(
-    TextEditingController? controller,
-    String label,
-    String type,
-    bool readOnly,
-  ) {
-    return TextFormField(
-      readOnly: readOnly,
-      maxLength: type.compareTo("text") == 0 ? 55 : 11,
-      controller: controller,
-      textInputAction: TextInputAction.done,
-      keyboardType: type.compareTo("text") == 0
-          ? TextInputType.text
-          : TextInputType.number,
-      decoration: const InputDecoration(
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.all(Radius.circular(12)),
-        ),
-      ),
-      onChanged: (value) {},
-      validator: (value) {
-        if (value == null || value.isEmpty) {
-          return "Field is required.";
-        }
-        return null;
-      },
-    );
-  }
-
-  
+  }  
 }

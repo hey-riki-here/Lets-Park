@@ -9,12 +9,10 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:lets_park/globals/globals.dart' as globals;
-import 'package:lets_park/main.dart';
 import 'package:lets_park/models/parking.dart';
 import 'package:lets_park/models/report.dart';
 import 'package:lets_park/models/parking_space.dart';
 import 'package:lets_park/models/review.dart';
-import 'package:lets_park/screens/popups/notice_dialog.dart';
 import 'package:url_launcher/url_launcher.dart' as launcher;
 
 class ParkingSpaceServices {

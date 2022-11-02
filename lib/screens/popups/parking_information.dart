@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:lets_park/models/parking.dart';
 import 'package:intl/intl.dart';
+import 'package:url_launcher/url_launcher.dart' as launcher;
 
 class ParkingInformation extends StatelessWidget {
   final Parking parking;
@@ -19,7 +20,7 @@ class ParkingInformation extends StatelessWidget {
       ),
       body: SingleChildScrollView(
         child: Padding(
-          padding: EdgeInsets.all(16),
+          padding: const EdgeInsets.all(16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -37,7 +38,7 @@ class ParkingInformation extends StatelessWidget {
                     children: [
                       Text(
                         parking.getDriver!, 
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
                         ),
@@ -52,28 +53,37 @@ class ParkingInformation extends StatelessWidget {
                   ),
                 ],
               ),
-              // Row(
-              //   children: [
-              //     Expanded(
-              //     child: ElevatedButton.icon(
-              //       onPressed: (){},
-              //       icon: const Icon(Icons.open_in_new_rounded,),
-              //       label: const Text("View booking"),
-              //       style: ElevatedButton.styleFrom(
-              //         shape: RoundedRectangleBorder(
-              //           borderRadius: BorderRadius.circular(8.0),
-              //         ),
-              //       ),
-              //     ),
-              //   ),
-              //   ],
-              // ),
+              const SizedBox(height: 10),
+              Row(
+                children: [
+                  Expanded(
+                  child: ElevatedButton.icon(
+                    onPressed: () async {
+                      final url = "tel:${parking.getDriverPhone!}";
+                      if (await launcher.canLaunchUrl(Uri.parse(url))) {
+                        await launcher.launchUrl(Uri.parse(url));
+                      } else {
+                        throw 'Could not launch $url';
+                      }
+                    },
+                    icon: const Icon(Icons.phone_outlined,),
+                    label: Text("Call ${parking.getDriver!}"),
+                    style: ElevatedButton.styleFrom(
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8.0),
+                      ),
+                    ),
+                  ),
+                ),
+                ],
+              ),
               const SizedBox(height: 10),
               const Divider(),
               const SizedBox(height: 10),
               Text(
                 "${parking.getDriver!} booked on your space", 
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 15,
                   fontWeight: FontWeight.bold,
                 ),
@@ -95,7 +105,7 @@ class ParkingInformation extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: 10),
-              Text(
+              const Text(
                 "Parking ID", 
                 style: TextStyle(
                   fontSize: 15,
@@ -103,7 +113,7 @@ class ParkingInformation extends StatelessWidget {
                 ),
               ),
               Text(
-                "${parking.getParkingId!}",
+                parking.getParkingId!,
                 style: const TextStyle(
                   color: Colors.black54,
                 ),
@@ -120,7 +130,7 @@ class ParkingInformation extends StatelessWidget {
               ),
               const SizedBox(height: 10),
               Container(
-                padding: EdgeInsets.all(10),
+                padding: const EdgeInsets.all(10),
                 width: double.infinity,
                 decoration: BoxDecoration(
                   border: Border.all(
@@ -138,7 +148,7 @@ class ParkingInformation extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         const Text("Arrival"),
-                        Text("${getDateTime(parking.getArrival!)}"),
+                        Text(getDateTime(parking.getArrival!)),
                       ],
                     ),
                     const SizedBox(height: 10),
@@ -146,7 +156,7 @@ class ParkingInformation extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         const Text("Departure"),
-                        Text("${getDateTime(parking.getDeparture!)}"),
+                        Text(getDateTime(parking.getDeparture!)),
                       ],
                     ),
                     const SizedBox(height: 10),
@@ -154,7 +164,7 @@ class ParkingInformation extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         const Text("Duration"),
-                        Text("${parking.getDuration!}"),
+                        Text(parking.getDuration!),
                       ],
                     ),
                   ],
@@ -172,7 +182,7 @@ class ParkingInformation extends StatelessWidget {
               ),
               const SizedBox(height: 10),
               Container(
-                padding: EdgeInsets.all(10),
+                padding: const EdgeInsets.all(10),
                 width: double.infinity,
                 decoration: BoxDecoration(
                   border: Border.all(
@@ -202,7 +212,7 @@ class ParkingInformation extends StatelessWidget {
                         children: [
                           Text(
                             "${parking.getPrice!}.00", 
-                            style: TextStyle(
+                            style: const TextStyle(
                               fontWeight: FontWeight.bold,
                             ),
                           ),

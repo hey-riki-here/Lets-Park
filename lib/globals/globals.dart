@@ -9,7 +9,6 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:lets_park/models/parking.dart';
 import 'package:lets_park/models/user_data.dart';
 import 'package:lets_park/models/parking_space.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 
 TextEditingController globalStreet = TextEditingController();
 String globalBarangay = "";
@@ -32,4 +31,3 @@ List<String> favorites = [];
 LatLng parkingLoc = const LatLng(0, 0);
 int today = 0;
 List<String> certificates = [];
-AuthCredential? authCredential = null;

@@ -2,30 +2,20 @@
 
 import 'dart:async';
 import 'dart:io';
-
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dotted_border/dotted_border.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_holo_date_picker/flutter_holo_date_picker.dart';
-import 'package:flutter_time_picker_spinner/flutter_time_picker_spinner.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:lets_park/models/notification.dart';
 import 'package:lets_park/models/parking.dart';
-import 'package:lets_park/models/parking_space.dart';
-import 'package:lets_park/screens/drawer_screens/profile_page/registered_cars.dart';
 import 'package:lets_park/screens/popups/notice_dialog.dart';
-import 'package:lets_park/screens/popups/successful_booking.dart';
 import 'package:lets_park/screens/popups/parking_extended.dart';
 import 'package:lets_park/services/parking_space_services.dart';
 import 'package:lets_park/services/user_services.dart';
 import 'package:lets_park/services/world_time_api.dart';
 import 'package:numberpicker/numberpicker.dart';
-import 'package:lets_park/globals/globals.dart' as globals;
-import 'package:http/http.dart' as http;
-import 'dart:convert';
 import 'package:url_launcher/url_launcher.dart' as launcher;
 
 class ExtendParking extends StatefulWidget {
@@ -159,11 +149,11 @@ class _ExtendParkingState extends State<ExtendParking> {
                   false,
                   false,
                   true,
-                  "${_setupTimeState.currentState!.getDuration!}",
-                  "${getDateTime(widget.parking.getDeparture!)}",
-                  "${widget.parking.getDuration!}",
-                  "${DateFormat('MMM. dd, yyyy h:mm a').format(_setupTimeState.currentState!.getDeparture!)}",
-                  "${_setupTimeState.currentState!.getNewDuration}",
+                  _setupTimeState.currentState!.getDuration!,
+                  getDateTime(widget.parking.getDeparture!),
+                  widget.parking.getDuration!,
+                  DateFormat('MMM. dd, yyyy h:mm a').format(_setupTimeState.currentState!.getDeparture!),
+                  _setupTimeState.currentState!.getNewDuration,
                   _setupTimeState.currentState!.getParkingPrice,
                 );
 
@@ -267,11 +257,11 @@ class _ExtendParkingState extends State<ExtendParking> {
                       false,
                       false,
                       true,
-                      "${_setupTimeState.currentState!.getDuration!}",
-                      "${getDateTime(widget.parking.getDeparture!)}",
-                      "${widget.parking.getDuration!}",
-                      "${DateFormat('MMM. dd, yyyy h:mm a').format(_setupTimeState.currentState!.getDeparture!)}",
-                      "${_setupTimeState.currentState!.getNewDuration}",
+                      _setupTimeState.currentState!.getDuration!,
+                      getDateTime(widget.parking.getDeparture!),
+                      widget.parking.getDuration!,
+                      DateFormat('MMM. dd, yyyy h:mm a').format(_setupTimeState.currentState!.getDeparture!),
+                      _setupTimeState.currentState!.getNewDuration,
                       _setupTimeState.currentState!.getParkingPrice,
                     );
 
@@ -436,9 +426,6 @@ class SetUpTimeState extends State<SetUpTime> {
   int originalMinute = 0;
   String newParkingDuration = "";
   DateTime? sessionDeparture;
-  DateTime? _selectedDate = DateTime.now();
-  DateTime? _selectedTime;
-  DateTime? _selectedDateTime;
   DateTime? _selectedDepartureDateTime;
   String _departureDate = "Today";
   String? _departureTime;
@@ -493,7 +480,7 @@ class SetUpTimeState extends State<SetUpTime> {
                 color: Colors.blue.shade700,
               ),
               const SizedBox(width: 10),
-              Expanded(
+              const Expanded(
                 child: Text("If the extension time together with the current duration does not exceed the first 8 hours, there will be no charges applied."),
               ),
             ],
@@ -833,7 +820,6 @@ class Vehicle extends StatefulWidget {
 
 class VehicleState extends State<Vehicle> {
   final plateNumberController = TextEditingController();
-  final _formKey = GlobalKey<FormState>();
   List<String> plateNumbers = [];
   String selectedCar = "Select plate number";
 
@@ -864,7 +850,7 @@ class VehicleState extends State<Vehicle> {
               padding: const EdgeInsets.all(12),
               child: Text(
                 widget.plateNumber,
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 18,
                   color: Colors.black54,
                 ),

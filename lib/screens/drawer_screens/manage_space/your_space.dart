@@ -6,10 +6,9 @@ import 'package:lets_park/models/parking_space.dart';
 import 'package:lets_park/screens/drawer_screens/manage_space/space.dart';
 import 'package:lets_park/services/parking_space_services.dart';
 import 'package:lets_park/shared/shared_widgets.dart';
-import 'package:lets_park/globals/globals.dart' as globals;
 
 class YourSpace extends StatelessWidget {
-  YourSpace({Key? key}) : super(key: key);
+  const YourSpace({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -130,7 +129,7 @@ class ParkingCardState extends State<ParkingCard> {
                               fontWeight: FontWeight.w600,
                             ),
                           ),
-                          verified ? Icon(
+                          verified ? const Icon(
                             Icons.verified,
                             color: Colors.blue,
                             size: 14,

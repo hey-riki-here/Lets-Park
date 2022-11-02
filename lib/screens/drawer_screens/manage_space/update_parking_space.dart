@@ -126,7 +126,7 @@ class _UpdateParkingSpaceState extends State<UpdateParkingSpace> {
                 children: [
                   Text(
                     widget.verified ? "Verified" : "Not verified",
-                    style: TextStyle(
+                    style: const TextStyle(
                       color: Colors.blue,
                       fontSize: 16,
                     ),
@@ -138,7 +138,7 @@ class _UpdateParkingSpaceState extends State<UpdateParkingSpace> {
                         "A verified space makes it more credible. To get your spaces verified, reach the following requirements:\n\n• Get 50 parking bookings\n• Get 50 points\n• Achieve 4-5 stars",
                       );
                     },
-                    child: Icon(
+                    child: const Icon(
                       Icons.help,
                       color: Colors.grey,
                       size: 14,
@@ -902,7 +902,7 @@ class _UpdateParkingSpaceState extends State<UpdateParkingSpace> {
             Text(
               verified ? "Space is verified" : "Space is not yet verified",
               textAlign: TextAlign.center,
-              style: TextStyle(
+              style: const TextStyle(
                 color: Colors.blue,
                 fontSize: 16,
                 fontWeight: FontWeight.bold,

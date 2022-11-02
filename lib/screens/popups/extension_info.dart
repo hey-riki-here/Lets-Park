@@ -31,7 +31,7 @@ class ExtensionInformation extends StatelessWidget {
       ),
       body: SingleChildScrollView(
         child: Padding(
-          padding: EdgeInsets.all(16),
+          padding: const EdgeInsets.all(16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -49,7 +49,7 @@ class ExtensionInformation extends StatelessWidget {
                     children: [
                       Text(
                         parking.getDriver!, 
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
                         ),
@@ -69,7 +69,7 @@ class ExtensionInformation extends StatelessWidget {
               const SizedBox(height: 10),
               Text(
                 "${parking.getDriver!} extended parking session", 
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 15,
                   fontWeight: FontWeight.bold,
                 ),
@@ -91,7 +91,7 @@ class ExtensionInformation extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: 10),
-              Text(
+              const Text(
                 "Duration", 
                 style: TextStyle(
                   fontSize: 15,
@@ -105,7 +105,7 @@ class ExtensionInformation extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 10),
-              Text(
+              const Text(
                 "Parking ID", 
                 style: TextStyle(
                   fontSize: 15,
@@ -113,7 +113,7 @@ class ExtensionInformation extends StatelessWidget {
                 ),
               ),
               Text(
-                "${parking.getParkingId!}",
+                parking.getParkingId!,
                 style: const TextStyle(
                   color: Colors.black54,
                 ),
@@ -121,7 +121,7 @@ class ExtensionInformation extends StatelessWidget {
               const SizedBox(height: 10),
               const Divider(),
               Container(
-                padding: EdgeInsets.all(10),
+                padding: const EdgeInsets.all(10),
                 width: double.infinity,
                 decoration: BoxDecoration(
                   color: Colors.blueGrey[900],
@@ -138,9 +138,9 @@ class ExtensionInformation extends StatelessWidget {
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    Text(
+                    const Text(
                       "See adjusted booking below.",
-                      style: const TextStyle(
+                      style: TextStyle(
                         color: Colors.white,
                       ),
                     ),
@@ -155,7 +155,7 @@ class ExtensionInformation extends StatelessWidget {
               ),
               const SizedBox(height: 10),
               Container(
-                padding: EdgeInsets.all(10),
+                padding: const EdgeInsets.all(10),
                 width: double.infinity,
                 decoration: BoxDecoration(
                   border: Border.all(
@@ -173,7 +173,7 @@ class ExtensionInformation extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         const Text("Arrival"),
-                        Text("${getDateTime(parking.getArrival!)}"),
+                        Text(getDateTime(parking.getArrival!)),
                       ],
                     ),
                     const SizedBox(height: 10),
@@ -204,7 +204,7 @@ class ExtensionInformation extends StatelessWidget {
               ),
               const SizedBox(height: 10),
               Container(
-                padding: EdgeInsets.all(10),
+                padding: const EdgeInsets.all(10),
                 width: double.infinity,
                 decoration: BoxDecoration(
                   border: Border.all(
@@ -222,7 +222,7 @@ class ExtensionInformation extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         const Text("Arrival"),
-                        Text("${getDateTime(parking.getArrival!)}"),
+                        Text(getDateTime(parking.getArrival!)),
                       ],
                     ),
                     const SizedBox(height: 10),
@@ -256,7 +256,7 @@ class ExtensionInformation extends StatelessWidget {
               ),
               const SizedBox(height: 10),
               Container(
-                padding: EdgeInsets.all(10),
+                padding: const EdgeInsets.all(10),
                 width: double.infinity,
                 decoration: BoxDecoration(
                   border: Border.all(
@@ -286,7 +286,7 @@ class ExtensionInformation extends StatelessWidget {
                         children: [
                           Text(
                             "$price", 
-                            style: TextStyle(
+                            style: const TextStyle(
                               fontWeight: FontWeight.bold,
                             ),
                           ),

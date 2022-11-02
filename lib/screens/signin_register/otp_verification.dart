@@ -1,20 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:pinput/pinput.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:lets_park/screens/logged_in_screens/home_screen.dart';
-import 'package:lets_park/main.dart';
-import 'package:lets_park/globals/globals.dart' as globals;
 
 class OTPVerification extends StatefulWidget {
   final String phoneNumber;
-  const OTPVerification({Key? key, required this.phoneNumber,}) : super(key: key);
+  const OTPVerification({
+    Key? key,
+    required this.phoneNumber,
+  }) : super(key: key);
 
   @override
   State<OTPVerification> createState() => OTPVerificationState();
 }
 
 class OTPVerificationState extends State<OTPVerification> {
-  
   String pinput = "";
   String verifId = "";
   bool visible = false;
@@ -22,21 +21,19 @@ class OTPVerificationState extends State<OTPVerification> {
   String message = "";
   final controller = TextEditingController();
   @override
-  initState(){
-
+  initState() {
     verifyPhoneNumber();
     wait();
     super.initState();
   }
 
   @override
-  dispose(){
+  dispose() {
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
       appBar: AppBar(
         title: const Text("OTP Verification"),
@@ -56,7 +53,6 @@ class OTPVerificationState extends State<OTPVerification> {
                   fontWeight: FontWeight.bold,
                   fontSize: 20,
                 ),
-                
               ),
               const SizedBox(height: 30),
               const Text(
@@ -69,7 +65,7 @@ class OTPVerificationState extends State<OTPVerification> {
               const SizedBox(height: 20),
               Text(
                 widget.phoneNumber,
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
                 ),
@@ -95,22 +91,26 @@ class OTPVerificationState extends State<OTPVerification> {
               ),
               const SizedBox(height: 10),
               GestureDetector(
-                onTap: canResend ? () async {
-                  verifyPhoneNumber();
-                  await wait();
-                } : null,
-                child: canResend ? const Text(
-                  "Resend code",
-                  style: TextStyle(
-                    color: Colors.blue,
-                    decoration: TextDecoration.underline,
-                  ),
-                ) : const Text(
-                  "Resend code",
-                  style: TextStyle(
-                    color: Colors.grey,
-                  ),
-                ),
+                onTap: canResend
+                    ? () async {
+                        verifyPhoneNumber();
+                        await wait();
+                      }
+                    : null,
+                child: canResend
+                    ? const Text(
+                        "Resend code",
+                        style: TextStyle(
+                          color: Colors.blue,
+                          decoration: TextDecoration.underline,
+                        ),
+                      )
+                    : const Text(
+                        "Resend code",
+                        style: TextStyle(
+                          color: Colors.grey,
+                        ),
+                      ),
               ),
             ],
           ),
@@ -119,38 +119,46 @@ class OTPVerificationState extends State<OTPVerification> {
     );
   }
 
-  Pinput buildPinput(){
+  Pinput buildPinput() {
     final defaultPinTheme = PinTheme(
       width: 40,
       height: 40,
-      textStyle: TextStyle(fontSize: 15, color: Color.fromRGBO(30, 60, 87, 1), fontWeight: FontWeight.w600),
+      textStyle: const TextStyle(
+        fontSize: 15,
+        color: Color.fromRGBO(
+          30,
+          60,
+          87,
+          1,
+        ),
+        fontWeight: FontWeight.w600,
+      ),
       decoration: BoxDecoration(
-        border: Border.all(color: Color.fromRGBO(234, 239, 243, 1)),
+        border: Border.all(color: const Color.fromRGBO(234, 239, 243, 1)),
         borderRadius: BorderRadius.circular(8),
       ),
     );
 
     final focusedPinTheme = defaultPinTheme.copyDecorationWith(
-      border: Border.all(color: Color.fromRGBO(114, 178, 238, 1)),
+      border: Border.all(color: const Color.fromRGBO(114, 178, 238, 1)),
       borderRadius: BorderRadius.circular(8),
     );
 
     final submittedPinTheme = defaultPinTheme.copyWith(
       decoration: defaultPinTheme.decoration!.copyWith(
-        color: Color.fromRGBO(234, 239, 243, 1),
+        color: const Color.fromRGBO(234, 239, 243, 1),
       ),
     );
 
     return Pinput(
       length: 6,
-      androidSmsAutofillMethod:  AndroidSmsAutofillMethod.smsRetrieverApi,
+      androidSmsAutofillMethod: AndroidSmsAutofillMethod.smsRetrieverApi,
       defaultPinTheme: defaultPinTheme,
       focusedPinTheme: focusedPinTheme,
       submittedPinTheme: submittedPinTheme,
       pinputAutovalidateMode: PinputAutovalidateMode.onSubmit,
       showCursor: true,
       onCompleted: (pin) async {
-
         showDialog(
           context: context,
           barrierDismissible: false,
@@ -160,18 +168,19 @@ class OTPVerificationState extends State<OTPVerification> {
         );
 
         try {
-          await FirebaseAuth.instance.currentUser!.linkWithCredential(PhoneAuthProvider.credential(verificationId: verifId, smsCode: pin));
+          await FirebaseAuth.instance.currentUser!.linkWithCredential(
+              PhoneAuthProvider.credential(
+                  verificationId: verifId, smsCode: pin));
           Navigator.pop(context);
           Navigator.pop(context, "non-null-callback");
         } on FirebaseAuthException catch (e) {
-          setState((){
-           
-            if (e.code == 'invalid-verification-code'){
+          setState(() {
+            if (e.code == 'invalid-verification-code') {
               message = "Invalid verification code.";
-            } else if (e.code == 'credential-already-in-use'){
+            } else if (e.code == 'credential-already-in-use') {
               message = "Phone number is already linked to different account.";
             } else {
-              print("Err: ${e.code}:${e.message}");
+              debugPrint("Err: ${e.code}:${e.message}");
             }
             visible = true;
           });
@@ -184,33 +193,32 @@ class OTPVerificationState extends State<OTPVerification> {
 
   verifyPhoneNumber() async {
     await FirebaseAuth.instance.verifyPhoneNumber(
-      phoneNumber: '${widget.phoneNumber}',
+      phoneNumber: widget.phoneNumber,
       timeout: const Duration(minutes: 2),
       verificationCompleted: (PhoneAuthCredential credential) async {},
       verificationFailed: (FirebaseAuthException e) async {
-        setState((){ 
-          if (e.code == 'invalid-verification-code'){
+        setState(() {
+          if (e.code == 'invalid-verification-code') {
             message = "Invalid verification code.";
-          } else if (e.code == 'credential-already-in-use'){
+          } else if (e.code == 'credential-already-in-use') {
             message = "Phone number is already linked to different account.";
           } else {
-            print("Pakyu error");
+            debugPrint("Err: ${e.code}");
           }
           visible = true;
         });
       },
       codeSent: (String verificationId, int? resendToken) {
         verifId = verificationId;
-        print("Code sent!");
+        debugPrint("Code sent!");
       },
-      codeAutoRetrievalTimeout: (String verificationId) {
-      },
+      codeAutoRetrievalTimeout: (String verificationId) {},
     );
   }
 
   Future<void> wait() async {
-    if (mounted){
-      setState((){
+    if (mounted) {
+      setState(() {
         canResend = false;
       });
 
@@ -218,7 +226,7 @@ class OTPVerificationState extends State<OTPVerification> {
         const Duration(seconds: 20),
       );
 
-      setState((){
+      setState(() {
         canResend = true;
       });
     }

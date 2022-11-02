@@ -8,6 +8,7 @@ import 'package:lets_park/models/parking.dart';
 import 'package:lets_park/models/parking_space.dart';
 import 'package:lets_park/services/parking_space_services.dart';
 import 'package:lets_park/shared/shared_widgets.dart';
+import 'package:lets_park/screens/popups/parking_information.dart';
 
 class UpcomingParkings extends StatefulWidget {
   final ParkingSpace space;
@@ -58,165 +59,156 @@ class _UpcomingParkingsState extends State<UpcomingParkings> {
                             Radius.circular(12),
                           ),
                         ),
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 8,
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                children: [
-                                  CircleAvatar(
-                                    backgroundColor: Colors.white,
-                                    backgroundImage: NetworkImage(
-                                      upcomingParkings[index].getDriverImage!,
+                        child: InkWell(
+                          borderRadius: BorderRadius.circular(12),
+                          onTap: () async {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => ParkingInformation(
+                                  parking: upcomingParkings[index],
+                                  notificationDate: upcomingParkings[index].getPaymentDate!,
+                                ),
+                              ),
+                            );
+                          },
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 8,
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    CircleAvatar(
+                                      backgroundColor: Colors.white,
+                                      backgroundImage: NetworkImage(
+                                        upcomingParkings[index].getDriverImage!,
+                                      ),
+                                      radius: 25,
                                     ),
-                                    radius: 25,
-                                  ),
-                                  const SizedBox(width: 15),
-                                  Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        upcomingParkings[index].getDriver!,
-                                        style: textStyle,
-                                      ),
-                                      Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        children: [
-                                          Icon(
-                                            Icons.star,
-                                            color: Colors.yellow.shade600,
-                                            size: 15,
-                                          ),
-                                          Icon(
-                                            Icons.star,
-                                            color: Colors.yellow.shade600,
-                                            size: 15,
-                                          ),
-                                          Icon(
-                                            Icons.star,
-                                            color: Colors.yellow.shade600,
-                                            size: 15,
-                                          ),
-                                          Icon(
-                                            Icons.star,
-                                            color: Colors.yellow.shade600,
-                                            size: 15,
-                                          ),
-                                          Icon(
-                                            Icons.star,
-                                            color: Colors.yellow.shade600,
-                                            size: 15,
-                                          ),
-                                        ],
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 10),
-                              Row(
-                                children: [
-                                  const Icon(
-                                    FontAwesomeIcons.carAlt,
-                                    color: Colors.blue,
-                                    size: 30,
-                                  ),
-                                  const SizedBox(width: 15),
-                                  Text(
-                                    upcomingParkings[index].getPlateNumber!,
-                                    style: textStyle,
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 10),
-                              Row(
-                                children: [
-                                  const Icon(
-                                    Icons.access_time,
-                                    color: Colors.blue,
-                                    size: 30,
-                                  ),
-                                  const SizedBox(width: 15),
-                                  Expanded(
-                                    child: Column(
+                                    const SizedBox(width: 15),
+                                    Column(
                                       crossAxisAlignment:
                                           CrossAxisAlignment.start,
                                       children: [
-                                        Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceBetween,
-                                          children: [
-                                            Text(
-                                              "Arrival:",
-                                              style: textStyle,
-                                            ),
-                                            Text(
-                                              _getFormattedTime(
-                                                DateTime
-                                                    .fromMillisecondsSinceEpoch(
-                                                  upcomingParkings[index]
-                                                      .getArrival!,
-                                                ),
-                                              ),
-                                              style: textStyle.copyWith(
-                                                fontWeight: FontWeight.w700,
-                                              ),
-                                            ),
-                                          ],
+                                        Text(
+                                          upcomingParkings[index].getDriver!,
+                                          style: textStyle,
                                         ),
-                                        const SizedBox(height: 5),
-                                        Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceBetween,
-                                          children: [
-                                            Text(
-                                              "Departure:",
-                                              style: textStyle,
-                                            ),
-                                            Text(
-                                              _getFormattedTime(
-                                                DateTime
-                                                    .fromMillisecondsSinceEpoch(
-                                                  upcomingParkings[index]
-                                                      .getDeparture!,
-                                                ),
-                                              ),
-                                              style: textStyle.copyWith(
-                                                fontWeight: FontWeight.w700,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                        const SizedBox(height: 5),
-                                        Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceBetween,
-                                          children: [
-                                            Text(
-                                              "Duratiom:",
-                                              style: textStyle,
-                                            ),
-                                            Text(
-                                              upcomingParkings[index]
-                                                  .getDuration!,
-                                              style: textStyle.copyWith(
-                                                fontWeight: FontWeight.w700,
-                                              ),
-                                            ),
-                                          ],
+                                        const SizedBox(height: 2),
+                                        Text(
+                                          "Paid: ${upcomingParkings[index].getPrice!}.00",
+                                          style: const TextStyle(
+                                            fontSize: 12,
+                                            fontWeight: FontWeight.bold,
+                                          ),
                                         ),
                                       ],
                                     ),
-                                  ),
-                                ],
-                              ),
-                            ],
+                                  ],
+                                ),
+                                const SizedBox(height: 10),
+                                Row(
+                                  children: [
+                                    const Icon(
+                                      FontAwesomeIcons.carAlt,
+                                      color: Colors.blue,
+                                      size: 30,
+                                    ),
+                                    const SizedBox(width: 15),
+                                    Text(
+                                      upcomingParkings[index].getPlateNumber!,
+                                      style: textStyle,
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 10),
+                                Row(
+                                  children: [
+                                    const Icon(
+                                      Icons.access_time,
+                                      color: Colors.blue,
+                                      size: 30,
+                                    ),
+                                    const SizedBox(width: 15),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.spaceBetween,
+                                            children: [
+                                              Text(
+                                                "Arrival:",
+                                                style: textStyle,
+                                              ),
+                                              Text(
+                                                _getFormattedTime(
+                                                  DateTime
+                                                      .fromMillisecondsSinceEpoch(
+                                                    upcomingParkings[index]
+                                                        .getArrival!,
+                                                  ),
+                                                ),
+                                                style: textStyle.copyWith(
+                                                  fontWeight: FontWeight.w700,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                          const SizedBox(height: 5),
+                                          Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.spaceBetween,
+                                            children: [
+                                              Text(
+                                                "Departure:",
+                                                style: textStyle,
+                                              ),
+                                              Text(
+                                                _getFormattedTime(
+                                                  DateTime
+                                                      .fromMillisecondsSinceEpoch(
+                                                    upcomingParkings[index]
+                                                        .getDeparture!,
+                                                  ),
+                                                ),
+                                                style: textStyle.copyWith(
+                                                  fontWeight: FontWeight.w700,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                          const SizedBox(height: 5),
+                                          Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.spaceBetween,
+                                            children: [
+                                              Text(
+                                                "Duration:",
+                                                style: textStyle,
+                                              ),
+                                              Text(
+                                                upcomingParkings[index]
+                                                    .getDuration!,
+                                                style: textStyle.copyWith(
+                                                  fontWeight: FontWeight.w700,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
                           ),
                         ),
                       );

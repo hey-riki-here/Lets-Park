@@ -13,8 +13,6 @@ import 'package:lets_park/services/parking_space_services.dart';
 import 'package:lets_park/shared/shared_widgets.dart';
 import 'package:lets_park/models/review.dart';
 import 'package:lets_park/globals/globals.dart' as globals;
-import 'package:lets_park/screens/drawer_screens/manage_space/credit_score_page.dart';
-import 'package:percent_indicator/percent_indicator.dart';
 
 class Space extends StatefulWidget {
   final ParkingSpace space;

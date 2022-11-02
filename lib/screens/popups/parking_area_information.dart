@@ -1,3 +1,5 @@
+// ignore_for_file: import_of_legacy_library_into_null_safe, avoid_function_literals_in_foreach_calls
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:community_material_icon/community_material_icon.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -31,13 +33,12 @@ class ParkingAreaInformation extends StatefulWidget {
 }
 
 class _ParkingAreaInformationState extends State<ParkingAreaInformation> {
-  ScrollController _scrollController = ScrollController();
+  final ScrollController _scrollController = ScrollController();
   bool lastStatus = true;
-  Icon _favIcon = Icon(
+  Icon _favIcon = const Icon(
     Icons.favorite_outline,
   );
   bool _added = false;
-  String _label = "Add to Favorites";
   String destinationDistance = "";
   bool isLocationEnabled = false;
 
@@ -53,10 +54,6 @@ class _ParkingAreaInformationState extends State<ParkingAreaInformation> {
     );
 
     _added = globals.favorites.contains(widget.parkingSpace.getSpaceId!) ? true : false;
-
-    _label = globals.favorites.contains(widget.parkingSpace.getSpaceId!)
-        ? "Added to Favorites"
-        : "Add to Favorites";
 
     toDestination();
     super.initState();
@@ -88,8 +85,8 @@ class _ParkingAreaInformationState extends State<ParkingAreaInformation> {
                   Container(
                     width: 30,
                     height: 30,
-                    decoration: BoxDecoration(
-                      borderRadius: const BorderRadius.all(Radius.circular(5)),
+                    decoration: const BoxDecoration(
+                      borderRadius: BorderRadius.all(Radius.circular(5)),
                     ),
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(5),
@@ -150,7 +147,7 @@ class _ParkingAreaInformationState extends State<ParkingAreaInformation> {
                   onTap: () {
                     setState(() {
                       if (_added) {
-                        _favIcon = Icon(
+                        _favIcon = const Icon(
                           Icons.favorite_outline,
                         );
                         showNotice(
@@ -163,7 +160,7 @@ class _ParkingAreaInformationState extends State<ParkingAreaInformation> {
                         );
                         _added = false;
                       } else {
-                        _favIcon = Icon(
+                        _favIcon = const Icon(
                           Icons.favorite_outlined,
                           color: Colors.red,
                         );
@@ -177,7 +174,7 @@ class _ParkingAreaInformationState extends State<ParkingAreaInformation> {
                     });
                   },
                   child: Padding(
-                    padding: EdgeInsets.only(right: 16),
+                    padding: const EdgeInsets.only(right: 16),
                     child: _favIcon,
                   ),
                 ),
@@ -198,7 +195,7 @@ class _ParkingAreaInformationState extends State<ParkingAreaInformation> {
                     isLocationEnabled: isLocationEnabled,
                     dailyOrMonthly: widget.parkingSpace.getDailyOrMonthly!,
                   ),
-                  TabBar(
+                  const TabBar(
                     labelColor: Colors.black,
                     indicatorColor: Colors.black,
                     indicatorSize: TabBarIndicatorSize.label,
@@ -314,10 +311,10 @@ class _ParkingAreaInformationState extends State<ParkingAreaInformation> {
                                 color: Colors.blue.shade700,
                               ),
                               const SizedBox(width: 10),
-                              Expanded(
+                              const Expanded(
                                 child: Text(
                                   "Please be advied that you are about to rent a parking space that is not yet verified.",
-                                  style: const TextStyle(
+                                  style: TextStyle(
                                     fontSize: 15,
                                   ),
                                 ),
@@ -596,7 +593,7 @@ class _HeaderState extends State<Header> {
                         fontSize: 18,
                       ),
                     ),
-                    widget.verified ? Icon(
+                    widget.verified ? const Icon(
                       Icons.verified,
                       color: Colors.blue,
                       size: 14,
@@ -627,7 +624,7 @@ class _HeaderState extends State<Header> {
                       ),
                     ),
                     const SizedBox(width: 5),
-                    Text("/"),
+                    const Text("/"),
                     const SizedBox(width: 5),
                     Text(
                       widget.space.getDailyOrMonthly!,
@@ -636,7 +633,7 @@ class _HeaderState extends State<Header> {
                       ),
                     ),
                     const SizedBox(width: 5),
-                    Text("/"),
+                    const Text("/"),
                     const SizedBox(width: 5),
                     Text(
                       sessionsQty > 1 ? "$sessionsQty Parkings" : "$sessionsQty Parking",

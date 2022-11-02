@@ -117,6 +117,7 @@ class _NonReservableCheckoutState extends State<NonReservableCheckout> {
               FirebaseAuth.instance.currentUser!.displayName,
               FirebaseAuth.instance.currentUser!.uid,
               FirebaseAuth.instance.currentUser!.photoURL,
+              FirebaseAuth.instance.currentUser!.phoneNumber!,
               widget.parkingSpace.getRating!.toInt(),
               widget.parkingSpace.getAddress,
               [
