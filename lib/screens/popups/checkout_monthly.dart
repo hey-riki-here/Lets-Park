@@ -183,12 +183,22 @@ class _CheckoutMonthlyState extends State<CheckoutMonthly> {
                 return isAvailable;
               });
             }
-
-            Navigator.pop(context);
             if (isAvailable) {
-              UserServices.setPaymentParams(
+              await UserServices.setPaymentParams(
                 FirebaseAuth.instance.currentUser!.uid,
                 "${widget.parkingSpace.getPaypalEmail}/${_setupTimeState.currentState!.getParkingPrice}",
+              );
+
+              await UserServices.addToPay(
+                paymentDate,
+                parkingId,
+                _setupTimeState
+                    .currentState!.getArrival!.millisecondsSinceEpoch,
+                _setupTimeState
+                    .currentState!.getDeparture!.millisecondsSinceEpoch,
+                _setupTimeState.currentState!.getDuration!,
+                _setupTimeState.currentState!.getParkingPrice,
+                widget.parkingSpace.getAddress!,
               );
               String url =
                   "https://sample-paypal-payment-sandbox.herokuapp.com/${FirebaseAuth.instance.currentUser!.uid}";
@@ -198,6 +208,7 @@ class _CheckoutMonthlyState extends State<CheckoutMonthly> {
                   mode: launcher.LaunchMode.externalApplication,
                 );
               }
+              Navigator.pop(context);
               showAlertDialogWithLoading("Now paying...");
 
               checkPayedStream = checkPayed.listen((event) {
@@ -278,9 +289,10 @@ class _CheckoutMonthlyState extends State<CheckoutMonthly> {
                     request.body = jsonEncode(params);
                     await request.send();
 
-                    await UserServices.setPayedToFalse(FirebaseAuth.instance.currentUser!.uid);
+                    await UserServices.setPayedToFalse(
+                        FirebaseAuth.instance.currentUser!.uid);
                     Navigator.pop(context);
-                    
+
                     Navigator.push(
                       context,
                       MaterialPageRoute(
@@ -394,9 +406,14 @@ class _CheckoutMonthlyState extends State<CheckoutMonthly> {
         ),
         actions: [
           TextButton(
-            onPressed: () {
+            onPressed: () async {
               checkPayedStream!.cancel();
+              await UserServices.setPayedToFalse(
+                FirebaseAuth.instance.currentUser!.uid,
+              );
+              await UserServices.deletePaymentDoc();
               Navigator.pop(context);
+              Navigator.pop(context, "non-null-callback");
             },
             child: const Text("Cancel Payment"),
           ),

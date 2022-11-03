@@ -9,6 +9,7 @@ import 'package:lets_park/models/parking_space.dart';
 import 'package:lets_park/models/review.dart';
 import 'package:lets_park/screens/popups/checkout.dart';
 import 'package:lets_park/screens/popups/checkout_monthly.dart';
+import 'package:lets_park/screens/popups/checkout_non_reservable.dart';
 import 'package:lets_park/screens/popups/email_verification.dart';
 import 'package:lets_park/screens/popups/notice_dialog.dart';
 import 'package:lets_park/services/firebase_api.dart';
@@ -50,10 +51,14 @@ class _ParkingAreaInformationState extends State<ParkingAreaInformation> {
       globals.favorites.contains(widget.parkingSpace.getSpaceId!)
           ? Icons.favorite_outlined
           : Icons.favorite_outline,
-      color: globals.favorites.contains(widget.parkingSpace.getSpaceId!) ? Colors.red : Colors.white,
+      color: globals.favorites.contains(widget.parkingSpace.getSpaceId!)
+          ? Colors.red
+          : Colors.white,
     );
 
-    _added = globals.favorites.contains(widget.parkingSpace.getSpaceId!) ? true : false;
+    _added = globals.favorites.contains(widget.parkingSpace.getSpaceId!)
+        ? true
+        : false;
 
     toDestination();
     super.initState();
@@ -64,7 +69,7 @@ class _ParkingAreaInformationState extends State<ParkingAreaInformation> {
     _scrollController.removeListener(_scrollListener);
     super.dispose();
   }
-  
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -73,39 +78,40 @@ class _ParkingAreaInformationState extends State<ParkingAreaInformation> {
         child: CustomScrollView(
           controller: _scrollController,
           physics: const BouncingScrollPhysics(
-            parent: AlwaysScrollableScrollPhysics()
-          ),
+              parent: AlwaysScrollableScrollPhysics()),
           slivers: <Widget>[
             SliverAppBar(
               iconTheme: IconThemeData(
                 color: isShrink ? Colors.black : Colors.white,
               ),
-              title: isShrink ? Row(
-                children: [
-                  Container(
-                    width: 30,
-                    height: 30,
-                    decoration: const BoxDecoration(
-                      borderRadius: BorderRadius.all(Radius.circular(5)),
-                    ),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(5),
-                      child: Image.network(
-                        widget.parkingSpace.getImageUrl!,
-                        fit: BoxFit.fill,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  const Text(
-                    "Parking area information",
-                    style: TextStyle(
-                      color: Colors.black,
-                      fontWeight: FontWeight.w400,
-                    ),
-                  ),
-                ],
-              ) : const Text("Parking area information"),
+              title: isShrink
+                  ? Row(
+                      children: [
+                        Container(
+                          width: 30,
+                          height: 30,
+                          decoration: const BoxDecoration(
+                            borderRadius: BorderRadius.all(Radius.circular(5)),
+                          ),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(5),
+                            child: Image.network(
+                              widget.parkingSpace.getImageUrl!,
+                              fit: BoxFit.fill,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        const Text(
+                          "Parking area information",
+                          style: TextStyle(
+                            color: Colors.black,
+                            fontWeight: FontWeight.w400,
+                          ),
+                        ),
+                      ],
+                    )
+                  : const Text("Parking area information"),
               backgroundColor: Colors.white,
               stretch: true,
               floating: false,
@@ -164,7 +170,8 @@ class _ParkingAreaInformationState extends State<ParkingAreaInformation> {
                           Icons.favorite_outlined,
                           color: Colors.red,
                         );
-                        showNotice(context, "Parking space added to My Favorites");
+                        showNotice(
+                            context, "Parking space added to My Favorites");
                         UserServices.addSpaceonFavorites(
                           FirebaseAuth.instance.currentUser!.uid,
                           widget.parkingSpace.getSpaceId!,
@@ -250,7 +257,8 @@ class _ParkingAreaInformationState extends State<ParkingAreaInformation> {
                   type: widget.parkingSpace.getType!,
                   caretakerPhotoUrl: widget.parkingSpace.getCaretakerPhotoUrl!,
                   caretakerName: widget.parkingSpace.getCaretakerName!,
-                  caretakerPhoneNumber: widget.parkingSpace.getCaretakerPhoneNumber!,
+                  caretakerPhoneNumber:
+                      widget.parkingSpace.getCaretakerPhoneNumber!,
                   certificatesUrl: widget.parkingSpace.getCertificates!,
                 ),
               ),
@@ -273,86 +281,88 @@ class _ParkingAreaInformationState extends State<ParkingAreaInformation> {
               return;
             }
 
-            bool? proceed = true; 
+            bool? proceed = true;
 
-            if (!widget.verified){
-                proceed = await showDialog<bool>(
-                  context: context,
-                  builder: (_) => AlertDialog(
-                    title: Center(
-                      child: Image.asset(
-                        "assets/logo/app_icon.png",
-                        scale: 20,
-                      ),
+            if (!widget.verified) {
+              proceed = await showDialog<bool>(
+                context: context,
+                builder: (_) => AlertDialog(
+                  title: Center(
+                    child: Image.asset(
+                      "assets/logo/app_icon.png",
+                      scale: 20,
                     ),
-                    content: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Text(
-                          "Unverified parking space",
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            color: Colors.blue,
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                          ),
+                  ),
+                  content: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Text(
+                        "Unverified parking space",
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: Colors.blue,
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
                         ),
-                        const SizedBox(height: 10),
-                        Container(
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            color: Colors.blue[50],
-                            borderRadius: const BorderRadius.all(Radius.circular(8)),
-                          ),
-                          child: Row(
-                            children: [
-                              Icon(
-                                Icons.info,
-                                color: Colors.blue.shade700,
-                              ),
-                              const SizedBox(width: 10),
-                              const Expanded(
-                                child: Text(
-                                  "Please be advied that you are about to rent a parking space that is not yet verified.",
-                                  style: TextStyle(
-                                    fontSize: 15,
-                                  ),
+                      ),
+                      const SizedBox(height: 10),
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Colors.blue[50],
+                          borderRadius:
+                              const BorderRadius.all(Radius.circular(8)),
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.info,
+                              color: Colors.blue.shade700,
+                            ),
+                            const SizedBox(width: 10),
+                            const Expanded(
+                              child: Text(
+                                "Please be advied that you are about to rent a parking space that is not yet verified.",
+                                style: TextStyle(
+                                  fontSize: 15,
                                 ),
                               ),
-                            ],
-                          ),
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
-                    actions: [
-                      TextButton(
-                        onPressed: () {
-                          Navigator.pop(context, false);
-                        },
-                        child: const Text("Cancel"),
-                      ),
-                      TextButton(
-                        onPressed: () {
-                          Navigator.pop(context, true);
-                        },
-                        child: const Text("Proceed anyway"),
                       ),
                     ],
                   ),
-                );
+                  actions: [
+                    TextButton(
+                      onPressed: () {
+                        Navigator.pop(context, false);
+                      },
+                      child: const Text("Cancel"),
+                    ),
+                    TextButton(
+                      onPressed: () {
+                        Navigator.pop(context, true);
+                      },
+                      child: const Text("Proceed anyway"),
+                    ),
+                  ],
+                ),
+              );
             }
-            
-            if (proceed == null){
+
+            if (proceed == null) {
               return;
             }
 
-            if (proceed == false){
+            if (proceed == false) {
               return;
             }
 
+            bool cont = false;
             globals.nonReservable = widget.parkingSpace;
             widget.parkingSpace.getDailyOrMonthly!.compareTo("Monthly") == 0
-                ? Navigator.push(
+                ? await Navigator.push(
                     context,
                     MaterialPageRoute(
                       fullscreenDialog: true,
@@ -360,9 +370,22 @@ class _ParkingAreaInformationState extends State<ParkingAreaInformation> {
                         parkingSpace: widget.parkingSpace,
                       ),
                     ),
-                  )
+                  ).then((value) {
+                    if (value != null) {
+                      showDialog(
+                        context: context,
+                        builder: (context) {
+                          return (NoticeDialog(
+                            imageLink: "assets/logo/lets-park-logo.png",
+                            message:
+                                "Your booking at ${widget.parkingSpace.getAddress!} has been cancelled.",
+                          ));
+                        },
+                      );
+                    }
+                  })
                 : widget.parkingSpace.getType!.compareTo("Reservable") == 0
-                    ? Navigator.push(
+                    ? await Navigator.push(
                         context,
                         MaterialPageRoute(
                           fullscreenDialog: true,
@@ -370,8 +393,21 @@ class _ParkingAreaInformationState extends State<ParkingAreaInformation> {
                             parkingSpace: widget.parkingSpace,
                           ),
                         ),
-                      )
-                    : showDialog(
+                      ).then((value) {
+                        if (value != null) {
+                          showDialog(
+                            context: context,
+                            builder: (context) {
+                              return (NoticeDialog(
+                                imageLink: "assets/logo/lets-park-logo.png",
+                                message:
+                                    "Your booking at ${widget.parkingSpace.getAddress!} has been cancelled.",
+                              ));
+                            },
+                          );
+                        }
+                      })
+                    : await showDialog(
                         context: context,
                         barrierDismissible: true,
                         builder: (context) => NoticeDialog(
@@ -383,7 +419,34 @@ class _ParkingAreaInformationState extends State<ParkingAreaInformation> {
                               "Please confirm that you are currently at the parking location.",
                           forNonreservableConfirmation: true,
                         ),
-                      );
+                      ).then((value) {
+                        cont = value;
+                      });
+
+            if (cont) {
+              await Navigator.push(
+                context,
+                MaterialPageRoute(
+                  fullscreenDialog: true,
+                  builder: (context) => NonReservableCheckout(
+                    parkingSpace: globals.nonReservable,
+                  ),
+                ),
+              ).then((value) {
+                if (value != null) {
+                  showDialog(
+                    context: context,
+                    builder: (context) {
+                      return (NoticeDialog(
+                        imageLink: "assets/logo/lets-park-logo.png",
+                        message:
+                            "Your booking at ${widget.parkingSpace.getAddress!} has been cancelled.",
+                      ));
+                    },
+                  );
+                }
+              });
+            }
           },
           child: const Text(
             "Rent parking space",
@@ -560,12 +623,10 @@ class Header extends StatefulWidget {
 }
 
 class _HeaderState extends State<Header> {
-
   int sessionsQty = 0, reviewsQty = 0;
 
   @override
   void initState() {
-
     getParkingReviews();
     getParkingSessions();
 
@@ -593,11 +654,13 @@ class _HeaderState extends State<Header> {
                         fontSize: 18,
                       ),
                     ),
-                    widget.verified ? const Icon(
-                      Icons.verified,
-                      color: Colors.blue,
-                      size: 14,
-                    ) : const SizedBox(),
+                    widget.verified
+                        ? const Icon(
+                            Icons.verified,
+                            color: Colors.blue,
+                            size: 14,
+                          )
+                        : const SizedBox(),
                   ],
                 ),
                 const SizedBox(height: 2),
@@ -636,7 +699,9 @@ class _HeaderState extends State<Header> {
                     const Text("/"),
                     const SizedBox(width: 5),
                     Text(
-                      sessionsQty > 1 ? "$sessionsQty Parkings" : "$sessionsQty Parking",
+                      sessionsQty > 1
+                          ? "$sessionsQty Parkings"
+                          : "$sessionsQty Parking",
                       style: TextStyle(
                         color: Colors.blue[300],
                       ),
@@ -666,18 +731,18 @@ class _HeaderState extends State<Header> {
   }
 
   void getParkingSessions() async {
-    int qty =
-        await ParkingSpaceServices.getParkingSessionQuantity(widget.space.getSpaceId!)
-            .then((value) => value);
+    int qty = await ParkingSpaceServices.getParkingSessionQuantity(
+            widget.space.getSpaceId!)
+        .then((value) => value);
     setState(() {
       sessionsQty = qty;
     });
   }
 
   void getParkingReviews() async {
-    int qty =
-        await ParkingSpaceServices.getParkingReviewsQuantity(widget.space.getSpaceId!)
-            .then((value) => value);
+    int qty = await ParkingSpaceServices.getParkingReviewsQuantity(
+            widget.space.getSpaceId!)
+        .then((value) => value);
     setState(() {
       reviewsQty = qty;
     });

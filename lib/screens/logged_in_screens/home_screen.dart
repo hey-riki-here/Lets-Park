@@ -3,6 +3,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:lets_park/screens/popups/checkout_non_reservable.dart';
 import 'package:lets_park/shared/navigation_drawer.dart';
 import 'package:lets_park/models/parking_space.dart';
 import 'package:shimmer/shimmer.dart';
@@ -502,7 +503,8 @@ class QuickActions extends StatelessWidget {
                   radius: 30,
                   child: CircleAvatar(
                     backgroundColor: Colors.blue[50],
-                    backgroundImage: const AssetImage("assets/images/upcoming.png"),
+                    backgroundImage:
+                        const AssetImage("assets/images/upcoming.png"),
                     radius: 25,
                   ),
                 ),
@@ -532,7 +534,8 @@ class QuickActions extends StatelessWidget {
                   radius: 30,
                   child: CircleAvatar(
                     backgroundColor: Colors.blue[50],
-                    backgroundImage: const AssetImage("assets/images/history.png"),
+                    backgroundImage:
+                        const AssetImage("assets/images/history.png"),
                     radius: 25,
                   ),
                 ),
@@ -1117,9 +1120,11 @@ class NearbySpaces extends StatelessWidget {
                 return;
               }
 
+              bool cont = false;
+
               globals.nonReservable = space;
               space.getDailyOrMonthly!.compareTo("Monthly") == 0
-                  ? Navigator.push(
+                  ? await Navigator.push(
                       context,
                       MaterialPageRoute(
                         fullscreenDialog: true,
@@ -1127,9 +1132,22 @@ class NearbySpaces extends StatelessWidget {
                           parkingSpace: space,
                         ),
                       ),
-                    )
+                    ).then((value) {
+                      if (value != null) {
+                        showDialog(
+                          context: context,
+                          builder: (context) {
+                            return (NoticeDialog(
+                              imageLink: "assets/logo/lets-park-logo.png",
+                              message:
+                                  "Your booking at ${space.getAddress!} has been cancelled.",
+                            ));
+                          },
+                        );
+                      }
+                    })
                   : space.getType!.compareTo("Reservable") == 0
-                      ? Navigator.push(
+                      ? await Navigator.push(
                           context,
                           MaterialPageRoute(
                             fullscreenDialog: true,
@@ -1137,8 +1155,21 @@ class NearbySpaces extends StatelessWidget {
                               parkingSpace: space,
                             ),
                           ),
-                        )
-                      : showDialog(
+                        ).then((value) {
+                          if (value != null) {
+                            showDialog(
+                              context: context,
+                              builder: (context) {
+                                return (NoticeDialog(
+                                  imageLink: "assets/logo/lets-park-logo.png",
+                                  message:
+                                      "Your booking at ${space.getAddress!} has been cancelled.",
+                                ));
+                              },
+                            );
+                          }
+                        })
+                      : await showDialog(
                           context: context,
                           barrierDismissible: true,
                           builder: (context) => NoticeDialog(
@@ -1150,7 +1181,34 @@ class NearbySpaces extends StatelessWidget {
                                 "Please confirm that you are currently at the parking location.",
                             forNonreservableConfirmation: true,
                           ),
-                        );
+                        ).then((value) {
+                          cont = value;
+                        });
+
+              if (cont) {
+                await Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    fullscreenDialog: true,
+                    builder: (context) => NonReservableCheckout(
+                      parkingSpace: globals.nonReservable,
+                    ),
+                  ),
+                ).then((value) {
+                  if (value != null) {
+                    showDialog(
+                      context: context,
+                      builder: (context) {
+                        return (NoticeDialog(
+                          imageLink: "assets/logo/lets-park-logo.png",
+                          message:
+                              "Your booking at ${space.getAddress!} has been cancelled.",
+                        ));
+                      },
+                    );
+                  }
+                });
+              }
             },
             icon: const Icon(Icons.book),
             label: const Text("Book now"),

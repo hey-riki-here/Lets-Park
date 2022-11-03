@@ -137,10 +137,22 @@ class _NonReservableCheckoutState extends State<NonReservableCheckout> {
               false,
             );
 
-            UserServices.setPaymentParams(
+            await UserServices.setPaymentParams(
               FirebaseAuth.instance.currentUser!.uid,
               "${widget.parkingSpace.getPaypalEmail}/${_setupTimeState.currentState!.getParkingPrice}",
             );
+
+            await UserServices.addToPay(
+              paymentDate,
+              parkingId,
+              _setupTimeState.currentState!.getArrival!.millisecondsSinceEpoch,
+              _setupTimeState
+                  .currentState!.getDeparture!.millisecondsSinceEpoch,
+              _setupTimeState.currentState!.getDuration!,
+              _setupTimeState.currentState!.getParkingPrice,
+              widget.parkingSpace.getAddress!,
+            );
+
             String url =
                 "https://sample-paypal-payment-sandbox.herokuapp.com/${FirebaseAuth.instance.currentUser!.uid}";
             if (await launcher.canLaunchUrl(Uri.parse(url))) {
@@ -189,7 +201,7 @@ class _NonReservableCheckoutState extends State<NonReservableCheckout> {
                       time.minute,
                     );
                   });
-                  
+
                   // int notifLength =
                   //     await UserServices.getUserNotificationLength(
                   //   FirebaseAuth.instance.currentUser!.uid,
@@ -330,9 +342,14 @@ class _NonReservableCheckoutState extends State<NonReservableCheckout> {
         ),
         actions: [
           TextButton(
-            onPressed: () {
+            onPressed: () async {
               checkPayedStream!.cancel();
+              await UserServices.setPayedToFalse(
+                FirebaseAuth.instance.currentUser!.uid,
+              );
+              await UserServices.deletePaymentDoc();
               Navigator.pop(context);
+              Navigator.pop(context, "non-null-callback");
             },
             child: const Text("Cancel Payment"),
           ),

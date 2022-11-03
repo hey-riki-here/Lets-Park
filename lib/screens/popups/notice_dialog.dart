@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:lets_park/globals/globals.dart' as globals;
-import 'package:lets_park/screens/popups/checkout_non_reservable.dart';
 
 class NoticeDialog extends StatelessWidget {
   final String message;
@@ -185,7 +184,7 @@ class NoticeDialog extends StatelessWidget {
               ),
               onPressed: () {
                 globals.popWindow = false;
-                Navigator.of(context, rootNavigator: true).pop();
+                Navigator.of(context, rootNavigator: true).pop(false);
               },
             ),
             TextButton(
@@ -194,19 +193,11 @@ class NoticeDialog extends StatelessWidget {
                 style:
                     const TextStyle(fontSize: 14, fontWeight: FontWeight.w400),
               ),
-              onPressed: () {
+              onPressed: () async {
                 globals.popWindow = true;
-                Navigator.of(context, rootNavigator: true).pop();
+                Navigator.of(context, rootNavigator: true).pop(true);
 
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    fullscreenDialog: true,
-                    builder: (context) => NonReservableCheckout(
-                      parkingSpace: globals.nonReservable,
-                    ),
-                  ),
-                );
+                
               },
             ),
           ],

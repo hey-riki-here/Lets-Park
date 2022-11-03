@@ -51,6 +51,7 @@ class _CheckoutState extends State<Checkout> {
   void dispose() {
     if (checkPayedStream != null) {
       checkPayedStream!.cancel();
+
     }
 
     super.dispose();
@@ -189,11 +190,22 @@ class _CheckoutState extends State<Checkout> {
                 return isAvailable;
               });
             }
-            Navigator.pop(context);
             if (isAvailable) {
-              UserServices.setPaymentParams(
+              await UserServices.setPaymentParams(
                 FirebaseAuth.instance.currentUser!.uid,
                 "${widget.parkingSpace.getPaypalEmail}/${_setupTimeState.currentState!.getParkingPrice}",
+              );
+
+              await UserServices.addToPay(
+                paymentDate,
+                parkingId,
+                _setupTimeState
+                    .currentState!.getArrival!.millisecondsSinceEpoch,
+                _setupTimeState
+                    .currentState!.getDeparture!.millisecondsSinceEpoch,
+                _setupTimeState.currentState!.getDuration!,
+                _setupTimeState.currentState!.getParkingPrice,
+                widget.parkingSpace.getAddress!,
               );
               String url =
                   "https://sample-paypal-payment-sandbox.herokuapp.com/${FirebaseAuth.instance.currentUser!.uid}";
@@ -203,6 +215,7 @@ class _CheckoutState extends State<Checkout> {
                   mode: launcher.LaunchMode.externalApplication,
                 );
               }
+              Navigator.pop(context);
               showAlertDialogWithLoading("Now paying...");
 
               checkPayedStream = checkPayed.listen((event) {
@@ -402,9 +415,14 @@ class _CheckoutState extends State<Checkout> {
         ),
         actions: [
           TextButton(
-            onPressed: () {
-              checkPayedStream!.cancel();
+            onPressed: () async {
+              await checkPayedStream!.cancel();
+              await UserServices.setPayedToFalse(
+                FirebaseAuth.instance.currentUser!.uid,
+              );
+              await UserServices.deletePaymentDoc();
               Navigator.pop(context);
+              Navigator.pop(context, "non-null-callback");
             },
             child: const Text("Cancel Payment"),
           ),

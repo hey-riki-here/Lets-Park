@@ -16,6 +16,7 @@ import 'package:lets_park/services/parking_space_services.dart';
 import 'package:lets_park/services/world_time_api.dart';
 
 class UserServices {
+  static String paymentId = "";
   var userParkings = FirebaseFirestore.instance
       .collection('user-data')
       .doc(FirebaseAuth.instance.currentUser!.uid)
@@ -170,7 +171,6 @@ class UserServices {
                     .compareTo(now) ==
                 1 &&
             parking.isUpcoming == false) {
-
           // parkingSessionsStreams.pause();
 
           await userParkings.doc(parking.getParkingId).update({
@@ -201,7 +201,6 @@ class UserServices {
                             .compareTo(now) ==
                         -1)) &&
             parking.isInHistory == false) {
-
           // parkingSessionsStreams.pause();
 
           await userParkings.doc(parking.getParkingId).update({
@@ -209,7 +208,6 @@ class UserServices {
             'upcoming': false,
             'inHistory': true,
           }).then((_) async {
-
             // int notifLength = await UserServices.getUserNotificationLength(
             //   parking.getParkingOwner!,
             // );
@@ -315,7 +313,6 @@ class UserServices {
                       .compareTo(now) ==
                   1) &&
               parking.isInProgress == false) {
-
             // ownedParkingSessionsStreams.pause();
 
             await parkingSpacesDb
@@ -340,7 +337,6 @@ class UserServices {
                               .compareTo(now) ==
                           -1)) &&
               parking.isInHistory == false) {
-
             // ownedParkingSessionsStreams.pause();
 
             await parkingSpacesDb
@@ -358,7 +354,7 @@ class UserServices {
             // int notifLength = await UserServices.getUserNotificationLength(
             //   FirebaseAuth.instance.currentUser!.uid,
             // );
-            
+
             UserServices.notifyUser(
               parking.getParkingOwner!,
               UserNotification(
@@ -541,7 +537,7 @@ class UserServices {
     });
   }
 
-  static void setPaymentParams(String uid, String params) async {
+  static Future<void> setPaymentParams(String uid, String params) async {
     return await FirebaseFirestore.instance
         .collection('user-data')
         .doc(uid)
@@ -717,47 +713,85 @@ class UserServices {
     return isAvailable;
   }
 
-  static Future<void> updateDepartureOnParkingSession(Parking session, int departure) async {
+  static Future<void> updateDepartureOnParkingSession(
+      Parking session, int departure) async {
     await FirebaseFirestore.instance
         .collection('user-data')
         .doc(FirebaseAuth.instance.currentUser!.uid)
         .collection("user-parkings")
         .doc(session.getParkingId)
         .update({
-          "departure" : departure,
-        });
+      "departure": departure,
+    });
   }
 
-  static Future<void> updateDurationOnParkingSession(Parking session, String duration) async {
+  static Future<void> updateDurationOnParkingSession(
+      Parking session, String duration) async {
     await FirebaseFirestore.instance
         .collection('user-data')
         .doc(FirebaseAuth.instance.currentUser!.uid)
         .collection("user-parkings")
         .doc(session.getParkingId)
         .update({
-          "duration" : duration,
-        });
+      "duration": duration,
+    });
   }
 
-  static Future<void> setExtensionDuration(Parking session, String duration) async {
+  static Future<void> setExtensionDuration(
+      Parking session, String duration) async {
     await FirebaseFirestore.instance
         .collection('user-data')
         .doc(FirebaseAuth.instance.currentUser!.uid)
         .collection("user-parkings")
         .doc(session.getParkingId)
         .update({
-          "extensionDuration" : duration,
-        });
+      "extensionDuration": duration,
+    });
   }
 
-  static Future<QuerySnapshot<Map<String, dynamic>>> getFavoriteParkingSpaces() async {
-    
+  static Future<QuerySnapshot<Map<String, dynamic>>>
+      getFavoriteParkingSpaces() async {
     return FirebaseFirestore.instance
         .collection('parking-spaces')
         .where("id", arrayContains: globals.favorites)
         .snapshots()
         .first
-        .then((snapshot) => snapshot); 
+        .then((snapshot) => snapshot);
+  }
+
+  static Future<void> addToPay(
+    int transactionDate,
+    String parkingId,
+    int arrival,
+    int departure,
+    String duration,
+    double price,
+    String parkingAddress,
+  ) async {
+    final newToPayDoc = FirebaseFirestore.instance
+        .collection('user-data')
+        .doc(FirebaseAuth.instance.currentUser!.uid)
+        .collection('payments')
+        .doc();
+    paymentId = newToPayDoc.id;
+    await newToPayDoc.set({
+      "transactionDate": transactionDate,
+      "parkingId": parkingId,
+      "arrival": arrival,
+      "departure": departure,
+      "duration": duration,
+      "parkingFee": price,
+      "parkingAddress": parkingAddress,
+    });
+  }
+
+  static Future<void> deletePaymentDoc() async {
+    await FirebaseFirestore.instance
+        .collection('user-data')
+        .doc(FirebaseAuth.instance.currentUser!.uid)
+        .collection('payments')
+        .doc(paymentId)
+        .delete();
   }
 
   StreamSubscription get getParkingSessionsStream => parkingSessionsStreams;
