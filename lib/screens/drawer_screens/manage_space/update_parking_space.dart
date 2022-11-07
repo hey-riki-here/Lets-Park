@@ -24,7 +24,9 @@ import 'parking_space_modifier/caretaker_number_modifier.dart';
 class UpdateParkingSpace extends StatefulWidget {
   final ParkingSpace space;
   final bool verified;
-  const UpdateParkingSpace({Key? key, required this.space, required this.verified}) : super(key: key);
+  const UpdateParkingSpace(
+      {Key? key, required this.space, required this.verified})
+      : super(key: key);
 
   @override
   State<UpdateParkingSpace> createState() => _UpdateParkingSpaceState();
@@ -133,7 +135,7 @@ class _UpdateParkingSpaceState extends State<UpdateParkingSpace> {
                   ),
                   const SizedBox(width: 2),
                   GestureDetector(
-                    onTap: (){
+                    onTap: () {
                       showAlertDialog(
                         "A verified space makes it more credible. To get your spaces verified, reach the following requirements:\n\n• Get 50 parking bookings\n• Get 50 points\n• Achieve 4-5 stars",
                       );
@@ -142,11 +144,10 @@ class _UpdateParkingSpaceState extends State<UpdateParkingSpace> {
                       Icons.help,
                       color: Colors.grey,
                       size: 14,
-                    ), 
+                    ),
                   ),
                 ],
               ),
-              
               const SizedBox(height: 15),
               const Text(
                 "Parking space Information",
@@ -180,8 +181,9 @@ class _UpdateParkingSpaceState extends State<UpdateParkingSpace> {
                                 "DISPLAY PHOTO",
                                 style: _textStyle,
                               ),
+                              const SizedBox(height: 5),
                               Text(
-                                "Choose a photo for identity purposes.",
+                                "Choose a photo of \nyour space.",
                                 style: _textStyle,
                               ),
                             ],
@@ -371,121 +373,121 @@ class _UpdateParkingSpaceState extends State<UpdateParkingSpace> {
                   padding: const EdgeInsets.all(20),
                   child: Column(
                     children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                "DISPLAY PHOTO",
-                                style: _textStyle,
-                              ),
-                              Text(
-                                "Choose a photo for identity purposes.",
-                                style: _textStyle,
-                              ),
-                            ],
-                          ),
-                          Column(
-                            children: [
-                              CircleAvatar(
-                                backgroundColor: Colors.black12,
-                                backgroundImage: NetworkImage(
-                                  space.getCaretakerPhotoUrl!,
-                                ),
-                                radius: 40,
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.all(5),
-                                child: TextButton(
-                                  onPressed: () async {
-                                    try {
-                                      final image =
-                                          await ImagePicker().pickImage(
-                                        source: ImageSource.gallery,
-                                      );
-                                      if (image == null) return;
-                                      final imageTemp = File(image.path);
-                                      showDialog(
-                                        context: context,
-                                        barrierDismissible: false,
-                                        builder: (context) => WillPopScope(
-                                          onWillPop: () async => false,
-                                          child: const NoticeDialog(
-                                            imageLink:
-                                                "assets/logo/lets-park-logo.png",
-                                            message:
-                                                "We are now updating the caretaker info. Please wait.",
-                                            forLoading: true,
-                                          ),
-                                        ),
-                                      );
-                                      await ParkingSpaceServices.deleteImageUrl(
-                                        space.getCaretakerPhotoUrl!,
-                                      );
-                                      String newUrl = "";
-                                      await FirebaseServices.uploadImage(
-                                        imageTemp,
-                                        "avatar/" +
-                                            imageTemp.path.split('/').last,
-                                      ).then((url) {
-                                        newUrl = url;
-                                      });
-                                      await ParkingSpaceServices
-                                          .updateCaretakerPhotoUrl(
-                                        space.getSpaceId!,
-                                        newUrl,
-                                      );
+                      // Row(
+                      //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      //   crossAxisAlignment: CrossAxisAlignment.center,
+                      //   children: [
+                      //     Column(
+                      //       crossAxisAlignment: CrossAxisAlignment.start,
+                      //       children: [
+                      //         Text(
+                      //           "DISPLAY PHOTO",
+                      //           style: _textStyle,
+                      //         ),
+                      //         Text(
+                      //           "Choose a photo for identity purposes.",
+                      //           style: _textStyle,
+                      //         ),
+                      //       ],
+                      //     ),
+                      //     Column(
+                      //       children: [
+                      //         CircleAvatar(
+                      //           backgroundColor: Colors.black12,
+                      //           backgroundImage: NetworkImage(
+                      //             space.getCaretakerPhotoUrl!,
+                      //           ),
+                      //           radius: 40,
+                      //         ),
+                      //         Padding(
+                      //           padding: const EdgeInsets.all(5),
+                      //           child: TextButton(
+                      //             onPressed: () async {
+                      //               try {
+                      //                 final image =
+                      //                     await ImagePicker().pickImage(
+                      //                   source: ImageSource.gallery,
+                      //                 );
+                      //                 if (image == null) return;
+                      //                 final imageTemp = File(image.path);
+                      //                 showDialog(
+                      //                   context: context,
+                      //                   barrierDismissible: false,
+                      //                   builder: (context) => WillPopScope(
+                      //                     onWillPop: () async => false,
+                      //                     child: const NoticeDialog(
+                      //                       imageLink:
+                      //                           "assets/logo/lets-park-logo.png",
+                      //                       message:
+                      //                           "We are now updating the caretaker info. Please wait.",
+                      //                       forLoading: true,
+                      //                     ),
+                      //                   ),
+                      //                 );
+                      //                 await ParkingSpaceServices.deleteImageUrl(
+                      //                   space.getCaretakerPhotoUrl!,
+                      //                 );
+                      //                 String newUrl = "";
+                      //                 await FirebaseServices.uploadImage(
+                      //                   imageTemp,
+                      //                   "avatar/" +
+                      //                       imageTemp.path.split('/').last,
+                      //                 ).then((url) {
+                      //                   newUrl = url;
+                      //                 });
+                      //                 await ParkingSpaceServices
+                      //                     .updateCaretakerPhotoUrl(
+                      //                   space.getSpaceId!,
+                      //                   newUrl,
+                      //                 );
 
-                                      setState(() {
-                                        space.setCaretakerPhotoUrl = newUrl;
-                                      });
-                                      Navigator.pop(context);
-                                    } on Exception catch (e) {}
-                                  },
-                                  child: Row(
-                                    children: const [
-                                      Text(
-                                        "Replace",
-                                        style: TextStyle(
-                                          color: Colors.blue,
-                                        ),
-                                      ),
-                                      SizedBox(width: 5),
-                                      Icon(
-                                        Icons.camera_alt_outlined,
-                                        color: Colors.blue,
-                                        size: 16,
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 10),
-                      Row(
-                        children: const [
-                          Text("Name"),
-                        ],
-                      ),
-                      const SizedBox(height: 10),
-                      _buildInfoField(
-                        maxLines: 1,
-                        value: space.getCaretakerName!,
-                        onTap: () {
-                          goToPage(
-                            CaretakerNameModifier(
-                              space: space,
-                            ),
-                          );
-                        },
-                      ),
-                      const SizedBox(height: 10),
+                      //                 setState(() {
+                      //                   space.setCaretakerPhotoUrl = newUrl;
+                      //                 });
+                      //                 Navigator.pop(context);
+                      //               } on Exception catch (e) {}
+                      //             },
+                      //             child: Row(
+                      //               children: const [
+                      //                 Text(
+                      //                   "Replace",
+                      //                   style: TextStyle(
+                      //                     color: Colors.blue,
+                      //                   ),
+                      //                 ),
+                      //                 SizedBox(width: 5),
+                      //                 Icon(
+                      //                   Icons.camera_alt_outlined,
+                      //                   color: Colors.blue,
+                      //                   size: 16,
+                      //                 ),
+                      //               ],
+                      //             ),
+                      //           ),
+                      //         ),
+                      //       ],
+                      //     ),
+                      //   ],
+                      // ),
+                      // const SizedBox(height: 10),
+                      // Row(
+                      //   children: const [
+                      //     Text("Name"),
+                      //   ],
+                      // ),
+                      // const SizedBox(height: 10),
+                      // _buildInfoField(
+                      //   maxLines: 1,
+                      //   value: space.getCaretakerName!,
+                      //   onTap: () {
+                      //     goToPage(
+                      //       CaretakerNameModifier(
+                      //         space: space,
+                      //       ),
+                      //     );
+                      //   },
+                      // ),
+                      // const SizedBox(height: 10),
                       Row(
                         children: const [
                           Text("Phone number"),
@@ -494,7 +496,7 @@ class _UpdateParkingSpaceState extends State<UpdateParkingSpace> {
                       const SizedBox(height: 10),
                       _buildInfoField(
                         maxLines: 1,
-                        value: space.getCaretakerPhoneNumber!,
+                        value: "09${space.getCaretakerPhoneNumber!}",
                         onTap: () {
                           goToPage(
                             CaretakerNumberModifier(

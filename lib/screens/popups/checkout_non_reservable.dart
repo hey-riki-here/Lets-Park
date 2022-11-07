@@ -42,6 +42,7 @@ class _NonReservableCheckoutState extends State<NonReservableCheckout> {
       Stream.periodic(const Duration(milliseconds: 1000), (int count) {
     return count;
   });
+  bool canPay = true;
 
   @override
   void dispose() {
@@ -90,191 +91,211 @@ class _NonReservableCheckoutState extends State<NonReservableCheckout> {
           horizontal: 80,
         ),
         child: ElevatedButton(
-          onPressed: () async {
-            if (_vehicleState.currentState!.getPlateNumber!.isEmpty) {
-              showAlertDialog("Please provide car's plate number.");
-              return;
-            }
-
-            int qty = globals.userData.getUserParkings!.length + 1;
-            String parkingId = "PARKSESS" +
-                DateTime.now().millisecondsSinceEpoch.toString().toString() +
-                "$qty";
-
-            int paymentDate = 0;
-            await WorldTimeServices.getDateOnlyNow().then((date) {
-              paymentDate = date.millisecondsSinceEpoch;
-            });
-
-            Parking newParking = Parking(
-              widget.parkingSpace.getSpaceId,
-              widget.parkingSpace.getType,
-              widget.parkingSpace.getDailyOrMonthly,
-              parkingId,
-              widget.parkingSpace.getImageUrl,
-              widget.parkingSpace.getOwnerId,
-              widget.parkingSpace.getOwnerName,
-              FirebaseAuth.instance.currentUser!.displayName,
-              FirebaseAuth.instance.currentUser!.uid,
-              FirebaseAuth.instance.currentUser!.photoURL,
-              FirebaseAuth.instance.currentUser!.phoneNumber!,
-              widget.parkingSpace.getRating!.toInt(),
-              widget.parkingSpace.getAddress,
-              [
-                widget.parkingSpace.getLatLng!.latitude,
-                widget.parkingSpace.getLatLng!.longitude
-              ],
-              _vehicleState.currentState!.getPlateNumber,
-              _setupTimeState.currentState!.getArrival!.millisecondsSinceEpoch,
-              _setupTimeState
-                  .currentState!.getDeparture!.millisecondsSinceEpoch,
-              paymentDate,
-              _setupTimeState.currentState!.getDuration,
-              _setupTimeState.currentState!.getParkingPrice,
-              false,
-              true,
-              false,
-              false,
-            );
-
-            await UserServices.setPaymentParams(
-              FirebaseAuth.instance.currentUser!.uid,
-              "${widget.parkingSpace.getPaypalEmail}/${_setupTimeState.currentState!.getParkingPrice}",
-            );
-
-            await UserServices.addToPay(
-              paymentDate,
-              parkingId,
-              _setupTimeState.currentState!.getArrival!.millisecondsSinceEpoch,
-              _setupTimeState
-                  .currentState!.getDeparture!.millisecondsSinceEpoch,
-              _setupTimeState.currentState!.getDuration!,
-              _setupTimeState.currentState!.getParkingPrice,
-              widget.parkingSpace.getAddress!,
-            );
-
-            String url =
-                "https://sample-paypal-payment-sandbox.herokuapp.com/${FirebaseAuth.instance.currentUser!.uid}";
-            if (await launcher.canLaunchUrl(Uri.parse(url))) {
-              await launcher.launchUrl(
-                Uri.parse(url),
-                mode: launcher.LaunchMode.externalApplication,
-              );
-            }
-            showAlertDialogWithLoading("Now paying...");
-
-            checkPayedStream = checkPayed.listen((event) {
-              UserServices.isPayed(FirebaseAuth.instance.currentUser!.uid)
-                  .then((payed) async {
-                if (payed) {
-                  checkPayedStream!.cancel();
-
-                  Navigator.pop(context);
-                  showDialog(
-                    context: context,
-                    barrierDismissible: false,
-                    builder: (context) => WillPopScope(
-                      onWillPop: () async => false,
-                      child: const NoticeDialog(
-                        imageLink: "assets/logo/lets-park-logo.png",
-                        message: "Finalizing your booking. Please wait.",
-                        forLoading: true,
-                      ),
-                    ),
-                  );
-                  var request = http.Request(
-                    'POST',
-                    Uri.parse(
-                      "https://sample-paypal-payment-sandbox.herokuapp.com/write/to/database",
-                    ),
-                  )..headers.addAll({
-                      HttpHeaders.contentTypeHeader: "application/json",
-                    });
-
-                  DateTime now = DateTime(0, 0, 0, 0, 0);
-                  await WorldTimeServices.getDateTimeNow().then((time) {
-                    now = DateTime(
-                      time.year,
-                      time.month,
-                      time.day,
-                      time.hour,
-                      time.minute,
-                    );
+          onPressed: canPay
+              ? () async {
+                  setState(() {
+                    canPay = false;
                   });
 
-                  // int notifLength =
-                  //     await UserServices.getUserNotificationLength(
-                  //   FirebaseAuth.instance.currentUser!.uid,
-                  // );
+                  if (_vehicleState.currentState!.getPlateNumber!.isEmpty) {
+                    showAlertDialog("Please provide car's plate number.");
+                    return;
+                  }
 
-                  final userNotif = UserNotification(
-                    "",
-                    widget.parkingSpace.getSpaceId!,
-                    newParking.getParkingId!,
-                    FirebaseAuth.instance.currentUser!.photoURL ??
-                        "https://cdn4.iconfinder.com/data/icons/user-people-2/48/5-512.png",
-                    FirebaseAuth.instance.currentUser!.displayName!,
-                    "just booked on your parking space. Tap to view details.",
+                  int qty = globals.userData.getUserParkings!.length + 1;
+                  String parkingId = "PARKSESS" +
+                      DateTime.now()
+                          .millisecondsSinceEpoch
+                          .toString()
+                          .toString() +
+                      "$qty";
+
+                  int paymentDate = 0;
+                  await WorldTimeServices.getDateOnlyNow().then((date) {
+                    paymentDate = date.millisecondsSinceEpoch;
+                  });
+
+                  Parking newParking = Parking(
+                    widget.parkingSpace.getSpaceId,
+                    widget.parkingSpace.getType,
+                    widget.parkingSpace.getDailyOrMonthly,
+                    parkingId,
+                    widget.parkingSpace.getImageUrl,
+                    widget.parkingSpace.getOwnerId,
+                    widget.parkingSpace.getOwnerName,
+                    FirebaseAuth.instance.currentUser!.displayName,
+                    FirebaseAuth.instance.currentUser!.uid,
+                    FirebaseAuth.instance.currentUser!.photoURL,
+                    FirebaseAuth.instance.currentUser!.phoneNumber!,
+                    widget.parkingSpace.getRating!.toInt(),
+                    widget.parkingSpace.getAddress,
+                    [
+                      widget.parkingSpace.getLatLng!.latitude,
+                      widget.parkingSpace.getLatLng!.longitude
+                    ],
+                    _vehicleState.currentState!.getPlateNumber,
+                    _setupTimeState
+                        .currentState!.getArrival!.millisecondsSinceEpoch,
+                    _setupTimeState
+                        .currentState!.getDeparture!.millisecondsSinceEpoch,
+                    paymentDate,
+                    _setupTimeState.currentState!.getDuration,
+                    _setupTimeState.currentState!.getParkingPrice,
+                    false,
                     true,
                     false,
-                    now.millisecondsSinceEpoch,
                     false,
-                    false,
-                    false,
-                    "",
-                    "",
-                    "",
-                    "",
-                    "",
-                    0.0,
                   );
 
-                  var params = {
-                    "parking": newParking.toJson(),
-                    "notification": {
-                      "notificationId": "",
-                      "userId": widget.parkingSpace.getOwnerId!,
-                      "userNotification": userNotif.toJson(),
-                    },
-                  };
-
-                  request.body = jsonEncode(params);
-                  await request.send();
-
-                  UserServices.setPayedToFalse(
-                      FirebaseAuth.instance.currentUser!.uid);
-                  Navigator.pop(context);
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: ((context) => SuccessfulBooking(
-                            owner: widget.parkingSpace.getOwnerName!,
-                            parkee:
-                                FirebaseAuth.instance.currentUser!.displayName!,
-                            transactioDate: DateFormat('MMMM dd, yyyy')
-                                .format(DateTime.now()),
-                            arrivalDate: DateFormat('MMMM dd, yyyy - h:mm a')
-                                .format(DateTime.fromMillisecondsSinceEpoch(
-                                    _setupTimeState.currentState!.getArrival!
-                                        .millisecondsSinceEpoch)),
-                            departureDate: DateFormat('MMMM dd, yyyy - h:mm a')
-                                .format(DateTime.fromMillisecondsSinceEpoch(
-                                    _setupTimeState.currentState!.getDeparture!
-                                        .millisecondsSinceEpoch)),
-                            duration:
-                                _setupTimeState.currentState!.getDuration!,
-                            parkingFee:
-                                _setupTimeState.currentState!.getParkingPrice,
-                            spaceAddress: widget.parkingSpace.getAddress!,
-                            sendTo: FirebaseAuth.instance.currentUser!.email!,
-                            replyTo: "chuarex55@gmail.com",
-                          )),
-                    ),
+                  await UserServices.setPaymentParams(
+                    FirebaseAuth.instance.currentUser!.uid,
+                    "${widget.parkingSpace.getPaypalEmail}/${_setupTimeState.currentState!.getParkingPrice}",
                   );
+
+                  await UserServices.addToPay(
+                    paymentDate,
+                    parkingId,
+                    _setupTimeState
+                        .currentState!.getArrival!.millisecondsSinceEpoch,
+                    _setupTimeState
+                        .currentState!.getDeparture!.millisecondsSinceEpoch,
+                    _setupTimeState.currentState!.getDuration!,
+                    _setupTimeState.currentState!.getParkingPrice,
+                    widget.parkingSpace.getAddress!,
+                  );
+
+                  String url =
+                      "https://sample-paypal-payment-sandbox.herokuapp.com/${FirebaseAuth.instance.currentUser!.uid}";
+                  if (await launcher.canLaunchUrl(Uri.parse(url))) {
+                    await launcher.launchUrl(
+                      Uri.parse(url),
+                      mode: launcher.LaunchMode.externalApplication,
+                    );
+                  }
+                  showAlertDialogWithLoading("Now paying...");
+
+                  checkPayedStream = checkPayed.listen((event) {
+                    UserServices.isPayed(FirebaseAuth.instance.currentUser!.uid)
+                        .then((payed) async {
+                      if (payed) {
+                        checkPayedStream!.cancel();
+
+                        Navigator.pop(context);
+                        showDialog(
+                          context: context,
+                          barrierDismissible: false,
+                          builder: (context) => WillPopScope(
+                            onWillPop: () async => false,
+                            child: const NoticeDialog(
+                              imageLink: "assets/logo/lets-park-logo.png",
+                              message: "Finalizing your booking. Please wait.",
+                              forLoading: true,
+                            ),
+                          ),
+                        );
+                        var request = http.Request(
+                          'POST',
+                          Uri.parse(
+                            "https://sample-paypal-payment-sandbox.herokuapp.com/write/to/database",
+                          ),
+                        )..headers.addAll({
+                            HttpHeaders.contentTypeHeader: "application/json",
+                          });
+
+                        DateTime now = DateTime(0, 0, 0, 0, 0);
+                        await WorldTimeServices.getDateTimeNow().then((time) {
+                          now = DateTime(
+                            time.year,
+                            time.month,
+                            time.day,
+                            time.hour,
+                            time.minute,
+                          );
+                        });
+
+                        // int notifLength =
+                        //     await UserServices.getUserNotificationLength(
+                        //   FirebaseAuth.instance.currentUser!.uid,
+                        // );
+
+                        final userNotif = UserNotification(
+                          "",
+                          widget.parkingSpace.getSpaceId!,
+                          newParking.getParkingId!,
+                          FirebaseAuth.instance.currentUser!.photoURL ??
+                              "https://cdn4.iconfinder.com/data/icons/user-people-2/48/5-512.png",
+                          FirebaseAuth.instance.currentUser!.displayName!,
+                          "just booked on your parking space. Tap to view details.",
+                          true,
+                          false,
+                          now.millisecondsSinceEpoch,
+                          false,
+                          false,
+                          false,
+                          "",
+                          "",
+                          "",
+                          "",
+                          "",
+                          0.0,
+                        );
+
+                        var params = {
+                          "parking": newParking.toJson(),
+                          "notification": {
+                            "notificationId": "",
+                            "userId": widget.parkingSpace.getOwnerId!,
+                            "userNotification": userNotif.toJson(),
+                          },
+                        };
+
+                        request.body = jsonEncode(params);
+                        await request.send();
+
+                        UserServices.setPayedToFalse(
+                            FirebaseAuth.instance.currentUser!.uid);
+                        Navigator.pop(context);
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: ((context) => SuccessfulBooking(
+                                  owner: widget.parkingSpace.getOwnerName!,
+                                  parkee: FirebaseAuth
+                                      .instance.currentUser!.displayName!,
+                                  transactioDate: DateFormat('MMMM dd, yyyy')
+                                      .format(DateTime.now()),
+                                  arrivalDate: DateFormat(
+                                          'MMMM dd, yyyy - h:mm a')
+                                      .format(
+                                          DateTime.fromMillisecondsSinceEpoch(
+                                              _setupTimeState
+                                                  .currentState!
+                                                  .getArrival!
+                                                  .millisecondsSinceEpoch)),
+                                  departureDate: DateFormat(
+                                          'MMMM dd, yyyy - h:mm a')
+                                      .format(
+                                          DateTime.fromMillisecondsSinceEpoch(
+                                              _setupTimeState
+                                                  .currentState!
+                                                  .getDeparture!
+                                                  .millisecondsSinceEpoch)),
+                                  duration: _setupTimeState
+                                      .currentState!.getDuration!,
+                                  parkingFee: _setupTimeState
+                                      .currentState!.getParkingPrice,
+                                  spaceAddress: widget.parkingSpace.getAddress!,
+                                  sendTo:
+                                      FirebaseAuth.instance.currentUser!.email!,
+                                  replyTo: "chuarex55@gmail.com",
+                                )),
+                          ),
+                        );
+                      }
+                    });
+                  });
                 }
-              });
-            });
-          },
+              : null,
           child: const Text(
             "Pay now",
             style: TextStyle(
@@ -293,8 +314,8 @@ class _NonReservableCheckoutState extends State<NonReservableCheckout> {
     );
   }
 
-  void showAlertDialog(String message) {
-    showDialog(
+  void showAlertDialog(String message) async {
+    await showDialog(
       context: context,
       builder: (_) => AlertDialog(
         title: Center(
@@ -313,7 +334,11 @@ class _NonReservableCheckoutState extends State<NonReservableCheckout> {
           ),
         ],
       ),
-    );
+    ).then((value) {
+      setState(() {
+        canPay = true;
+      });
+    });
   }
 
   void showAlertDialogWithLoading(String message) {
@@ -348,6 +373,9 @@ class _NonReservableCheckoutState extends State<NonReservableCheckout> {
                 FirebaseAuth.instance.currentUser!.uid,
               );
               await UserServices.deletePaymentDoc();
+              setState(() {
+                canPay = true;
+              });
               Navigator.pop(context);
               Navigator.pop(context, "non-null-callback");
             },
@@ -355,7 +383,11 @@ class _NonReservableCheckoutState extends State<NonReservableCheckout> {
           ),
         ],
       ),
-    );
+    ).then((value) {
+      setState(() {
+        canPay = true;
+      });
+    });
   }
 }
 

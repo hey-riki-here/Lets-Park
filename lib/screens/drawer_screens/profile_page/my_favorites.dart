@@ -45,13 +45,91 @@ class MyFavoritesState extends State<MyFavorites> {
                       ),
                     ),
                     elevation: 3,
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Stack(
+                          children: [
+                            ClipRRect(
+                              borderRadius: const BorderRadius.only(
+                                topLeft: Radius.circular(12),
+                                topRight: Radius.circular(12),
+                              ),
+                              child: Image.network(
+                                _favorites[index].getImageUrl!,
+                                fit: BoxFit.fill,
+                              ),
+                            ),
+                            Align(
+                              alignment: Alignment.bottomRight,
+                              child: Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  crossAxisAlignment: CrossAxisAlignment.end,
+                                  children: [
+                                    GestureDetector(
+                                      onTap: () {
+                                        UserServices.removeSpaceonFavorites(
+                                          FirebaseAuth
+                                              .instance.currentUser!.uid,
+                                          _favorites[index].getSpaceId!,
+                                        );
+                                        showNotice(
+                                          context,
+                                          "Parking space remove from My Favorites",
+                                        );
+                                        setState(() {
+                                          _favorites = getFavorites();
+                                        });
+                                      },
+                                      child: Icon(
+                                        Icons.favorite_outlined,
+                                        color: Colors.red[100],
+                                      ),
+                                    ),
+                                    const SizedBox(width: 10),
+                                    GestureDetector(
+                                      onTap: () async {
+                                        bool verified =
+                                            await ParkingSpaceServices
+                                                .isVerified(
+                                          _favorites[index].getSpaceId!,
+                                        );
+
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) =>
+                                                ParkingAreaInformation(
+                                              parkingSpace: _favorites[index],
+                                              verified: verified &&
+                                                  _favorites[index]
+                                                          .getRating! >=
+                                                      4,
+                                            ),
+                                          ),
+                                        ).then((value) {
+                                          setState(() {
+                                            _favorites = getFavorites();
+                                          });
+                                        });
+                                      },
+                                      child: Icon(
+                                        Icons.open_in_new_rounded,
+                                        color: Colors.blue[100],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.start,
                             children: [
                               Row(
                                 children: [
@@ -70,8 +148,12 @@ class MyFavoritesState extends State<MyFavorites> {
                                 ],
                               ),
                               const SizedBox(height: 7),
-                              ParkingSpaceServices.getStars(
-                                _favorites[index].getRating!,
+                              Row(
+                                children: [
+                                  ParkingSpaceServices.getStars(
+                                    _favorites[index].getRating!,
+                                  ),
+                                ],
                               ),
                               const SizedBox(height: 7),
                               Row(
@@ -111,56 +193,8 @@ class MyFavoritesState extends State<MyFavorites> {
                               ),
                             ],
                           ),
-                          Row(
-                            children: [
-                              GestureDetector(
-                                onTap: () {
-                                  UserServices.removeSpaceonFavorites(
-                                    FirebaseAuth.instance.currentUser!.uid,
-                                    _favorites[index].getSpaceId!,
-                                  );
-                                  showNotice(
-                                    context,
-                                    "Parking space remove from My Favorites",
-                                  );
-                                  setState(() {
-                                    _favorites = getFavorites();
-                                  });
-                                },
-                                child: const Icon(
-                                  Icons.favorite_outlined,
-                                  color: Colors.red,
-                                ),
-                              ),
-                              const SizedBox(width: 10),
-                              GestureDetector(
-                                onTap: () async {
-
-                                  bool verified = await ParkingSpaceServices.isVerified(_favorites[index].getSpaceId!);
-
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => ParkingAreaInformation(
-                                        parkingSpace: _favorites[index],
-                                        verified: verified && _favorites[index].getRating! >= 4,
-                                      ),
-                                    ),
-                                  ).then((value) {
-                                    setState(() {
-                                      _favorites = getFavorites();
-                                    });
-                                  });
-                                },
-                                child: Icon(
-                                  Icons.open_in_new_rounded,
-                                  color: Colors.blue[400],
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
                   );
                 },
@@ -189,7 +223,6 @@ class MyFavoritesState extends State<MyFavorites> {
   }
 
   List<ParkingSpace> getFavorites() {
-  
     List<ParkingSpace> favorites = [];
 
     globals.currentParkingSpaces.forEach((space) {

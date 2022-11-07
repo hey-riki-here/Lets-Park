@@ -17,8 +17,11 @@ import 'package:lets_park/globals/globals.dart' as globals;
 class Space extends StatefulWidget {
   final ParkingSpace space;
   final String title;
-  const Space({Key? key, required this.space, required this.title,})
-      : super(key: key);
+  const Space({
+    Key? key,
+    required this.space,
+    required this.title,
+  }) : super(key: key);
 
   @override
   State<Space> createState() => _SpaceState();
@@ -484,70 +487,70 @@ class _SpaceState extends State<Space> {
                             );
                     }),
                 const SizedBox(height: 10),
-                const Text(
-                  "Caretaker",
-                  style: TextStyle(
-                    color: Colors.blue,
-                  ),
-                ),
-                const SizedBox(height: 10),
-                Card(
-                  elevation: 2,
-                  shape: const RoundedRectangleBorder(
-                    borderRadius: BorderRadius.all(
-                      Radius.circular(12),
-                    ),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      children: [
-                        CircleAvatar(
-                          backgroundColor: Colors.black12,
-                          backgroundImage: NetworkImage(
-                            space.getCaretakerPhotoUrl!,
-                          ),
-                          radius: 40,
-                        ),
-                        const SizedBox(height: 12),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            const Icon(
-                              Icons.person,
-                              color: Colors.blue,
-                            ),
-                            const SizedBox(width: 10),
-                            Text(
-                              space.getCaretakerName!,
-                              style: const TextStyle(
-                                fontSize: 16,
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 5),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            const Icon(
-                              Icons.phone,
-                              color: Colors.green,
-                            ),
-                            const SizedBox(width: 10),
-                            Text(
-                              space.getCaretakerPhoneNumber!,
-                              style: const TextStyle(
-                                fontSize: 16,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 10),
+                // const Text(
+                //   "Caretaker",
+                //   style: TextStyle(
+                //     color: Colors.blue,
+                //   ),
+                // ),
+                // const SizedBox(height: 10),
+                // Card(
+                //   elevation: 2,
+                //   shape: const RoundedRectangleBorder(
+                //     borderRadius: BorderRadius.all(
+                //       Radius.circular(12),
+                //     ),
+                //   ),
+                //   child: Padding(
+                //     padding: const EdgeInsets.all(16),
+                //     child: Column(
+                //       children: [
+                //         CircleAvatar(
+                //           backgroundColor: Colors.black12,
+                //           backgroundImage: NetworkImage(
+                //             space.getCaretakerPhotoUrl!,
+                //           ),
+                //           radius: 40,
+                //         ),
+                //         const SizedBox(height: 12),
+                //         Row(
+                //           mainAxisAlignment: MainAxisAlignment.center,
+                //           children: [
+                //             const Icon(
+                //               Icons.person,
+                //               color: Colors.blue,
+                //             ),
+                //             const SizedBox(width: 10),
+                //             Text(
+                //               space.getCaretakerName!,
+                //               style: const TextStyle(
+                //                 fontSize: 16,
+                //               ),
+                //             ),
+                //           ],
+                //         ),
+                //         const SizedBox(height: 5),
+                //         Row(
+                //           mainAxisAlignment: MainAxisAlignment.center,
+                //           children: [
+                //             const Icon(
+                //               Icons.phone,
+                //               color: Colors.green,
+                //             ),
+                //             const SizedBox(width: 10),
+                //             Text(
+                //               space.getCaretakerPhoneNumber!,
+                //               style: const TextStyle(
+                //                 fontSize: 16,
+                //               ),
+                //             ),
+                //           ],
+                //         ),
+                //       ],
+                //     ),
+                //   ),
+                // ),
+                // const SizedBox(height: 10),
                 const Text(
                   "Settings",
                   style: TextStyle(
@@ -573,27 +576,25 @@ class _SpaceState extends State<Space> {
                                     space.getSpaceId!)
                                 .then((canModify) => canModify);
                             if (result) {
-                              
                               showDialog(
                                 context: context,
                                 barrierDismissible: false,
                                 builder: (context) => WillPopScope(
                                   onWillPop: () async => false,
                                   child: const NoticeDialog(
-                                    imageLink:
-                                        "assets/logo/lets-park-logo.png",
-                                    message:
-                                        "Loading, please wait...",
+                                    imageLink: "assets/logo/lets-park-logo.png",
+                                    message: "Loading, please wait...",
                                     forLoading: true,
                                   ),
                                 ),
                               );
-                              bool flag = await ParkingSpaceServices.isVerified(space.getSpaceId!);
+                              bool flag = await ParkingSpaceServices.isVerified(
+                                  space.getSpaceId!);
 
                               bool verified = flag && space.getRating! >= 4;
 
                               Navigator.pop(context);
-                              
+
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
@@ -606,8 +607,6 @@ class _SpaceState extends State<Space> {
                               ).then((value) {
                                 setState(() {});
                               });
-
-                              
                             } else {
                               showDialog(
                                 context: context,
@@ -1037,15 +1036,15 @@ class _SpaceState extends State<Space> {
     return Row(children: newChildren);
   }
 
-  double sessionsPercentage(int sessions){
+  double sessionsPercentage(int sessions) {
     return sessions / 50;
   }
 
-  double pointsPercentage(int points){
+  double pointsPercentage(int points) {
     return points / 50;
   }
 
-  double ratingsPercentage(double rating){
+  double ratingsPercentage(double rating) {
     return rating / 5;
   }
 }

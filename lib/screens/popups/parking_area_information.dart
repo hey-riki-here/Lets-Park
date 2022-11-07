@@ -12,6 +12,7 @@ import 'package:lets_park/screens/popups/checkout_monthly.dart';
 import 'package:lets_park/screens/popups/checkout_non_reservable.dart';
 import 'package:lets_park/screens/popups/email_verification.dart';
 import 'package:lets_park/screens/popups/notice_dialog.dart';
+import 'package:lets_park/screens/popups/space_certificates.dart';
 import 'package:lets_park/services/firebase_api.dart';
 import 'package:lets_park/services/parking_space_services.dart';
 import 'package:geolocator/geolocator.dart' as geolocator;
@@ -74,7 +75,7 @@ class _ParkingAreaInformationState extends State<ParkingAreaInformation> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: DefaultTabController(
-        length: 4,
+        length: 3,
         child: CustomScrollView(
           controller: _scrollController,
           physics: const BouncingScrollPhysics(
@@ -103,7 +104,7 @@ class _ParkingAreaInformationState extends State<ParkingAreaInformation> {
                         ),
                         const SizedBox(width: 10),
                         const Text(
-                          "Parking area information",
+                          "Space information",
                           style: TextStyle(
                             color: Colors.black,
                             fontWeight: FontWeight.w400,
@@ -111,7 +112,7 @@ class _ParkingAreaInformationState extends State<ParkingAreaInformation> {
                         ),
                       ],
                     )
-                  : const Text("Parking area information"),
+                  : const Text("Space information"),
               backgroundColor: Colors.white,
               stretch: true,
               floating: false,
@@ -190,12 +191,9 @@ class _ParkingAreaInformationState extends State<ParkingAreaInformation> {
             SliverList(
               delegate: SliverChildListDelegate(
                 [
-                  Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Header(
-                      space: widget.parkingSpace,
-                      verified: widget.verified,
-                    ),
+                  Header(
+                    space: widget.parkingSpace,
+                    verified: widget.verified,
                   ),
                   PriceAndDistance(
                     distance: destinationDistance,
@@ -217,23 +215,15 @@ class _ParkingAreaInformationState extends State<ParkingAreaInformation> {
                       ),
                       Tab(
                         child: Text(
-                          "Certificates",
-                          style: TextStyle(
-                            fontSize: 15,
-                          ),
-                        ),
-                      ),
-                      Tab(
-                        child: Text(
-                          "Attendant",
-                          style: TextStyle(
-                            fontSize: 15,
-                          ),
-                        ),
-                      ),
-                      Tab(
-                        child: Text(
                           "Reviews",
+                          style: TextStyle(
+                            fontSize: 15,
+                          ),
+                        ),
+                      ),
+                      Tab(
+                        child: Text(
+                          "Instructions",
                           style: TextStyle(
                             fontSize: 15,
                           ),
@@ -638,81 +628,233 @@ class _HeaderState extends State<Header> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Text(
-                      widget.space.getAddress!,
-                      style: const TextStyle(
-                        color: Colors.black54,
-                        fontWeight: FontWeight.w400,
-                        fontSize: 18,
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Column(
+                children: [
+                  Row(
+                    children: [
+                      Text(
+                        widget.space.getAddress!,
+                        style: const TextStyle(
+                          color: Colors.black54,
+                          fontWeight: FontWeight.w400,
+                          fontSize: 18,
+                        ),
                       ),
-                    ),
-                    widget.verified
-                        ? const Icon(
-                            Icons.verified,
-                            color: Colors.blue,
-                            size: 14,
-                          )
-                        : const SizedBox(),
-                  ],
-                ),
-                const SizedBox(height: 2),
-                Row(
-                  children: [
-                    ParkingSpaceServices.getStars(widget.space.getRating!),
-                    const SizedBox(width: 5),
-                    Text(
-                      "($reviewsQty)",
-                      style: const TextStyle(
-                        color: Colors.black54,
-                        fontWeight: FontWeight.w400,
+                      widget.verified
+                          ? const Icon(
+                              Icons.verified,
+                              color: Colors.blue,
+                              size: 14,
+                            )
+                          : const SizedBox(),
+                    ],
+                  ),
+                  const SizedBox(height: 2),
+                  Row(
+                    children: [
+                      ParkingSpaceServices.getStars(widget.space.getRating!),
+                      const SizedBox(width: 5),
+                      Text(
+                        "($reviewsQty)",
+                        style: const TextStyle(
+                          color: Colors.black54,
+                          fontWeight: FontWeight.w400,
+                        ),
                       ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 5),
-                Row(
-                  children: [
-                    Text(
-                      widget.space.getType!,
-                      style: TextStyle(
-                        color: Colors.blue[300],
+                    ],
+                  ),
+                  const SizedBox(height: 5),
+                  Row(
+                    children: [
+                      Text(
+                        widget.space.getType!,
+                        style: TextStyle(
+                          color: Colors.blue[300],
+                        ),
                       ),
-                    ),
-                    const SizedBox(width: 5),
-                    const Text("/"),
-                    const SizedBox(width: 5),
-                    Text(
-                      widget.space.getDailyOrMonthly!,
-                      style: TextStyle(
-                        color: Colors.blue[300],
+                      const SizedBox(width: 5),
+                      const Text("/"),
+                      const SizedBox(width: 5),
+                      Text(
+                        widget.space.getDailyOrMonthly!,
+                        style: TextStyle(
+                          color: Colors.blue[300],
+                        ),
                       ),
-                    ),
-                    const SizedBox(width: 5),
-                    const Text("/"),
-                    const SizedBox(width: 5),
-                    Text(
-                      sessionsQty > 1
-                          ? "$sessionsQty Parkings"
-                          : "$sessionsQty Parking",
-                      style: TextStyle(
-                        color: Colors.blue[300],
+                      const SizedBox(width: 5),
+                      const Text("/"),
+                      const SizedBox(width: 5),
+                      Text(
+                        sessionsQty > 1
+                            ? "$sessionsQty Parkings"
+                            : "$sessionsQty Parking",
+                        style: TextStyle(
+                          color: Colors.blue[300],
+                        ),
                       ),
-                    ),
-                  ],
-                ),
-              ],
+                    ],
+                  ),
+                ],
+              ),
             ),
+            InkWell(
+              onTap: () => callCaretaker(widget.space.getCaretakerPhoneNumber!),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  vertical: 8.0,
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.phone,
+                            color: Colors.green.shade300,
+                          ),
+                          const SizedBox(
+                            width: 5,
+                          ),
+                          const Text(
+                            "Call caretaker",
+                            style: TextStyle(
+                              fontSize: 16,
+                            ),
+                          ),
+                        ],
+                      ),
+                      Icon(
+                        Icons.arrow_forward_ios_rounded,
+                        size: 14,
+                        color: Colors.grey.shade700,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            InkWell(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => SpaceCertificates(
+                      space: widget.space,
+                    ),
+                  ),
+                );
+              },
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  vertical: 8.0,
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.wysiwyg_rounded,
+                            color: Colors.blue.shade300,
+                          ),
+                          const SizedBox(width: 5),
+                          const Text(
+                            "Certificates",
+                            style: TextStyle(
+                              fontSize: 16,
+                            ),
+                          ),
+                        ],
+                      ),
+                      Icon(
+                        Icons.arrow_forward_ios_rounded,
+                        size: 14,
+                        color: Colors.grey.shade700,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 2),
           ],
         ),
       ],
+    );
+  }
+
+  void showAlertDialog() {
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: Center(
+          child: Image.asset(
+            "assets/logo/app_icon.png",
+            scale: 20,
+          ),
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text(
+              "Certificates",
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: Colors.blue,
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 10),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.blue[50],
+                borderRadius: const BorderRadius.all(Radius.circular(8)),
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.info,
+                    color: Colors.blue.shade700,
+                  ),
+                  const SizedBox(width: 10),
+                  const Expanded(
+                    child: Text(
+                      "View the certificates below for your reference.",
+                      style: TextStyle(
+                        fontSize: 15,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            // GalleryImage(
+            //   titleGallery: "Business Certificates",
+            //   numOfShowImages: 3,
+            //   imageUrls: widget.space.getCertificates!,
+            // ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+            },
+            child: const Text("Close"),
+          ),
+        ],
+      ),
     );
   }
 
@@ -746,6 +888,15 @@ class _HeaderState extends State<Header> {
     setState(() {
       reviewsQty = qty;
     });
+  }
+
+  void callCaretaker(String caretakerPhoneNumber) async {
+    final url = "tel:0$caretakerPhoneNumber";
+    if (await launcher.canLaunchUrl(Uri.parse(url))) {
+      await launcher.launchUrl(Uri.parse(url));
+    } else {
+      throw 'Could not launch $url';
+    }
   }
 }
 
@@ -1058,139 +1209,6 @@ class InfoReviewsCaretaker extends StatelessWidget {
             ),
           ),
         ),
-        SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 12,
-              vertical: 30,
-            ),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: Colors.blue[50],
-                    borderRadius: const BorderRadius.all(Radius.circular(8)),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Icon(
-                            Icons.info,
-                            color: Colors.blue.shade700,
-                          ),
-                          const SizedBox(width: 10),
-                          const Expanded(
-                            child: Text(
-                              "The images below are the certificates of the owner for the parking space that shows the legality of the business as well as the legality of the parking space.",
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 10),
-                GalleryImage(
-                  titleGallery: "Business Certificates",
-                  numOfShowImages: 3,
-                  imageUrls: certificatesUrl,
-                ),
-              ],
-            ),
-          ),
-        ),
-        SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 12,
-              vertical: 30,
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: Colors.green[50],
-                    borderRadius: const BorderRadius.all(Radius.circular(8)),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Icon(
-                            Icons.info,
-                            color: Colors.green.shade700,
-                          ),
-                          const SizedBox(width: 10),
-                          const Expanded(
-                            child: Text(
-                              "Have queries about parking? You can always call the parking space's attendant.",
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 10),
-                      ElevatedButton.icon(
-                        style: ElevatedButton.styleFrom(
-                          elevation: 0,
-                          primary: Colors.green,
-                        ),
-                        onPressed: () async {
-                          final url = "tel:09$caretakerPhoneNumber";
-                          if (await launcher.canLaunchUrl(Uri.parse(url))) {
-                            await launcher.launchUrl(Uri.parse(url));
-                          } else {
-                            throw 'Could not launch $url';
-                          }
-                        },
-                        icon: const Icon(Icons.phone_in_talk_rounded),
-                        label: const Text("Call attendant"),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 20),
-                CircleAvatar(
-                  backgroundColor: Colors.black12,
-                  backgroundImage: NetworkImage(
-                    caretakerPhotoUrl,
-                  ),
-                  radius: 40,
-                ),
-                const SizedBox(height: 20),
-                const Text(
-                  "Name",
-                  style: labelStyle,
-                ),
-                const SizedBox(height: 12),
-                Text(
-                  caretakerName,
-                  style: const TextStyle(
-                    fontSize: 16,
-                  ),
-                ),
-                const SizedBox(height: 20),
-                const Text(
-                  "Phone number",
-                  style: labelStyle,
-                ),
-                const SizedBox(height: 12),
-                Text(
-                  "09$caretakerPhoneNumber",
-                  style: const TextStyle(
-                    fontSize: 16,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
         Center(
           child: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
             stream: ParkingSpaceServices.getParkingSpaceReviews(spaceId),
@@ -1342,6 +1360,81 @@ class InfoReviewsCaretaker extends StatelessWidget {
                       },
                     );
             },
+          ),
+        ),
+        SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: 12,
+              vertical: 30,
+            ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Row(
+                  children: [
+                    CircleAvatar(
+                      backgroundColor: Colors.blue[50],
+                      radius: 30,
+                      child: CircleAvatar(
+                        backgroundColor: Colors.blue[50],
+                        backgroundImage:
+                            const AssetImage("assets/images/reserve.png"),
+                        radius: 25,
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    const Expanded(
+                      child: Text(
+                        "This parking space is not reservable so make sure that you are at the parking area as you are paying.",
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 20),
+                Row(
+                  children: [
+                    CircleAvatar(
+                      backgroundColor: Colors.blue[50],
+                      radius: 30,
+                      child: CircleAvatar(
+                        backgroundColor: Colors.blue[50],
+                        backgroundImage:
+                            const AssetImage("assets/images/reserve.png"),
+                        radius: 25,
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    const Expanded(
+                      child: Text(
+                        "Once arrived or payed, present the receipt sent through your email to the parking attendant.",
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 20),
+                Row(
+                  children: [
+                    CircleAvatar(
+                      backgroundColor: Colors.blue[50],
+                      radius: 30,
+                      child: CircleAvatar(
+                        backgroundColor: Colors.blue[50],
+                        backgroundImage:
+                            const AssetImage("assets/images/reserve.png"),
+                        radius: 25,
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    const Expanded(
+                      child: Text(
+                        "You can always extend your parking session as you wish.",
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
       ],

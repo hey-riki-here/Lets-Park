@@ -51,7 +51,7 @@ class ParkingCard extends StatefulWidget {
   final String title;
   const ParkingCard({
     Key? key,
-    required this.parkingSpace, 
+    required this.parkingSpace,
     required this.title,
   }) : super(key: key);
 
@@ -63,7 +63,7 @@ class ParkingCardState extends State<ParkingCard> {
   bool verified = false;
 
   @override
-  initState(){
+  initState() {
     setSpaceVerified();
     super.initState();
   }
@@ -74,8 +74,8 @@ class ParkingCardState extends State<ParkingCard> {
     int availableSlot = 0;
 
     return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-      stream:
-          ParkingSpaceServices.getParkingSessionsDocs(widget.parkingSpace.getSpaceId!),
+      stream: ParkingSpaceServices.getParkingSessionsDocs(
+          widget.parkingSpace.getSpaceId!),
       builder: (context, snapshot) {
         if (snapshot.hasData) {
           if (snapshot.hasData) {
@@ -99,7 +99,6 @@ class ParkingCardState extends State<ParkingCard> {
           child: InkWell(
             borderRadius: BorderRadius.circular(12),
             onTap: () async {
-              
               Navigator.push(
                 context,
                 MaterialPageRoute(
@@ -110,13 +109,22 @@ class ParkingCardState extends State<ParkingCard> {
                 ),
               );
             },
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Column(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                ClipRRect(
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(12),
+                    topRight: Radius.circular(12),
+                  ),
+                  child: Image.network(
+                    widget.parkingSpace.getImageUrl!,
+                    fit: BoxFit.cover,
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Row(
@@ -129,11 +137,13 @@ class ParkingCardState extends State<ParkingCard> {
                               fontWeight: FontWeight.w600,
                             ),
                           ),
-                          verified ? const Icon(
-                            Icons.verified,
-                            color: Colors.blue,
-                            size: 14,
-                          ) : const SizedBox(),
+                          verified
+                              ? const Icon(
+                                  Icons.verified,
+                                  color: Colors.blue,
+                                  size: 14,
+                                )
+                              : const SizedBox(),
                         ],
                       ),
                       const SizedBox(height: 7),
@@ -154,7 +164,8 @@ class ParkingCardState extends State<ParkingCard> {
                         ],
                       ),
                       const SizedBox(height: 7),
-                      ParkingSpaceServices.getStars(widget.parkingSpace.getRating!),
+                      ParkingSpaceServices.getStars(
+                          widget.parkingSpace.getRating!),
                       const SizedBox(height: 10),
                       Row(
                         children: [
@@ -176,22 +187,7 @@ class ParkingCardState extends State<ParkingCard> {
                           ),
                         ],
                       ),
-                    ],
-                  ),
-                  Column(
-                    children: [
-                      SizedBox(
-                        width: 120,
-                        height: 80,
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(12),
-                          child: Image.network(
-                            widget.parkingSpace.getImageUrl!,
-                            fit: BoxFit.fill,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 5),
+                      const SizedBox(height: 10),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.start,
                         children: [
@@ -205,7 +201,9 @@ class ParkingCardState extends State<ParkingCard> {
                           ),
                           const SizedBox(width: 5),
                           buildTag(
-                            widget.parkingSpace.isDisabled! ? "Disabled" : "Active",
+                            widget.parkingSpace.isDisabled!
+                                ? "Disabled"
+                                : "Active",
                             widget.parkingSpace.isDisabled!
                                 ? Colors.red
                                 : Colors.green,
@@ -214,8 +212,8 @@ class ParkingCardState extends State<ParkingCard> {
                       ),
                     ],
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
         );
@@ -243,11 +241,11 @@ class ParkingCardState extends State<ParkingCard> {
   }
 
   void setSpaceVerified() async {
-    bool flag = await ParkingSpaceServices.isVerified(widget.parkingSpace.getSpaceId!);
+    bool flag =
+        await ParkingSpaceServices.isVerified(widget.parkingSpace.getSpaceId!);
 
-    setState((){
+    setState(() {
       verified = flag && widget.parkingSpace.getRating! >= 4;
     });
-    
   }
 }

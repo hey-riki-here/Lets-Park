@@ -46,12 +46,12 @@ class _CheckoutState extends State<Checkout> {
       Stream.periodic(const Duration(milliseconds: 1000), (int count) {
     return count;
   });
+  bool canPay = true;
 
   @override
   void dispose() {
     if (checkPayedStream != null) {
       checkPayedStream!.cancel();
-
     }
 
     super.dispose();
@@ -106,248 +106,275 @@ class _CheckoutState extends State<Checkout> {
           horizontal: 80,
         ),
         child: ElevatedButton(
-          onPressed: () async {
-            if (!(_setupTimeState.currentState!.isTimeValid())) {
-              return;
-            }
+          onPressed: canPay
+              ? () async {
+                  setState(() {
+                    canPay = false;
+                  });
 
-            if (_vehicleState.currentState!.getPlateNumber!
-                    .compareTo("Select plate number") ==
-                0) {
-              showAlertDialog("Please provide car's plate number.");
-              return;
-            }
-
-            if (FirebaseAuth.instance.currentUser!.emailVerified == false) {
-              return;
-            }
-
-            int qty = globals.userData.getUserParkings!.length + 1;
-            String parkingId = "PARKSESS" +
-                DateTime.now().millisecondsSinceEpoch.toString().toString() +
-                "$qty";
-
-            showDialog(
-              context: context,
-              barrierDismissible: false,
-              builder: (context) => WillPopScope(
-                onWillPop: () async => false,
-                child: const NoticeDialog(
-                  imageLink: "assets/logo/lets-park-logo.png",
-                  message: "Checking and verifying your booking...",
-                  forLoading: true,
-                ),
-              ),
-            );
-
-            int paymentDate = 0;
-            await WorldTimeServices.getDateOnlyNow().then((date) {
-              paymentDate = date.millisecondsSinceEpoch;
-            });
-
-            Parking newParking = Parking(
-              widget.parkingSpace.getSpaceId,
-              widget.parkingSpace.getType,
-              widget.parkingSpace.getDailyOrMonthly,
-              parkingId,
-              widget.parkingSpace.getImageUrl,
-              widget.parkingSpace.getOwnerId,
-              widget.parkingSpace.getOwnerName,
-              FirebaseAuth.instance.currentUser!.displayName,
-              FirebaseAuth.instance.currentUser!.uid,
-              FirebaseAuth.instance.currentUser!.photoURL,
-              FirebaseAuth.instance.currentUser!.phoneNumber!,
-              widget.parkingSpace.getRating!.toInt(),
-              widget.parkingSpace.getAddress,
-              [
-                widget.parkingSpace.getLatLng!.latitude,
-                widget.parkingSpace.getLatLng!.longitude
-              ],
-              _vehicleState.currentState!.getPlateNumber,
-              _setupTimeState.currentState!.getArrival!.millisecondsSinceEpoch,
-              _setupTimeState
-                  .currentState!.getDeparture!.millisecondsSinceEpoch,
-              paymentDate,
-              _setupTimeState.currentState!.getDuration,
-              _setupTimeState.currentState!.getParkingPrice,
-              false,
-              true,
-              false,
-              false,
-            );
-            bool isAvailable = true;
-            if (availableSlot > 0) {
-              isAvailable = true;
-            } else {
-              isAvailable =
-                  await ParkingSpaceServices.isParkingSpaceAvailableAtTimeRange(
-                widget.parkingSpace.getSpaceId,
-                _setupTimeState
-                    .currentState!.getArrival!.millisecondsSinceEpoch,
-                _setupTimeState
-                    .currentState!.getDeparture!.millisecondsSinceEpoch,
-              ).then((isAvailable) async {
-                return isAvailable;
-              });
-            }
-            if (isAvailable) {
-              await UserServices.setPaymentParams(
-                FirebaseAuth.instance.currentUser!.uid,
-                "${widget.parkingSpace.getPaypalEmail}/${_setupTimeState.currentState!.getParkingPrice}",
-              );
-
-              await UserServices.addToPay(
-                paymentDate,
-                parkingId,
-                _setupTimeState
-                    .currentState!.getArrival!.millisecondsSinceEpoch,
-                _setupTimeState
-                    .currentState!.getDeparture!.millisecondsSinceEpoch,
-                _setupTimeState.currentState!.getDuration!,
-                _setupTimeState.currentState!.getParkingPrice,
-                widget.parkingSpace.getAddress!,
-              );
-              String url =
-                  "https://sample-paypal-payment-sandbox.herokuapp.com/${FirebaseAuth.instance.currentUser!.uid}";
-              if (await launcher.canLaunchUrl(Uri.parse(url))) {
-                await launcher.launchUrl(
-                  Uri.parse(url),
-                  mode: launcher.LaunchMode.externalApplication,
-                );
-              }
-              Navigator.pop(context);
-              showAlertDialogWithLoading("Now paying...");
-
-              checkPayedStream = checkPayed.listen((event) {
-                UserServices.isPayed(FirebaseAuth.instance.currentUser!.uid)
-                    .then((payed) async {
-                  if (payed) {
-                    checkPayedStream!.cancel();
-
-                    Navigator.pop(context);
-                    showDialog(
-                      context: context,
-                      barrierDismissible: false,
-                      builder: (context) => WillPopScope(
-                        onWillPop: () async => false,
-                        child: const NoticeDialog(
-                          imageLink: "assets/logo/lets-park-logo.png",
-                          message: "Finalizing your booking. Please wait.",
-                          forLoading: true,
-                        ),
-                      ),
-                    );
-
-                    var request = http.Request(
-                      'POST',
-                      Uri.parse(
-                        "https://sample-paypal-payment-sandbox.herokuapp.com/write/to/database",
-                      ),
-                    )..headers.addAll({
-                        HttpHeaders.contentTypeHeader: "application/json",
-                      });
-
-                    DateTime now = DateTime(0, 0, 0, 0, 0);
-                    await WorldTimeServices.getDateTimeNow().then((time) {
-                      now = DateTime(
-                        time.year,
-                        time.month,
-                        time.day,
-                        time.hour,
-                        time.minute,
-                      );
+                  if (!(_setupTimeState.currentState!.isTimeValid())) {
+                    setState(() {
+                      canPay = true;
                     });
-
-                    // int notifLength =
-                    //     await UserServices.getUserNotificationLength(
-                    //   FirebaseAuth.instance.currentUser!.uid,
-                    // );
-
-                    final userNotif = UserNotification(
-                      "",
-                      widget.parkingSpace.getSpaceId!,
-                      newParking.getParkingId!,
-                      FirebaseAuth.instance.currentUser!.photoURL ??
-                          "https://cdn4.iconfinder.com/data/icons/user-people-2/48/5-512.png",
-                      FirebaseAuth.instance.currentUser!.displayName!,
-                      "just booked on your parking space. Tap to view details.",
-                      true,
-                      false,
-                      now.millisecondsSinceEpoch,
-                      false,
-                      false,
-                      false,
-                      "",
-                      "",
-                      "",
-                      "",
-                      "",
-                      0.0,
-                    );
-
-                    var params = {
-                      "parking": newParking.toJson(),
-                      "notification": {
-                        "notificationId": "",
-                        "userId": widget.parkingSpace.getOwnerId!,
-                        "userNotification": userNotif.toJson(),
-                      },
-                    };
-
-                    request.body = jsonEncode(params);
-
-                    await request.send();
-
-                    await UserServices.setPayedToFalse(
-                        FirebaseAuth.instance.currentUser!.uid);
-
-                    Navigator.pop(context);
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: ((context) => SuccessfulBooking(
-                              owner: widget.parkingSpace.getOwnerName!,
-                              parkee: FirebaseAuth
-                                  .instance.currentUser!.displayName!,
-                              transactioDate:
-                                  DateFormat('MMMM dd, yyyy').format(now),
-                              arrivalDate: DateFormat('MMMM dd, yyyy - h:mm a')
-                                  .format(DateTime.fromMillisecondsSinceEpoch(
-                                      _setupTimeState.currentState!.getArrival!
-                                          .millisecondsSinceEpoch)),
-                              departureDate:
-                                  DateFormat('MMMM dd, yyyy - h:mm a').format(
-                                      DateTime.fromMillisecondsSinceEpoch(
-                                          _setupTimeState
-                                              .currentState!
-                                              .getDeparture!
-                                              .millisecondsSinceEpoch)),
-                              duration:
-                                  _setupTimeState.currentState!.getDuration!,
-                              parkingFee:
-                                  _setupTimeState.currentState!.getParkingPrice,
-                              spaceAddress: widget.parkingSpace.getAddress!,
-                              sendTo: FirebaseAuth.instance.currentUser!.email!,
-                              replyTo: "chuarex55@gmail.com",
-                            )),
-                      ),
-                    );
+                    return;
                   }
-                });
-              });
-            } else {
-              showDialog(
-                context: context,
-                builder: (context) {
-                  return (const NoticeDialog(
-                    imageLink: "assets/logo/lets-park-logo.png",
-                    message:
-                        "We're sorry, but the time alloted is not available. Please try different time.",
-                  ));
-                },
-              );
-            }
-          },
+
+                  if (_vehicleState.currentState!.getPlateNumber!
+                          .compareTo("Select plate number") ==
+                      0) {
+                    showAlertDialog("Please provide car's plate number.");
+                    return;
+                  }
+
+                  if (FirebaseAuth.instance.currentUser!.emailVerified ==
+                      false) {
+                    return;
+                  }
+
+                  int qty = globals.userData.getUserParkings!.length + 1;
+                  String parkingId = "PARKSESS" +
+                      DateTime.now()
+                          .millisecondsSinceEpoch
+                          .toString()
+                          .toString() +
+                      "$qty";
+
+                  showDialog(
+                    context: context,
+                    barrierDismissible: false,
+                    builder: (context) => WillPopScope(
+                      onWillPop: () async => false,
+                      child: const NoticeDialog(
+                        imageLink: "assets/logo/lets-park-logo.png",
+                        message: "Checking and verifying your booking...",
+                        forLoading: true,
+                      ),
+                    ),
+                  );
+
+                  int paymentDate = 0;
+                  await WorldTimeServices.getDateOnlyNow().then((date) {
+                    paymentDate = date.millisecondsSinceEpoch;
+                  });
+
+                  Parking newParking = Parking(
+                    widget.parkingSpace.getSpaceId,
+                    widget.parkingSpace.getType,
+                    widget.parkingSpace.getDailyOrMonthly,
+                    parkingId,
+                    widget.parkingSpace.getImageUrl,
+                    widget.parkingSpace.getOwnerId,
+                    widget.parkingSpace.getOwnerName,
+                    FirebaseAuth.instance.currentUser!.displayName,
+                    FirebaseAuth.instance.currentUser!.uid,
+                    FirebaseAuth.instance.currentUser!.photoURL,
+                    FirebaseAuth.instance.currentUser!.phoneNumber!,
+                    widget.parkingSpace.getRating!.toInt(),
+                    widget.parkingSpace.getAddress,
+                    [
+                      widget.parkingSpace.getLatLng!.latitude,
+                      widget.parkingSpace.getLatLng!.longitude
+                    ],
+                    _vehicleState.currentState!.getPlateNumber,
+                    _setupTimeState
+                        .currentState!.getArrival!.millisecondsSinceEpoch,
+                    _setupTimeState
+                        .currentState!.getDeparture!.millisecondsSinceEpoch,
+                    paymentDate,
+                    _setupTimeState.currentState!.getDuration,
+                    _setupTimeState.currentState!.getParkingPrice,
+                    false,
+                    true,
+                    false,
+                    false,
+                  );
+                  bool isAvailable = true;
+                  if (availableSlot > 0) {
+                    isAvailable = true;
+                  } else {
+                    isAvailable = await ParkingSpaceServices
+                        .isParkingSpaceAvailableAtTimeRange(
+                      widget.parkingSpace.getSpaceId,
+                      _setupTimeState
+                          .currentState!.getArrival!.millisecondsSinceEpoch,
+                      _setupTimeState
+                          .currentState!.getDeparture!.millisecondsSinceEpoch,
+                    ).then((isAvailable) async {
+                      return isAvailable;
+                    });
+                  }
+                  if (isAvailable) {
+                    await UserServices.setPaymentParams(
+                      FirebaseAuth.instance.currentUser!.uid,
+                      "${widget.parkingSpace.getPaypalEmail}/${_setupTimeState.currentState!.getParkingPrice}",
+                    );
+
+                    await UserServices.addToPay(
+                      paymentDate,
+                      parkingId,
+                      _setupTimeState
+                          .currentState!.getArrival!.millisecondsSinceEpoch,
+                      _setupTimeState
+                          .currentState!.getDeparture!.millisecondsSinceEpoch,
+                      _setupTimeState.currentState!.getDuration!,
+                      _setupTimeState.currentState!.getParkingPrice,
+                      widget.parkingSpace.getAddress!,
+                    );
+                    String url =
+                        "https://sample-paypal-payment-sandbox.herokuapp.com/${FirebaseAuth.instance.currentUser!.uid}";
+                    if (await launcher.canLaunchUrl(Uri.parse(url))) {
+                      await launcher.launchUrl(
+                        Uri.parse(url),
+                        mode: launcher.LaunchMode.externalApplication,
+                      );
+                    }
+                    Navigator.pop(context);
+                    showAlertDialogWithLoading("Now paying...");
+
+                    checkPayedStream = checkPayed.listen((event) {
+                      UserServices.isPayed(
+                        FirebaseAuth.instance.currentUser!.uid,
+                      ).then((payed) async {
+                        if (payed) {
+                          checkPayedStream!.cancel();
+
+                          Navigator.pop(context);
+                          showDialog(
+                            context: context,
+                            barrierDismissible: false,
+                            builder: (context) => WillPopScope(
+                              onWillPop: () async => false,
+                              child: const NoticeDialog(
+                                imageLink: "assets/logo/lets-park-logo.png",
+                                message:
+                                    "Finalizing your booking. Please wait.",
+                                forLoading: true,
+                              ),
+                            ),
+                          );
+
+                          var request = http.Request(
+                            'POST',
+                            Uri.parse(
+                              "https://sample-paypal-payment-sandbox.herokuapp.com/write/to/database",
+                            ),
+                          )..headers.addAll({
+                              HttpHeaders.contentTypeHeader: "application/json",
+                            });
+
+                          DateTime now = DateTime(0, 0, 0, 0, 0);
+                          await WorldTimeServices.getDateTimeNow().then((time) {
+                            now = DateTime(
+                              time.year,
+                              time.month,
+                              time.day,
+                              time.hour,
+                              time.minute,
+                            );
+                          });
+
+                          // int notifLength =
+                          //     await UserServices.getUserNotificationLength(
+                          //   FirebaseAuth.instance.currentUser!.uid,
+                          // );
+
+                          final userNotif = UserNotification(
+                            "",
+                            widget.parkingSpace.getSpaceId!,
+                            newParking.getParkingId!,
+                            FirebaseAuth.instance.currentUser!.photoURL ??
+                                "https://cdn4.iconfinder.com/data/icons/user-people-2/48/5-512.png",
+                            FirebaseAuth.instance.currentUser!.displayName!,
+                            "just booked on your parking space. Tap to view details.",
+                            true,
+                            false,
+                            now.millisecondsSinceEpoch,
+                            false,
+                            false,
+                            false,
+                            "",
+                            "",
+                            "",
+                            "",
+                            "",
+                            0.0,
+                          );
+
+                          var params = {
+                            "parking": newParking.toJson(),
+                            "notification": {
+                              "notificationId": "",
+                              "userId": widget.parkingSpace.getOwnerId!,
+                              "userNotification": userNotif.toJson(),
+                            },
+                          };
+
+                          request.body = jsonEncode(params);
+
+                          await request.send();
+
+                          await UserServices.setPayedToFalse(
+                              FirebaseAuth.instance.currentUser!.uid);
+
+                          Navigator.pop(context);
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: ((context) => SuccessfulBooking(
+                                    owner: widget.parkingSpace.getOwnerName!,
+                                    parkee: FirebaseAuth
+                                        .instance.currentUser!.displayName!,
+                                    transactioDate:
+                                        DateFormat('MMMM dd, yyyy').format(now),
+                                    arrivalDate: DateFormat(
+                                            'MMMM dd, yyyy - h:mm a')
+                                        .format(
+                                            DateTime.fromMillisecondsSinceEpoch(
+                                                _setupTimeState
+                                                    .currentState!
+                                                    .getArrival!
+                                                    .millisecondsSinceEpoch)),
+                                    departureDate: DateFormat(
+                                            'MMMM dd, yyyy - h:mm a')
+                                        .format(
+                                            DateTime.fromMillisecondsSinceEpoch(
+                                                _setupTimeState
+                                                    .currentState!
+                                                    .getDeparture!
+                                                    .millisecondsSinceEpoch)),
+                                    duration: _setupTimeState
+                                        .currentState!.getDuration!,
+                                    parkingFee: _setupTimeState
+                                        .currentState!.getParkingPrice,
+                                    spaceAddress:
+                                        widget.parkingSpace.getAddress!,
+                                    sendTo: FirebaseAuth
+                                        .instance.currentUser!.email!,
+                                    replyTo: "chuarex55@gmail.com",
+                                  )),
+                            ),
+                          );
+                        }
+                      });
+                    });
+                  } else {
+                    await showDialog(
+                      context: context,
+                      builder: (context) {
+                        return (const NoticeDialog(
+                          imageLink: "assets/logo/lets-park-logo.png",
+                          message:
+                              "We're sorry, but the time alloted is not available. Please try different time.",
+                        ));
+                      },
+                    ).then((value) {
+                      setState(() {
+                        canPay = true;
+                      });
+                    });
+                  }
+                }
+              : null,
           child: const Text(
             "Pay now",
             style: TextStyle(
@@ -366,8 +393,8 @@ class _CheckoutState extends State<Checkout> {
     );
   }
 
-  void showAlertDialog(String message) {
-    showDialog(
+  void showAlertDialog(String message) async {
+    await showDialog(
       context: context,
       builder: (_) => AlertDialog(
         title: Center(
@@ -380,55 +407,72 @@ class _CheckoutState extends State<Checkout> {
         actions: [
           TextButton(
             onPressed: () {
+              setState(() {
+                canPay = true;
+              });
               Navigator.pop(context);
             },
             child: const Text("Close"),
           ),
         ],
       ),
-    );
+    ).then((value) {
+      setState(() {
+        canPay = true;
+      });
+    });
   }
 
-  void showAlertDialogWithLoading(String message) {
-    showDialog(
+  void showAlertDialogWithLoading(String message) async {
+    await showDialog(
       barrierDismissible: false,
       context: context,
-      builder: (_) => AlertDialog(
-        title: Center(
-          child: Image.asset(
-            "assets/logo/app_icon.png",
-            scale: 20,
+      builder: (_) => WillPopScope(
+        onWillPop: () async => false,
+        child: AlertDialog(
+          title: Center(
+            child: Image.asset(
+              "assets/logo/app_icon.png",
+              scale: 20,
+            ),
           ),
-        ),
-        content: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(message),
-            const SizedBox(
-              width: 20,
-              height: 20,
-              child: CircularProgressIndicator(
-                strokeWidth: 2,
+          content: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(message),
+              const SizedBox(
+                width: 20,
+                height: 20,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                ),
               ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () async {
+                await checkPayedStream!.cancel();
+                await UserServices.setPayedToFalse(
+                  FirebaseAuth.instance.currentUser!.uid,
+                );
+                await UserServices.deletePaymentDoc();
+                setState(() {
+                  canPay = true;
+                });
+                Navigator.pop(context);
+                Navigator.pop(context, "non-null-callback");
+              },
+              child: const Text("Cancel Payment"),
             ),
           ],
         ),
-        actions: [
-          TextButton(
-            onPressed: () async {
-              await checkPayedStream!.cancel();
-              await UserServices.setPayedToFalse(
-                FirebaseAuth.instance.currentUser!.uid,
-              );
-              await UserServices.deletePaymentDoc();
-              Navigator.pop(context);
-              Navigator.pop(context, "non-null-callback");
-            },
-            child: const Text("Cancel Payment"),
-          ),
-        ],
       ),
-    );
+    ).then((value) {
+      setState(() {
+        canPay = true;
+      });
+    });
   }
 }
 
@@ -728,10 +772,11 @@ class SetUpTimeState extends State<SetUpTime> {
       context: context,
       builder: (context) => Dialog(
         child: SizedBox(
-          height: 335,
+          height: 360,
           child: Padding(
             padding: const EdgeInsets.all(8.0),
             child: Column(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
                 Text(
                   "Please select valid time and date of arrival",

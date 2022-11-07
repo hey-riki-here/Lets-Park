@@ -156,6 +156,7 @@ class _UpcomingParkingsState extends State<UpcomingParkings> {
                                                   ),
                                                 ),
                                                 style: textStyle.copyWith(
+                                                  fontSize: 15,
                                                   fontWeight: FontWeight.w700,
                                                 ),
                                               ),
@@ -179,6 +180,7 @@ class _UpcomingParkingsState extends State<UpcomingParkings> {
                                                   ),
                                                 ),
                                                 style: textStyle.copyWith(
+                                                  fontSize: 15,
                                                   fontWeight: FontWeight.w700,
                                                 ),
                                               ),
@@ -197,6 +199,7 @@ class _UpcomingParkingsState extends State<UpcomingParkings> {
                                                 upcomingParkings[index]
                                                     .getDuration!,
                                                 style: textStyle.copyWith(
+                                                  fontSize: 15,
                                                   fontWeight: FontWeight.w700,
                                                 ),
                                               ),

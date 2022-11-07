@@ -6,6 +6,7 @@ import 'package:lets_park/services/notif_services.dart';
 import 'package:lets_park/services/signin_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:device_preview/device_preview.dart';
 
 Future main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -13,10 +14,14 @@ Future main() async {
   NotificationServices.initChannel();
 
   final prefs = await SharedPreferences.getInstance();
-  runApp(LetsPark(
-    prefs: prefs,
-  ));
-
+  runApp(
+    DevicePreview(
+      enabled: true,
+      builder: (context) => LetsPark(
+        prefs: prefs,
+      ),
+    ),
+  );
 }
 
 final navigatorKey = GlobalKey<NavigatorState>();
@@ -37,6 +42,9 @@ class LetsPark extends StatelessWidget {
       },
       child: MaterialApp(
         navigatorKey: navigatorKey,
+        useInheritedMediaQuery: true,
+        locale: DevicePreview.locale(context),
+        builder: DevicePreview.appBuilder,
         debugShowCheckedModeBanner: false,
         title: "Let's Park!",
         theme: ThemeData(

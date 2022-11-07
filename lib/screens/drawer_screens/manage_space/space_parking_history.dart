@@ -62,14 +62,145 @@ class _ParkingHistoryState extends State<ParkingHistory> {
                           Radius.circular(12),
                         ),
                       ),
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 8,
-                        ),
-                        child: Row(
-                          children: [
-                            Row(
+                      child: InkWell(
+                        borderRadius: BorderRadius.circular(12),
+                        onTap: () {
+                          showModalBottomSheet<void>(
+                            elevation: 50,
+                            context: context,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            builder: (BuildContext context) {
+                              return Card(
+                                elevation: 0,
+                                shape: const RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.all(
+                                    Radius.circular(20),
+                                  ),
+                                ),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        "Driver",
+                                        style: labelStyle,
+                                      ),
+                                      const SizedBox(height: 10),
+                                      Row(
+                                        children: [
+                                          CircleAvatar(
+                                            backgroundColor: Colors.white,
+                                            backgroundImage: NetworkImage(
+                                              parkingHistory[index]
+                                                  .getDriverImage!,
+                                            ),
+                                            radius: 20,
+                                          ),
+                                          const SizedBox(width: 10),
+                                          Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                parkingHistory[index]
+                                                    .getDriver!,
+                                                style: valueStyle,
+                                              ),
+                                            ],
+                                          )
+                                        ],
+                                      ),
+                                      const SizedBox(height: 10),
+                                      Text(
+                                        "Car",
+                                        style: labelStyle,
+                                      ),
+                                      const SizedBox(height: 10),
+                                      Row(
+                                        children: [
+                                          const Icon(
+                                            FontAwesomeIcons.carAlt,
+                                          ),
+                                          const SizedBox(width: 10),
+                                          Column(
+                                            children: [
+                                              Text(
+                                                parkingHistory[index]
+                                                    .getPlateNumber!
+                                                    .toUpperCase(),
+                                                style: valueStyle,
+                                              ),
+                                            ],
+                                          )
+                                        ],
+                                      ),
+                                      const SizedBox(height: 10),
+                                      Text(
+                                        "Parking information",
+                                        style: labelStyle,
+                                      ),
+                                      const SizedBox(height: 10),
+                                      Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            "Arrived: " +
+                                                _getFormattedTime(
+                                                  DateTime
+                                                      .fromMillisecondsSinceEpoch(
+                                                    parkingHistory[index]
+                                                        .getArrival!,
+                                                  ),
+                                                ),
+                                            style: valueStyle,
+                                          ),
+                                          Text(
+                                            "Departed: " +
+                                                _getFormattedTime(
+                                                  DateTime
+                                                      .fromMillisecondsSinceEpoch(
+                                                    parkingHistory[index]
+                                                        .getDeparture!,
+                                                  ),
+                                                ),
+                                            style: valueStyle,
+                                          ),
+                                          Text(
+                                            "Duration: ${parkingHistory[index].getDuration!}",
+                                            style: valueStyle,
+                                          ),
+                                        ],
+                                      ),
+                                      const SizedBox(height: 10),
+                                      Text(
+                                        "Paid",
+                                        style: labelStyle,
+                                      ),
+                                      const SizedBox(height: 10),
+                                      Text(
+                                        "${parkingHistory[index].getPrice!}.00",
+                                        style: valueStyle,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              );
+                            },
+                          );
+                        },
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 8,
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Row(
                               children: [
                                 const Icon(
                                   FontAwesomeIcons.carAlt,
@@ -77,217 +208,18 @@ class _ParkingHistoryState extends State<ParkingHistory> {
                                   color: Colors.blue,
                                 ),
                                 const SizedBox(width: 10),
-                                Text(
-                                  parkingHistory[index]
-                                      .getPlateNumber!
-                                      .toUpperCase(),
-                                  style: const TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                                Text(
-                                  ", parked for ${parkingHistory[index].getDuration!}",
-                                  style: const TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w400,
+                                Expanded(
+                                  child: Text(
+                                    "${ parkingHistory[index].getPlateNumber!.toUpperCase()}, parked for ${parkingHistory[index].getDuration!}",
+                                    style: const TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w400,
+                                    ),
                                   ),
                                 ),
                               ],
                             ),
-                            Expanded(
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.end,
-                                children: [
-                                  IconButton(
-                                    icon: const Icon(Icons.info_outline),
-                                    color: Colors.grey,
-                                    onPressed: () {
-                                      showModalBottomSheet<void>(
-                                        elevation: 50,
-                                        context: context,
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(20),
-                                        ),
-                                        builder: (BuildContext context) {
-                                          return Card(
-                                            elevation: 0,
-                                            shape: const RoundedRectangleBorder(
-                                              borderRadius: BorderRadius.all(
-                                                Radius.circular(20),
-                                              ),
-                                            ),
-                                            child: Padding(
-                                              padding:
-                                                  const EdgeInsets.all(8.0),
-                                              child: Column(
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.start,
-                                                children: [
-                                                  Text(
-                                                    "Driver",
-                                                    style: labelStyle,
-                                                  ),
-                                                  const SizedBox(height: 10),
-                                                  Row(
-                                                    children: [
-                                                      CircleAvatar(
-                                                        backgroundColor:
-                                                            Colors.white,
-                                                        backgroundImage:
-                                                            NetworkImage(
-                                                          parkingHistory[index]
-                                                              .getDriverImage!,
-                                                        ),
-                                                        radius: 20,
-                                                      ),
-                                                      const SizedBox(width: 10),
-                                                      Column(
-                                                        crossAxisAlignment:
-                                                            CrossAxisAlignment
-                                                                .start,
-                                                        children: [
-                                                          Text(
-                                                            parkingHistory[
-                                                                    index]
-                                                                .getDriver!,
-                                                            style: valueStyle,
-                                                          ),
-                                                          Row(
-                                                            mainAxisAlignment:
-                                                                MainAxisAlignment
-                                                                    .center,
-                                                            children: [
-                                                              Icon(
-                                                                Icons.star,
-                                                                color: Colors
-                                                                    .yellow
-                                                                    .shade600,
-                                                                size: 15,
-                                                              ),
-                                                              Icon(
-                                                                Icons.star,
-                                                                color: Colors
-                                                                    .yellow
-                                                                    .shade600,
-                                                                size: 15,
-                                                              ),
-                                                              Icon(
-                                                                Icons.star,
-                                                                color: Colors
-                                                                    .yellow
-                                                                    .shade600,
-                                                                size: 15,
-                                                              ),
-                                                              Icon(
-                                                                Icons.star,
-                                                                color: Colors
-                                                                    .yellow
-                                                                    .shade600,
-                                                                size: 15,
-                                                              ),
-                                                              Icon(
-                                                                Icons.star,
-                                                                color: Colors
-                                                                    .yellow
-                                                                    .shade600,
-                                                                size: 15,
-                                                              ),
-                                                            ],
-                                                          ),
-                                                        ],
-                                                      )
-                                                    ],
-                                                  ),
-                                                  const SizedBox(height: 10),
-                                                  Text(
-                                                    "Car",
-                                                    style: labelStyle,
-                                                  ),
-                                                  const SizedBox(height: 10),
-                                                  Row(
-                                                    children: [
-                                                      const Icon(
-                                                        FontAwesomeIcons.carAlt,
-                                                      ),
-                                                      const SizedBox(width: 10),
-                                                      Column(
-                                                        children: [
-                                                          Text(
-                                                            parkingHistory[
-                                                                    index]
-                                                                .getPlateNumber!
-                                                                .toUpperCase(),
-                                                            style: valueStyle,
-                                                          ),
-                                                        ],
-                                                      )
-                                                    ],
-                                                  ),
-                                                  const SizedBox(height: 10),
-                                                  Text(
-                                                    "Duration",
-                                                    style: labelStyle,
-                                                  ),
-                                                  const SizedBox(height: 10),
-                                                  Column(
-                                                    crossAxisAlignment:
-                                                        CrossAxisAlignment
-                                                            .start,
-                                                    children: [
-                                                      Text(
-                                                        "Arrived: " +
-                                                            _getFormattedTime(
-                                                              DateTime
-                                                                  .fromMillisecondsSinceEpoch(
-                                                                parkingHistory[
-                                                                        index]
-                                                                    .getArrival!,
-                                                              ),
-                                                            ),
-                                                        style: valueStyle,
-                                                      ),
-                                                      Text(
-                                                        "Departed: " +
-                                                            _getFormattedTime(
-                                                              DateTime
-                                                                  .fromMillisecondsSinceEpoch(
-                                                                parkingHistory[
-                                                                        index]
-                                                                    .getDeparture!,
-                                                              ),
-                                                            ),
-                                                        style: valueStyle,
-                                                      ),
-                                                      Text(
-                                                        "Duration: ${parkingHistory[index].getDuration!}",
-                                                        style: valueStyle,
-                                                      ),
-                                                    ],
-                                                  ),
-                                                  const SizedBox(height: 10),
-                                                  Text(
-                                                    "Paid",
-                                                    style: labelStyle,
-                                                  ),
-                                                  const SizedBox(height: 10),
-                                                  Text(
-                                                    "${parkingHistory[index].getPrice!}",
-                                                    style: valueStyle,
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
-                                          );
-                                        },
-                                      );
-                                    },
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
+                          ),
                         ),
                       ),
                     );

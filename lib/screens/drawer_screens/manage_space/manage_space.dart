@@ -151,7 +151,7 @@ class Header extends StatelessWidget {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            "Want to earn more?",
+                            "Earn more?",
                             style: TextStyle(
                               fontSize: 16,
                               color: Colors.grey.shade200,

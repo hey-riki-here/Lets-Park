@@ -131,8 +131,9 @@ class _UpdateProfileState extends State<UpdateProfile> {
                                     "DISPLAY PHOTO",
                                     style: _textStyle,
                                   ),
+                                  const SizedBox(height: 3),
                                   Text(
-                                    "Choose a photo for identity purposes.",
+                                    "Choose a photo for\nidentity purposes.",
                                     style: _textStyle,
                                   ),
                                 ],

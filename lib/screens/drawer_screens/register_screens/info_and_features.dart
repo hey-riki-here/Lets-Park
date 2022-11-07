@@ -407,7 +407,7 @@ class ReservabilityState extends State<Reservability> {
             children: [
               _buildReservabilityRadioButton(
                 "Reservable",
-                "Driver can book at this parking space in advance",
+                "Driver can book at this parking\nspace in advance",
                 Colors.blue[400]!,
               ),
               const SizedBox(height: 10),

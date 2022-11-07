@@ -68,7 +68,7 @@ dependencies:
   fluttertoast: ^8.1.1
   percent_indicator: ^4.2.2
   pinput: ^2.2.16
-  webview_flutter: ^3.0.4
+  device_preview: ^1.1.0
   
 dev_dependencies:
   flutter_test:
