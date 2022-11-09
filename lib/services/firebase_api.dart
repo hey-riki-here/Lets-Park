@@ -177,7 +177,7 @@ class FirebaseServices {
           parkingSpace.getLatLng!.longitude,
         );
 
-        if (distance <= 10) {
+        if (distance <= 5) {
           _map[parkingSpace] = distance;
         }
       }
@@ -209,7 +209,7 @@ class FirebaseServices {
     List<ParkingSpace> highRatedSpaces = [];
 
     globals.currentParkingSpaces.forEach((space) {
-      if (space.getRating! >= 0) {
+      if (space.getRating! >= 3) {
         highRatedSpaces.add(space);
       }
     });
@@ -238,7 +238,7 @@ class FirebaseServices {
       getTop5ParkingSpace() async {
     return FirebaseFirestore.instance
         .collection('parking-spaces')
-        .where("rating", isGreaterThanOrEqualTo: 0)
+        .where("rating", isGreaterThanOrEqualTo: 3)
         .snapshots()
         .first
         .then((snapshot) => snapshot);

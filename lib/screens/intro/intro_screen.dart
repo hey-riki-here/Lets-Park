@@ -15,7 +15,7 @@ class Introduction extends StatelessWidget {
       pages: [
         PageViewModel(
           title: 'Park with ease!',
-          body: 'View avaialbe parking area near you and view information.',
+          body: 'View available parking area near you and view information.',
           image: getImageFromAsset('assets/images/intro_1.png'),
         ),
         PageViewModel(

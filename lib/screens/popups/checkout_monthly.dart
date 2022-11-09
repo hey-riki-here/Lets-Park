@@ -117,7 +117,9 @@ class _CheckoutMonthlyState extends State<CheckoutMonthly> {
                     return;
                   }
 
-                  if (_vehicleState.currentState!.getPlateNumber!.isEmpty) {
+                  if (_vehicleState.currentState!.getPlateNumber!
+                          .compareTo("Select plate number") ==
+                      0) {
                     showAlertDialog("Please provide car's plate number.");
                     return;
                   }

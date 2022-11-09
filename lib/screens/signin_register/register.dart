@@ -1,4 +1,8 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:lets_park/screens/documents/guidelines.dart';
+import 'package:lets_park/screens/documents/privacy_policy.dart';
+import 'package:lets_park/screens/documents/terms_and_conditions.dart';
 import 'package:lets_park/services/signin_provider.dart';
 import 'package:lets_park/shared/shared_widgets.dart';
 import 'package:provider/provider.dart';
@@ -19,6 +23,7 @@ class _RegisterState extends State<Register> {
   final confirmPasswordController = TextEditingController();
   final numberController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
+  bool isAgreed = false;
 
   @override
   Widget build(BuildContext context) {
@@ -47,18 +52,36 @@ class _RegisterState extends State<Register> {
       ),
       bottomNavigationBar: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 8),
-        child: _sharedWidgets.button(
-          label: 'Register',
-          onPressed: () {
-            if (_formKey.currentState!.validate()) {
-              provider.signUpWithEmailandPassword(
-                name: firstNameController.text.trim() + " " + surnameController.text.trim(),
-                email: emailController.text.trim(),
-                password: passwordController.text.trim(),
-                context: context,
-              );
-            }
-          },
+        child: ElevatedButton(
+          onPressed: isAgreed
+              ? () {
+                  if (_formKey.currentState!.validate()) {
+                    provider.signUpWithEmailandPassword(
+                      name: firstNameController.text.trim() +
+                          " " +
+                          surnameController.text.trim(),
+                      email: emailController.text.trim(),
+                      password: passwordController.text.trim(),
+                      context: context,
+                    );
+                  }
+                }
+              : null,
+          child: const Text(
+            "Register",
+            style: TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.w400,
+              fontSize: 20,
+            ),
+          ),
+          style: ElevatedButton.styleFrom(
+            primary: Colors.lightBlue,
+            fixedSize: const Size(140, 40),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(50.0),
+            ),
+          ),
         ),
       ),
     );
@@ -138,6 +161,88 @@ class _RegisterState extends State<Register> {
               }
               return null;
             },
+          ),
+          const SizedBox(height: 20),
+          Row(
+            children: [
+              Checkbox(
+                value: isAgreed,
+                onChanged: (value) {
+                  setState(() {
+                    isAgreed = value!;
+                  });
+                },
+              ),
+              Expanded(
+                child: RichText(
+                  text: TextSpan(
+                    text: "I agree to the app's ",
+                    style: const TextStyle(
+                      color: Colors.black,
+                    ),
+                    children: <TextSpan>[
+                      TextSpan(
+                        text: 'Privacy Policy',
+                        recognizer: TapGestureRecognizer()
+                          ..onTap = () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                fullscreenDialog: true,
+                                builder: (context) => const PrivacyPolicy(),
+                              ),
+                            );
+                          },
+                        style: const TextStyle(
+                          color: Colors.blue,
+                        ),
+                      ),
+                      const TextSpan(
+                        text: ', ',
+                      ),
+                      TextSpan(
+                        text: 'Terms and Conditions',
+                        recognizer: TapGestureRecognizer()
+                          ..onTap = () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                fullscreenDialog: true,
+                                builder: (context) => const TermsAndConditions(),
+                              ),
+                            );
+                          },
+                        style: const TextStyle(
+                          color: Colors.blue,
+                        ),
+                      ),
+                      const TextSpan(
+                        text: ', and ',
+                      ),
+                      TextSpan(
+                        text: 'Guidelines',
+                        recognizer: TapGestureRecognizer()
+                          ..onTap = () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                fullscreenDialog: true,
+                                builder: (context) => const Guidelines(),
+                              ),
+                            );
+                          },
+                        style: const TextStyle(
+                          color: Colors.blue,
+                        ),
+                      ),
+                      const TextSpan(
+                        text: '.',
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
           ),
         ],
       ),

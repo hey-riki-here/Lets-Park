@@ -4,7 +4,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:community_material_icon/community_material_icon.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:galleryimage/galleryimage.dart';
 import 'package:lets_park/models/parking_space.dart';
 import 'package:lets_park/models/review.dart';
 import 'package:lets_park/screens/popups/checkout.dart';

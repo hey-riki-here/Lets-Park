@@ -44,7 +44,6 @@ class _ExtendParkingState extends State<ExtendParking> {
       checkPayedStream!.cancel();
     }
 
-    
     super.dispose();
   }
 
@@ -64,7 +63,9 @@ class _ExtendParkingState extends State<ExtendParking> {
               Column(
                 children: [
                   SetUpTime(key: _setupTimeState, parking: widget.parking),
-                  Vehicle(key: _vehicleState, plateNumber: widget.parking.getPlateNumber!),
+                  Vehicle(
+                      key: _vehicleState,
+                      plateNumber: widget.parking.getPlateNumber!),
                   //const PhotoPicker(),
                   const Payment(),
                 ],
@@ -80,7 +81,6 @@ class _ExtendParkingState extends State<ExtendParking> {
         ),
         child: ElevatedButton(
           onPressed: () async {
-
             bool isAvailable = await UserServices.extendParking(
               _setupTimeState.currentState!.getHour!,
               _setupTimeState.currentState!.getMinute!,
@@ -89,8 +89,7 @@ class _ExtendParkingState extends State<ExtendParking> {
             );
 
             if (isAvailable) {
-
-              if (!hasToPay(_setupTimeState.currentState!.getNewDuration)){
+              if (!hasToPay(_setupTimeState.currentState!.getNewDuration)) {
                 showDialog(
                   context: context,
                   barrierDismissible: false,
@@ -105,15 +104,17 @@ class _ExtendParkingState extends State<ExtendParking> {
                 );
 
                 await UserServices.updateDepartureOnParkingSession(
-                  widget.parking, 
-                _setupTimeState.currentState!.getDeparture!.millisecondsSinceEpoch,
+                  widget.parking,
+                  _setupTimeState
+                      .currentState!.getDeparture!.millisecondsSinceEpoch,
                 );
 
                 await ParkingSpaceServices.updateDepartureOnParkingSession(
-                  widget.parking, 
-                _setupTimeState.currentState!.getDeparture!.millisecondsSinceEpoch,
+                  widget.parking,
+                  _setupTimeState
+                      .currentState!.getDeparture!.millisecondsSinceEpoch,
                 );
-                
+
                 await UserServices.updateDurationOnParkingSession(
                   widget.parking,
                   _setupTimeState.currentState!.getNewDuration,
@@ -123,7 +124,7 @@ class _ExtendParkingState extends State<ExtendParking> {
                   widget.parking,
                   _setupTimeState.currentState!.getNewDuration,
                 );
-                
+
                 DateTime now = DateTime(0, 0, 0, 0, 0);
                 await WorldTimeServices.getDateTimeNow().then((time) {
                   now = DateTime(
@@ -152,7 +153,8 @@ class _ExtendParkingState extends State<ExtendParking> {
                   _setupTimeState.currentState!.getDuration!,
                   getDateTime(widget.parking.getDeparture!),
                   widget.parking.getDuration!,
-                  DateFormat('MMM. dd, yyyy h:mm a').format(_setupTimeState.currentState!.getDeparture!),
+                  DateFormat('MMM. dd, yyyy h:mm a')
+                      .format(_setupTimeState.currentState!.getDeparture!),
                   _setupTimeState.currentState!.getNewDuration,
                   _setupTimeState.currentState!.getParkingPrice,
                 );
@@ -162,7 +164,8 @@ class _ExtendParkingState extends State<ExtendParking> {
                   userNotif,
                 );
 
-                await UserServices.setPayedToFalse(FirebaseAuth.instance.currentUser!.uid);
+                await UserServices.setPayedToFalse(
+                    FirebaseAuth.instance.currentUser!.uid);
 
                 Navigator.pop(context);
 
@@ -177,11 +180,30 @@ class _ExtendParkingState extends State<ExtendParking> {
                 return;
               }
 
-              String paypalEmail = await ParkingSpaceServices.getSpacePaypalEmail(widget.parking.getParkingSpaceId!);
-              UserServices.setPaymentParams(
+              int paymentDate = 0;
+              await WorldTimeServices.getDateOnlyNow().then((date) {
+                paymentDate = date.millisecondsSinceEpoch;
+              });
+
+              String paypalEmail =
+                  await ParkingSpaceServices.getSpacePaypalEmail(
+                widget.parking.getParkingSpaceId!,
+              );
+              await UserServices.setPaymentParams(
                 FirebaseAuth.instance.currentUser!.uid,
                 "$paypalEmail/${_setupTimeState.currentState!.getParkingPrice}",
               );
+
+              await UserServices.addToPayExtend(
+                paymentDate,
+                widget.parking.getParkingId!,
+                _setupTimeState
+                    .currentState!.getDeparture!.millisecondsSinceEpoch,
+                _setupTimeState.currentState!.getDuration!,
+                _setupTimeState.currentState!.getParkingPrice,
+                widget.parking.getAddress!,
+              );
+
               String url =
                   "https://sample-paypal-payment-sandbox.herokuapp.com/${FirebaseAuth.instance.currentUser!.uid}";
               if (await launcher.canLaunchUrl(Uri.parse(url))) {
@@ -206,22 +228,25 @@ class _ExtendParkingState extends State<ExtendParking> {
                         onWillPop: () async => false,
                         child: const NoticeDialog(
                           imageLink: "assets/logo/lets-park-logo.png",
-                          message: "Extending your parking session. Please wait.",
+                          message:
+                              "Extending your parking session. Please wait.",
                           forLoading: true,
                         ),
                       ),
                     );
 
                     await UserServices.updateDepartureOnParkingSession(
-                      widget.parking, 
-                    _setupTimeState.currentState!.getDeparture!.millisecondsSinceEpoch,
+                      widget.parking,
+                      _setupTimeState
+                          .currentState!.getDeparture!.millisecondsSinceEpoch,
                     );
 
                     await ParkingSpaceServices.updateDepartureOnParkingSession(
-                      widget.parking, 
-                    _setupTimeState.currentState!.getDeparture!.millisecondsSinceEpoch,
+                      widget.parking,
+                      _setupTimeState
+                          .currentState!.getDeparture!.millisecondsSinceEpoch,
                     );
-                    
+
                     await UserServices.updateDurationOnParkingSession(
                       widget.parking,
                       _setupTimeState.currentState!.getNewDuration,
@@ -231,7 +256,7 @@ class _ExtendParkingState extends State<ExtendParking> {
                       widget.parking,
                       _setupTimeState.currentState!.getNewDuration,
                     );
-                    
+
                     DateTime now = DateTime(0, 0, 0, 0, 0);
                     await WorldTimeServices.getDateTimeNow().then((time) {
                       now = DateTime(
@@ -260,7 +285,8 @@ class _ExtendParkingState extends State<ExtendParking> {
                       _setupTimeState.currentState!.getDuration!,
                       getDateTime(widget.parking.getDeparture!),
                       widget.parking.getDuration!,
-                      DateFormat('MMM. dd, yyyy h:mm a').format(_setupTimeState.currentState!.getDeparture!),
+                      DateFormat('MMM. dd, yyyy h:mm a')
+                          .format(_setupTimeState.currentState!.getDeparture!),
                       _setupTimeState.currentState!.getNewDuration,
                       _setupTimeState.currentState!.getParkingPrice,
                     );
@@ -270,7 +296,8 @@ class _ExtendParkingState extends State<ExtendParking> {
                       userNotif,
                     );
 
-                    await UserServices.setPayedToFalse(FirebaseAuth.instance.currentUser!.uid);
+                    await UserServices.setPayedToFalse(
+                        FirebaseAuth.instance.currentUser!.uid);
 
                     Navigator.pop(context);
 
@@ -315,24 +342,25 @@ class _ExtendParkingState extends State<ExtendParking> {
     );
   }
 
-  bool hasToPay(String duration){
+  bool hasToPay(String duration) {
     List<String> elements = duration.split(" ");
     bool result = false;
 
-    if (elements.length == 2){
-      if (elements[1].compareTo("minute") == 0 || elements[1].compareTo("minutes") == 0){
+    if (elements.length == 2) {
+      if (elements[1].compareTo("minute") == 0 ||
+          elements[1].compareTo("minutes") == 0) {
         result = false;
       } else {
         int hour = int.parse(elements[0]);
 
-        if (hour > 8){
+        if (hour > 8) {
           result = true;
         }
       }
     } else {
       int hour = int.parse(elements[0]);
 
-      if (hour > 8){
+      if (hour > 8) {
         result = true;
       }
     }
@@ -340,8 +368,9 @@ class _ExtendParkingState extends State<ExtendParking> {
     return result;
   }
 
-  String getDateTime(int date){
-    return DateFormat('MMM. dd, yyyy h:mm a').format(DateTime.fromMillisecondsSinceEpoch(date));
+  String getDateTime(int date) {
+    return DateFormat('MMM. dd, yyyy h:mm a')
+        .format(DateTime.fromMillisecondsSinceEpoch(date));
   }
 
   void showAlertDialog(String message) {
@@ -440,8 +469,9 @@ class SetUpTimeState extends State<SetUpTime> {
     _selectedMinute = 0;
     List<String> elements = widget.parking.getDuration!.trim().split(" ");
 
-    if (elements.length == 2){
-      if (elements[1].compareTo("minute") == 0 || elements[1].compareTo("minutes") == 0){
+    if (elements.length == 2) {
+      if (elements[1].compareTo("minute") == 0 ||
+          elements[1].compareTo("minutes") == 0) {
         originalMinute = int.parse(elements[0]);
       } else {
         originalHour = int.parse(elements[0]);
@@ -450,10 +480,12 @@ class SetUpTimeState extends State<SetUpTime> {
       originalMinute = int.parse(widget.parking.getDuration!.split(" ")[3]);
       originalHour = int.parse(widget.parking.getDuration!.split(" ")[0]);
     }
-    
-    sessionDeparture = DateTime.fromMillisecondsSinceEpoch(widget.parking.getDeparture!);
 
-    _selectedDepartureDateTime = sessionDeparture!.add(const Duration(hours: 1));
+    sessionDeparture =
+        DateTime.fromMillisecondsSinceEpoch(widget.parking.getDeparture!);
+
+    _selectedDepartureDateTime =
+        sessionDeparture!.add(const Duration(hours: 1));
     _departureTime = DateFormat("h:mm a").format(_selectedDepartureDateTime!);
 
     setDuration();
@@ -481,7 +513,8 @@ class SetUpTimeState extends State<SetUpTime> {
               ),
               const SizedBox(width: 10),
               const Expanded(
-                child: Text("If the extension time together with the current duration does not exceed the first 8 hours, there will be no charges applied."),
+                child: Text(
+                    "If the extension time together with the current duration does not exceed the first 8 hours, there will be no charges applied."),
               ),
             ],
           ),
@@ -719,8 +752,7 @@ class SetUpTimeState extends State<SetUpTime> {
       } else if (hour > 1 && minute == 0) {
         newParkingDuration = "$hour hours";
       } else if (hour > 1 && minute > 1) {
-        newParkingDuration =
-            "$hour hours and $minute minutes";
+        newParkingDuration = "$hour hours and $minute minutes";
       } else if (hour == 1 && minute == 1) {
         newParkingDuration = "$hour hour and $minute minute";
       } else if (hour > 1 && minute == 1) {
@@ -764,21 +796,21 @@ class SetUpTimeState extends State<SetUpTime> {
   }
 
   void getPrice() {
-
     int hour = 0;
     List<String> elements = widget.parking.getDuration!.trim().split(" ");
 
-    if (elements.length == 2){
-      if (elements[1].compareTo("hour") == 0 || elements[1].compareTo("hours") == 0){
+    if (elements.length == 2) {
+      if (elements[1].compareTo("hour") == 0 ||
+          elements[1].compareTo("hours") == 0) {
         hour = int.parse(elements[0]);
-      } 
+      }
     } else {
       hour = int.parse(elements[0]);
     }
 
-    setState((){
+    setState(() {
       hour += _selectedHour;
-      if (hour > 8){
+      if (hour > 8) {
         price = 10;
         price *= hour - 8;
       } else {
@@ -859,7 +891,7 @@ class VehicleState extends State<Vehicle> {
           ),
         ),
       ],
-    );   
+    );
   }
 
   String? get getPlateNumber => selectedCar;

@@ -99,6 +99,76 @@ class _HomeScreenState extends State<HomeScreen> {
                   _scaffoldKey.currentState!.openDrawer();
                 },
               ),
+              actions: [
+                IconButton(
+                  splashRadius: 25,
+                  onPressed: () {
+                    showDialog(
+                      context: context,
+                      builder: (_) => AlertDialog(
+                        title: Center(
+                          child: Image.asset(
+                            "assets/logo/app_icon.png",
+                            scale: 20,
+                          ),
+                        ),
+                        content: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Text(
+                              "Tip",
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                color: Colors.blue,
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            const SizedBox(height: 10),
+                            Container(
+                              padding: const EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                                color: Colors.blue[50],
+                                borderRadius:
+                                    const BorderRadius.all(Radius.circular(8)),
+                              ),
+                              child: Row(
+                                children: [
+                                  Icon(
+                                    Icons.info,
+                                    color: Colors.blue.shade700,
+                                  ),
+                                  const SizedBox(width: 10),
+                                  const Expanded(
+                                    child: Text(
+                                      "Pull down to refresh the app.",
+                                      style: TextStyle(
+                                        fontSize: 15,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                        actions: [
+                          TextButton(
+                            onPressed: () {
+                              Navigator.pop(context, false);
+                            },
+                            child: const Text("Close"),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                  icon: const Icon(
+                    Icons.help,
+                    color: Colors.white,
+                  ),
+                ),
+              ],
               elevation: 0,
               shape: const RoundedRectangleBorder(
                 borderRadius: BorderRadius.vertical(
@@ -246,6 +316,12 @@ class _HomeScreenState extends State<HomeScreen> {
                                   color: Colors.black54,
                                 ),
                               ),
+                              const Text(
+                                "These are the parking area that are highly rated by other users.",
+                                style: TextStyle(
+                                  color: Colors.black45,
+                                ),
+                              ),
                               const SizedBox(height: 15),
                               TopSpacesGrid(key: topSpacesGridState),
                               const SizedBox(height: 30),
@@ -256,9 +332,16 @@ class _HomeScreenState extends State<HomeScreen> {
                                   color: Colors.black54,
                                 ),
                               ),
+                              const Text(
+                                "Listed below are the parking spaces that supports monthly parking.",
+                                style: TextStyle(
+                                  color: Colors.black45,
+                                ),
+                              ),
                               const SizedBox(height: 15),
                               MonthlyParkingSpaceGrid(
-                                  key: monthlyParkingSpaceGridState),
+                                key: monthlyParkingSpaceGridState,
+                              ),
                             ],
                           ),
                         ),

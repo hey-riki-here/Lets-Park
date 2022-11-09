@@ -1,6 +1,9 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:lets_park/screens/documents/guidelines.dart';
+import 'package:lets_park/screens/documents/privacy_policy.dart';
+import 'package:lets_park/screens/documents/terms_and_conditions.dart';
 import 'package:lets_park/screens/drawer_screens/profile_page/my_favorites.dart';
 import 'package:lets_park/screens/drawer_screens/profile_page/registered_cars.dart';
 import 'package:lets_park/screens/drawer_screens/profile_page/update_profile_info.dart';
@@ -243,15 +246,6 @@ class Menu extends StatelessWidget {
                 },
               ),
               buildMenuItem(
-                icon: Icons.paypal_rounded,
-                iconSize: 20,
-                iconColor: Colors.blue[700]!,
-                label: "Paypal accounts",
-                insets: const EdgeInsets.all(15),
-                borderRadius: const BorderRadius.all(Radius.zero),
-                onTap: ()  {},
-              ),
-              buildMenuItem(
                 icon: FontAwesomeIcons.key,
                 iconSize: 17,
                 iconColor: Colors.yellow[700]!,
@@ -363,13 +357,27 @@ class MenuTD extends StatelessWidget {
                   topRight: Radius.circular(12),
                   topLeft: Radius.circular(12),
                 ),
-                onTap: () {},
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: ((context) => const PrivacyPolicy()),
+                    ),
+                  );
+                },
               ),
               buildMenuItem(
                 label: "Terms and conditions",
                 insets: const EdgeInsets.all(15),
                 borderRadius: const BorderRadius.all(Radius.zero),
-                onTap: () {},
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: ((context) => const TermsAndConditions()),
+                    ),
+                  );
+                },
               ),
               buildMenuItem(
                 label: "Guidelines",
@@ -378,7 +386,14 @@ class MenuTD extends StatelessWidget {
                   bottomRight: Radius.circular(12),
                   bottomLeft: Radius.circular(12),
                 ),
-                onTap: () {},
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: ((context) => const Guidelines()),
+                    ),
+                  );
+                },
               ),
             ],
           ),

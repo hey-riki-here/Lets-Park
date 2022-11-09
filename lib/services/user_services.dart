@@ -598,6 +598,7 @@ class UserServices {
         .update(session.toJson());
 
     await FirebaseFirestore.instance
+        .collection('parking-spaces')
         .doc(session.getParkingSpaceId!)
         .collection("parking-sessions")
         .doc(session.getParkingId!)
@@ -775,6 +776,7 @@ class UserServices {
         .doc();
     paymentId = newToPayDoc.id;
     await newToPayDoc.set({
+      "type": "book",
       "transactionDate": transactionDate,
       "parkingId": parkingId,
       "arrival": arrival,
@@ -784,6 +786,32 @@ class UserServices {
       "parkingAddress": parkingAddress,
     });
   }
+
+  static Future<void> addToPayExtend(
+    int transactionDate,
+    String parkingId,
+    int departure,
+    String duration,
+    double price,
+    String parkingAddress,
+  ) async {
+    final newToPayDoc = FirebaseFirestore.instance
+        .collection('user-data')
+        .doc(FirebaseAuth.instance.currentUser!.uid)
+        .collection('payments')
+        .doc();
+    paymentId = newToPayDoc.id;
+    await newToPayDoc.set({
+      "type": "extend",
+      "transactionDate": transactionDate,
+      "parkingId": parkingId,
+      "departure": departure,
+      "duration": duration,
+      "parkingFee": price,
+      "parkingAddress": parkingAddress,
+    });
+  }
+
 
   static Future<void> deletePaymentDoc() async {
     await FirebaseFirestore.instance

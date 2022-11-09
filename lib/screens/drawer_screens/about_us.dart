@@ -39,7 +39,7 @@ class AboutUs extends StatelessWidget {
               ),
               SizedBox(height: divHeight),
               const Text(
-                "With Let's Park parking is made easy. Locate avaialable parking space and book or pay now. Generate extra income using our app by registering your space and manage it.",
+                "With Let's Park parking is made easy. Locate available parking space and book or pay now. Generate extra income using our app by registering your space and manage it.",
                 style: TextStyle(
                   fontSize: 18,
                 ),

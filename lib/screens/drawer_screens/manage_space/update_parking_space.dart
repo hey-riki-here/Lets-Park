@@ -9,7 +9,6 @@ import 'package:image_picker/image_picker.dart';
 import 'package:lets_park/models/parking_space.dart';
 import 'package:lets_park/screens/drawer_screens/manage_space/parking_space_modifier/address_modifier.dart';
 import 'package:lets_park/screens/drawer_screens/manage_space/parking_space_modifier/capacity_modifier.dart';
-import 'package:lets_park/screens/drawer_screens/manage_space/parking_space_modifier/caretaker_name_modifier.dart';
 import 'package:lets_park/screens/drawer_screens/manage_space/parking_space_modifier/features_modifier.dart';
 import 'package:lets_park/screens/drawer_screens/manage_space/parking_space_modifier/info_modifier.dart';
 import 'package:lets_park/screens/drawer_screens/manage_space/parking_space_modifier/paypal_modifier.dart';
