@@ -61,7 +61,7 @@ class SpaceCertificates extends StatelessWidget {
             const SizedBox(height: 10),
             GalleryImage(
               titleGallery: "",
-              numOfShowImages: 3,
+              numOfShowImages: 2,
               imageUrls: space.getCertificates!,
             ),
           ],

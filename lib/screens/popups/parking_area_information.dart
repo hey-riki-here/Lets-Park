@@ -244,8 +244,6 @@ class _ParkingAreaInformationState extends State<ParkingAreaInformation> {
                   capacity: widget.parkingSpace.getCapacity!,
                   verticalClearance: widget.parkingSpace.getVerticalClearance!,
                   type: widget.parkingSpace.getType!,
-                  caretakerPhotoUrl: widget.parkingSpace.getCaretakerPhotoUrl!,
-                  caretakerName: widget.parkingSpace.getCaretakerName!,
                   caretakerPhoneNumber:
                       widget.parkingSpace.getCaretakerPhoneNumber!,
                   certificatesUrl: widget.parkingSpace.getCertificates!,
@@ -636,12 +634,14 @@ class _HeaderState extends State<Header> {
                 children: [
                   Row(
                     children: [
-                      Text(
-                        widget.space.getAddress!,
-                        style: const TextStyle(
-                          color: Colors.black54,
-                          fontWeight: FontWeight.w400,
-                          fontSize: 18,
+                      Expanded(
+                        child: Text(
+                          widget.space.getAddress!,
+                          style: const TextStyle(
+                            color: Colors.black54,
+                            fontWeight: FontWeight.w400,
+                            fontSize: 18,
+                          ),
                         ),
                       ),
                       widget.verified
@@ -1079,8 +1079,7 @@ class InfoReviewsCaretaker extends StatelessWidget {
   final int capacity;
   final double verticalClearance;
   final String type;
-  final String caretakerPhotoUrl;
-  final String caretakerName;
+
   final String caretakerPhoneNumber;
   final List<String> certificatesUrl;
   const InfoReviewsCaretaker({
@@ -1092,8 +1091,6 @@ class InfoReviewsCaretaker extends StatelessWidget {
     required this.capacity,
     required this.verticalClearance,
     required this.type,
-    required this.caretakerPhotoUrl,
-    required this.caretakerName,
     required this.caretakerPhoneNumber,
     required this.certificatesUrl,
   }) : super(key: key);
@@ -1180,26 +1177,6 @@ class InfoReviewsCaretaker extends StatelessWidget {
                     const SizedBox(width: 12),
                     Text(
                       "$capacity",
-                      style: valueStyle,
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 20),
-                const Text(
-                  "Vertical Clearance",
-                  style: labelStyle,
-                ),
-                const SizedBox(height: 12),
-                Row(
-                  children: [
-                    const Icon(
-                      CommunityMaterialIcons.table_row_height,
-                      color: Colors.blue,
-                      size: 30,
-                    ),
-                    const SizedBox(width: 12),
-                    Text(
-                      "$verticalClearance m.",
                       style: valueStyle,
                     ),
                   ],

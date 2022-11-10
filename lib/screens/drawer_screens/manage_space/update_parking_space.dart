@@ -17,7 +17,6 @@ import 'package:lets_park/screens/drawer_screens/manage_space/parking_space_modi
 import 'package:lets_park/screens/popups/notice_dialog.dart';
 import 'package:lets_park/services/firebase_api.dart';
 import 'package:lets_park/services/parking_space_services.dart';
-
 import 'parking_space_modifier/caretaker_number_modifier.dart';
 
 class UpdateParkingSpace extends StatefulWidget {
@@ -737,7 +736,7 @@ class _UpdateParkingSpaceState extends State<UpdateParkingSpace> {
     return TextFormField(
       readOnly: true,
       key: Key(value),
-      initialValue: value,
+      initialValue: "$value ",
       maxLines: maxLines,
       textInputAction: TextInputAction.done,
       decoration: InputDecoration(

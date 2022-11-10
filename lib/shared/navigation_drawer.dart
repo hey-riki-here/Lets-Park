@@ -200,6 +200,7 @@ class MyAccount extends StatelessWidget {
                 style: const TextStyle(
                   fontSize: 17,
                   fontWeight: FontWeight.w400,
+                  overflow: TextOverflow.fade,
                 ),
               ),
             ],

@@ -142,7 +142,7 @@ class LocationSectionState extends State<LocationSection> {
         _sharedWidget.stepHeader("Business Certificates"),
         const SizedBox(height: 30),
         const Text(
-          "Please provide the following certificates of your space:\n\n• Valenzuela Business Permit\n• BN - Certificate\n• Fire Safety Inspection Certificate\n• Government ID",
+          "Please provide the following certificates of your space:\n\n• Valenzuela Business Permit\n• Government ID",
           style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.w300,
@@ -165,62 +165,63 @@ class LocationSectionState extends State<LocationSection> {
           ),
         ),
         const SizedBox(height: 5),
-        valenzuelaBusinessPermit != null ? buildImage("vbp", valenzuelaBusinessPermit) : OutlinedButton.icon(
-          onPressed: () {
-            chooseImage("vbp");
-          },
-          icon: const Icon(Icons.add_photo_alternate_outlined),
-          label: const Text("Select from photos"),
-          style: ElevatedButton.styleFrom(
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8.0),
-            ),
-          ),
-        ),
+        valenzuelaBusinessPermit != null
+            ? buildImage("vbp", valenzuelaBusinessPermit)
+            : OutlinedButton.icon(
+                onPressed: () {
+                  chooseImage("vbp");
+                },
+                icon: const Icon(Icons.add_photo_alternate_outlined),
+                label: const Text("Select from photos"),
+                style: ElevatedButton.styleFrom(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8.0),
+                  ),
+                ),
+              ),
         const SizedBox(height: 10),
-        const Text(
-          "BN - Certificate",
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w300,
-          ),
-        ),
-        //File? valenzuelaBusinessPermit, bnCertificate, fsic, govId;
-        const SizedBox(height: 5),
-        bnCertificate != null ? buildImage("bnc", bnCertificate) : OutlinedButton.icon(
-          onPressed: () {
-            chooseImage("bnc");
-          },
-          icon: const Icon(Icons.add_photo_alternate_outlined),
-          label: const Text("Select from photos"),
-          style: ElevatedButton.styleFrom(
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8.0),
-            ),
-          ),
-        ),
-        const SizedBox(height: 10),
-        const Text(
-          "Fire Safety Inspection Certificate",
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w300,
-          ),
-        ),
-        const SizedBox(height: 5),
-        fsic != null ? buildImage("fsic", fsic) : OutlinedButton.icon(
-          onPressed: () {
-            chooseImage("fsic");
-          },
-          icon: const Icon(Icons.add_photo_alternate_outlined),
-          label: const Text("Select from photos"),
-          style: ElevatedButton.styleFrom(
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8.0),
-            ),
-          ),
-        ),
-        const SizedBox(height: 10),
+        // const Text(
+        //   "BN - Certificate",
+        //   style: TextStyle(
+        //     fontSize: 16,
+        //     fontWeight: FontWeight.w300,
+        //   ),
+        // ),
+        // const SizedBox(height: 5),
+        // bnCertificate != null ? buildImage("bnc", bnCertificate) : OutlinedButton.icon(
+        //   onPressed: () {
+        //     chooseImage("bnc");
+        //   },
+        //   icon: const Icon(Icons.add_photo_alternate_outlined),
+        //   label: const Text("Select from photos"),
+        //   style: ElevatedButton.styleFrom(
+        //     shape: RoundedRectangleBorder(
+        //       borderRadius: BorderRadius.circular(8.0),
+        //     ),
+        //   ),
+        // ),
+        // const SizedBox(height: 10),
+        // const Text(
+        //   "Fire Safety Inspection Certificate",
+        //   style: TextStyle(
+        //     fontSize: 16,
+        //     fontWeight: FontWeight.w300,
+        //   ),
+        // ),
+        // const SizedBox(height: 5),
+        // fsic != null ? buildImage("fsic", fsic) : OutlinedButton.icon(
+        //   onPressed: () {
+        //     chooseImage("fsic");
+        //   },
+        //   icon: const Icon(Icons.add_photo_alternate_outlined),
+        //   label: const Text("Select from photos"),
+        //   style: ElevatedButton.styleFrom(
+        //     shape: RoundedRectangleBorder(
+        //       borderRadius: BorderRadius.circular(8.0),
+        //     ),
+        //   ),
+        // ),
+        // const SizedBox(height: 10),
         const Text(
           "Government ID",
           style: TextStyle(
@@ -229,18 +230,20 @@ class LocationSectionState extends State<LocationSection> {
           ),
         ),
         const SizedBox(height: 5),
-        govId != null ? buildImage("govId", govId) : OutlinedButton.icon(
-          onPressed: () {
-            chooseImage("govId");
-          },
-          icon: const Icon(Icons.add_photo_alternate_outlined),
-          label: const Text("Select from photos"),
-          style: ElevatedButton.styleFrom(
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8.0),
-            ),
-          ),
-        ),
+        govId != null
+            ? buildImage("govId", govId)
+            : OutlinedButton.icon(
+                onPressed: () {
+                  chooseImage("govId");
+                },
+                icon: const Icon(Icons.add_photo_alternate_outlined),
+                label: const Text("Select from photos"),
+                style: ElevatedButton.styleFrom(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8.0),
+                  ),
+                ),
+              ),
       ],
     );
   }
@@ -252,15 +255,9 @@ class LocationSectionState extends State<LocationSection> {
       );
       if (image == null) return;
       final imageTemp = File(image.path);
-      if (imageSrc.compareTo("vbp") == 0){
+      if (imageSrc.compareTo("vbp") == 0) {
         setState(() => valenzuelaBusinessPermit = imageTemp);
         certificates.add(valenzuelaBusinessPermit!);
-      } else if (imageSrc.compareTo("bnc") == 0){
-        setState(() => bnCertificate = imageTemp);
-        certificates.add(bnCertificate!);
-      } else if (imageSrc.compareTo("fsic") == 0){
-        setState(() => fsic = imageTemp);
-        certificates.add(fsic!);
       } else {
         setState(() => govId = imageTemp);
         certificates.add(govId!);
@@ -284,7 +281,7 @@ class LocationSectionState extends State<LocationSection> {
     );
   }
 
-  Widget buildImage(String imageSrc, File? image){
+  Widget buildImage(String imageSrc, File? image) {
     return Padding(
       padding: const EdgeInsets.only(
         top: 8.0,
@@ -308,16 +305,10 @@ class LocationSectionState extends State<LocationSection> {
             top: 5,
             right: 5,
             child: GestureDetector(
-              onTap: (){
-                if (imageSrc.compareTo("vbp") == 0){
+              onTap: () {
+                if (imageSrc.compareTo("vbp") == 0) {
                   certificates.remove(valenzuelaBusinessPermit!);
                   setState(() => valenzuelaBusinessPermit = null);
-                } else if (imageSrc.compareTo("bnc") == 0){
-                  certificates.remove(bnCertificate!);
-                  setState(() => bnCertificate = null);
-                } else if (imageSrc.compareTo("fsic") == 0){
-                  certificates.remove(fsic!);
-                  setState(() => fsic = null);
                 } else {
                   certificates.remove(govId!);
                   setState(() => govId = null);
@@ -344,7 +335,7 @@ class LocationSectionState extends State<LocationSection> {
       ),
     );
   }
-  
+
   List<File>? get getImageFiles => certificates;
 }
 

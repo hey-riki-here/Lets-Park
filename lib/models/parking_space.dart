@@ -6,8 +6,6 @@ class ParkingSpace {
   String? _ownerName;
   String? _imageUrl;
   String? _address;
-  String? _caretakerPhotoUrl;
-  String? _caretakerName;
   String? _caretakerPhoneNumber;
   LatLng? _latLng;
   int? _capacity;
@@ -33,8 +31,7 @@ class ParkingSpace {
     String? ownerName,
     String? imageUrl,
     String? address,
-    String? caretakerPhotoUrl,
-    String? caretakerName,
+
     String? caretakerPhoneNumber,
     List geoposition,
     int? capacity,
@@ -56,8 +53,7 @@ class ParkingSpace {
     _ownerName = ownerName;
     _imageUrl = imageUrl;
     _address = address;
-    _caretakerPhotoUrl = caretakerPhotoUrl;
-    _caretakerName = caretakerName;
+
     _caretakerPhoneNumber = caretakerPhoneNumber;
     _latLng = LatLng(geoposition[0], geoposition[1]);
     _capacity = capacity;
@@ -103,18 +99,6 @@ class ParkingSpace {
 
   set setAddress(String? address) {
     _address = address;
-  }
-
-  String? get getCaretakerPhotoUrl => _caretakerPhotoUrl;
-
-  set setCaretakerPhotoUrl(String? photoUrl) {
-    _caretakerPhotoUrl = photoUrl;
-  }
-
-  String? get getCaretakerName => _caretakerName;
-
-  set setCaretakerName(String? caretakerName) {
-    _caretakerName = caretakerName;
   }
 
   String? get getCaretakerPhoneNumber => _caretakerPhoneNumber;
@@ -221,8 +205,7 @@ class ParkingSpace {
         'ownerName': _ownerName,
         'imageUrl': _imageUrl,
         'address': _address,
-        'caretakerPhotoUrl': _caretakerPhotoUrl,
-        'caretakerName': _caretakerName,
+
         'caretakerPhoneNumber': _caretakerPhoneNumber,
         'geoposition': [_latLng!.latitude, _latLng!.longitude],
         'capacity': _capacity,
@@ -255,8 +238,6 @@ class ParkingSpace {
       json['ownerName'],
       json['imageUrl'],
       json['address'],
-      json['caretakerPhotoUrl'],
-      json['caretakerName'],
       json['caretakerPhoneNumber'],
       json['geoposition'],
       json['capacity'],

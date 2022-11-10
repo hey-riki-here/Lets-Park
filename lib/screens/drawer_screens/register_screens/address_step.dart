@@ -37,22 +37,22 @@ class AddressSectionState extends State<AddressSection> {
         ),
         AreaAdress(key: _addressState),
         const SizedBox(height: 15),
-        _sharedWidget.stepHeader("Caretaker"),
-        const SizedBox(height: 10),
-        Caretaker(key: _caretakerState),
+        // _sharedWidget.stepHeader("Caretaker"),
+        // const SizedBox(height: 10),
+        // Caretaker(key: _caretakerState),
       ],
     );
   }
 
   GlobalKey<FormState> get getAddressFormKey =>
       _addressState.currentState!.getFormKey;
-  GlobalKey<FormState> get getCaretakerFormKey =>
-      _caretakerState.currentState!.getFormKey;
+  // GlobalKey<FormState> get getCaretakerFormKey =>
+  //     _caretakerState.currentState!.getFormKey;
   File? get getSpaceImage => _photoPickerState.currentState!.getImage;
-  File? get getCaretakerImage => _caretakerState.currentState!.getImage;
-  String get getCaretakerName => _caretakerState.currentState!.getName;
-  String get getCaretakerPhoneNumber =>
-      _caretakerState.currentState!.getPhoneNumber;
+  // File? get getCaretakerImage => _caretakerState.currentState!.getImage;
+  // String get getCaretakerName => _caretakerState.currentState!.getName;
+  // String get getCaretakerPhoneNumber =>
+  //     _caretakerState.currentState!.getPhoneNumber;
 }
 
 class PhotoPicker extends StatefulWidget {

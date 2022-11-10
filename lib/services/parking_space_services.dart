@@ -385,7 +385,7 @@ class ParkingSpaceServices {
     });
   }
 
-  static void deleteParkingSpace(String spaceId) async {
+  static Future<void> deleteParkingSpace(String spaceId) async {
     await FirebaseFirestore.instance
         .collection("parking-spaces")
         .doc(spaceId)

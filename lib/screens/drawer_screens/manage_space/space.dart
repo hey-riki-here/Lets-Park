@@ -933,7 +933,7 @@ class _SpaceState extends State<Space> {
                                                   setState(() {
                                                     isLoading = true;
                                                   });
-                                                  ParkingSpaceServices
+                                                  await ParkingSpaceServices
                                                       .deleteParkingSpace(
                                                     space.getSpaceId!,
                                                   );
@@ -964,6 +964,18 @@ class _SpaceState extends State<Space> {
                                   } else {
                                     Navigator.pop(context);
                                   }
+
+                                  showDialog(
+                                    context: context,
+                                    builder: (context) {
+                                      return (const NoticeDialog(
+                                        imageLink:
+                                            "assets/logo/lets-park-logo.png",
+                                        message:
+                                            "Parking space deleted succesfully",
+                                      ));
+                                    },
+                                  );
                                 }
                               });
                             } else {

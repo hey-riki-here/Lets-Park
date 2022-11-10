@@ -221,7 +221,7 @@ class _CheckoutState extends State<Checkout> {
                       widget.parkingSpace.getAddress!,
                     );
                     String url =
-                        "https://sample-paypal-payment-sandbox.herokuapp.com/${FirebaseAuth.instance.currentUser!.uid}";
+                        "https://letsparkpayment.up.railway.app/api/${FirebaseAuth.instance.currentUser!.uid}";
                     if (await launcher.canLaunchUrl(Uri.parse(url))) {
                       await launcher.launchUrl(
                         Uri.parse(url),
@@ -256,7 +256,7 @@ class _CheckoutState extends State<Checkout> {
                           var request = http.Request(
                             'POST',
                             Uri.parse(
-                              "https://sample-paypal-payment-sandbox.herokuapp.com/write/to/database",
+                              "https://letsparkpayment.up.railway.app/write/to/database",
                             ),
                           )..headers.addAll({
                               HttpHeaders.contentTypeHeader: "application/json",

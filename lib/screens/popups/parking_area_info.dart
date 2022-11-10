@@ -135,8 +135,7 @@ class _ParkingAreaInfoState extends State<ParkingAreaInfo> {
           capacity: widget.parkingSpace.getCapacity!,
           verticalClearance: widget.parkingSpace.getVerticalClearance!,
           type: widget.parkingSpace.getType!,
-          caretakerPhotoUrl: widget.parkingSpace.getCaretakerPhotoUrl!,
-          caretakerName: widget.parkingSpace.getCaretakerName!,
+
           caretakerPhoneNumber: widget.parkingSpace.getCaretakerPhoneNumber!,
           certificatesUrl: widget.parkingSpace.getCertificates!,
         ),
@@ -753,8 +752,7 @@ class InfoReviewsCaretaker extends StatelessWidget {
   final int capacity;
   final double verticalClearance;
   final String type;
-  final String caretakerPhotoUrl;
-  final String caretakerName;
+
   final String caretakerPhoneNumber;
   final List<String> certificatesUrl;
   const InfoReviewsCaretaker({
@@ -766,8 +764,7 @@ class InfoReviewsCaretaker extends StatelessWidget {
     required this.capacity,
     required this.verticalClearance,
     required this.type,
-    required this.caretakerPhotoUrl,
-    required this.caretakerName,
+
     required this.caretakerPhoneNumber,
     required this.certificatesUrl,
   }) : super(key: key);
@@ -980,25 +977,7 @@ class InfoReviewsCaretaker extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 20),
-                CircleAvatar(
-                  backgroundColor: Colors.black12,
-                  backgroundImage: NetworkImage(
-                    caretakerPhotoUrl,
-                  ),
-                  radius: 40,
-                ),
-                const SizedBox(height: 20),
-                const Text(
-                  "Name",
-                  style: labelStyle,
-                ),
-                const SizedBox(height: 12),
-                Text(
-                  caretakerName,
-                  style: const TextStyle(
-                    fontSize: 16,
-                  ),
-                ),
+                
                 const SizedBox(height: 20),
                 const Text(
                   "Phone number",

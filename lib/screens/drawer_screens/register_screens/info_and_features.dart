@@ -1,4 +1,6 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:lets_park/screens/documents/guidelines.dart';
 import 'package:lets_park/shared/shared_widgets.dart';
 
 class InfoAndFeatures extends StatefulWidget {
@@ -10,10 +12,12 @@ class InfoAndFeatures extends StatefulWidget {
 
 class InfoAndFeaturesState extends State<InfoAndFeatures> {
   final SharedWidget _sharedWidget = SharedWidget();
+  final GlobalKey<CapacityState> _capacityState = GlobalKey();
   final GlobalKey<InformationState> _informationState = GlobalKey();
   final GlobalKey<ReservabilityState> _reservabilityState = GlobalKey();
   final GlobalKey<FeaturesState> _featuresState = GlobalKey();
   final GlobalKey<PaypalState> _paypalState = GlobalKey();
+  final GlobalKey<CaretakerPhoneState> _caretakerPhoneState = GlobalKey();
   final featuresItems = <FeaturesItem>[
     FeaturesItem(title: "CCTV"),
     FeaturesItem(title: "Covered Parking"),
@@ -39,9 +43,37 @@ class InfoAndFeaturesState extends State<InfoAndFeatures> {
                     color: Colors.blue.shade700,
                   ),
                   const SizedBox(width: 10),
-                  const Expanded(
-                    child: Text(
-                      "Parking capacity and pricing should follow the city's ordinance. See Terms and Conditions and Parking Guidelines to learn more.",
+                  Expanded(
+                    child: RichText(
+                      text: TextSpan(
+                        text:
+                            "Parking minimum capacity and pricing should follow the city's ordinance. See",
+                        style: const TextStyle(
+                          color: Colors.black,
+                          fontSize: 14,
+                        ),
+                        children: <TextSpan>[
+                          TextSpan(
+                            text: ' Guidelines',
+                            recognizer: TapGestureRecognizer()
+                              ..onTap = () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    fullscreenDialog: true,
+                                    builder: (context) => const Guidelines(),
+                                  ),
+                                );
+                              },
+                            style: const TextStyle(
+                              color: Colors.blue,
+                            ),
+                          ),
+                          const TextSpan(
+                            text: ' to learn more.',
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ],
@@ -52,8 +84,8 @@ class InfoAndFeaturesState extends State<InfoAndFeatures> {
         const SizedBox(height: 20),
         _sharedWidget.stepHeader("Information"),
         const SizedBox(height: 10),
-        //Capacity(key: _capacityState),
-        // const SizedBox(height: 20),
+        Capacity(key: _capacityState),
+        const SizedBox(height: 20),
         Information(key: _informationState),
         const SizedBox(height: 20),
         Reservability(
@@ -67,6 +99,10 @@ class InfoAndFeaturesState extends State<InfoAndFeatures> {
         _sharedWidget.stepHeader("Paypal Account"),
         const SizedBox(height: 10),
         Paypal(key: _paypalState),
+        const SizedBox(height: 20),
+        _sharedWidget.stepHeader("Caretaker Phone number"),
+        const SizedBox(height: 10),
+        CaretakerPhone(key: _caretakerPhoneState),
         const SizedBox(height: 30),
       ],
     );
@@ -79,6 +115,11 @@ class InfoAndFeaturesState extends State<InfoAndFeatures> {
 
   GlobalKey<FormState> get getPaypalFormKey =>
       _paypalState.currentState!._paypalKey;
+
+  GlobalKey<FormState> get getCaretakerNumberFormKey =>
+      _caretakerPhoneState.currentState!.caretakerNumberKey;
+
+  int get getCapacity => _capacityState.currentState!.getCapacity;
 
   String get getInfo => _informationState.currentState!.getInfo;
 
@@ -97,6 +138,9 @@ class InfoAndFeaturesState extends State<InfoAndFeatures> {
       _featuresState.currentState!.getSelectedFeatures;
 
   String get getPaypalEmail => _paypalState.currentState!.getPaypaEmail;
+
+  String get getCaretakerPhoneNumber =>
+      _caretakerPhoneState.currentState!.getCaretakerPhoneNumber;
 }
 
 class Capacity extends StatefulWidget {
@@ -107,7 +151,7 @@ class Capacity extends StatefulWidget {
 }
 
 class CapacityState extends State<Capacity> {
-  int _capacity = 1;
+  int _capacity = 10;
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -209,9 +253,9 @@ class CapacityState extends State<Capacity> {
 
   void _increaseCapacity(String op) {
     if (op.compareTo("+") == 0) {
-      if (_capacity >= 1) _capacity++;
+      if (_capacity >= 10) _capacity++;
     } else {
-      if (_capacity > 1) _capacity--;
+      if (_capacity > 10) _capacity--;
     }
   }
 
@@ -694,4 +738,68 @@ class PaypalState extends State<Paypal> {
   GlobalKey<FormState> get getFormKey => _paypalKey;
 
   String get getPaypaEmail => _paypalController.text.trim();
+}
+
+class CaretakerPhone extends StatefulWidget {
+  const CaretakerPhone({Key? key}) : super(key: key);
+
+  @override
+  State<CaretakerPhone> createState() => CaretakerPhoneState();
+}
+
+class CaretakerPhoneState extends State<CaretakerPhone> {
+  final caretakerNumberKey = GlobalKey<FormState>();
+  final numberController = TextEditingController();
+  final SharedWidget _sharedWidget = SharedWidget();
+
+  @override
+  Widget build(BuildContext context) {
+    return Form(
+      key: caretakerNumberKey,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            "Enter caretaker phonenumber",
+            style: TextStyle(
+              fontSize: 18,
+            ),
+          ),
+          const SizedBox(height: 10),
+          _sharedWidget.textFormField(
+            action: TextInputAction.done,
+            textInputType: TextInputType.number,
+            controller: numberController,
+            hintText: "182083028",
+            obscure: false,
+            icon: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
+              children: const [
+                Text(
+                  "+639",
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Colors.grey,
+                  ),
+                ),
+              ],
+            ),
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return "Enter phone number";
+              } else if (value.length < 9) {
+                return "Invalid phone number";
+              }
+              return null;
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  GlobalKey<FormState> get getCaretakerNumberFormKey => caretakerNumberKey;
+
+  String get getCaretakerPhoneNumber => numberController.text.trim();
 }

@@ -67,8 +67,9 @@ class _RegisterAreaState extends State<RegisterArea> {
             ),
             child: Stepper(
               elevation: 1,
-              controlsBuilder: (BuildContext context, ControlsDetails details) =>
-                  _buildControls(
+              controlsBuilder:
+                  (BuildContext context, ControlsDetails details) =>
+                      _buildControls(
                 context,
                 details,
               ),
@@ -80,7 +81,18 @@ class _RegisterAreaState extends State<RegisterArea> {
                   if (_currentStep == _steps().length - 1) {
                     bool valid = true;
 
-                    if (!_informationState.currentState!.getFormKey.currentState!
+                    if (_informationState.currentState!.getInfo.compareTo(
+                            _informationState.currentState!.getRules) ==
+                        0) {
+                      _showDialog(
+                        imageLink: "assets/icons/marker.png",
+                        message:
+                            "Parking information and rules can't be the same.",
+                      );
+                      return;
+                    }
+                    if (!_informationState
+                        .currentState!.getFormKey.currentState!
                         .validate()) {
                       valid = false;
                     }
@@ -90,8 +102,16 @@ class _RegisterAreaState extends State<RegisterArea> {
                         .validate()) {
                       valid = false;
                     }
+
+                    if (!_informationState
+                        .currentState!.getCaretakerNumberFormKey.currentState!
+                        .validate()) {
+                      valid = false;
+                    }
+
                     if (valid) {
-                      globals.parkingSpace.setCapacity = 10;
+                      globals.parkingSpace.setCapacity =
+                          _informationState.currentState!.getCapacity;
 
                       globals.parkingSpace.setRating = 0;
 
@@ -121,141 +141,62 @@ class _RegisterAreaState extends State<RegisterArea> {
                       globals.parkingSpace.setOwnerName =
                           FirebaseAuth.instance.currentUser!.displayName;
 
+                      globals.parkingSpace.setCaretakerPhoneNumber =
+                          _informationState
+                              .currentState!.getCaretakerPhoneNumber;
+
                       showDialog<bool>(
                         context: context,
                         builder: (BuildContext context) {
                           return StatefulBuilder(
                             builder: (context, setState) => AlertDialog(
-                              title: const Text(
-                                "Parking Guidelines",
-                                style: TextStyle(fontSize: 24.0),
+                              title: Container(
+                                padding: const EdgeInsets.all(16),
+                                decoration: BoxDecoration(
+                                  color: Colors.blue,
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: const [
+                                    Text(
+                                      "Agreement",
+                                      style: TextStyle(
+                                        fontSize: 24.0,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                    SizedBox(height: 5),
+                                    Text(
+                                      "If you haven't read the Guidelines already, please do read it and check the box if you agree.",
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.w400,
+                                        fontSize: 13,
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               ),
                               shape: const RoundedRectangleBorder(
                                 borderRadius: BorderRadius.all(
                                   Radius.circular(20),
                                 ),
                               ),
-                              contentPadding: const EdgeInsets.only(top: 10.0),
-                              content: Stack(
+                              contentPadding: const EdgeInsets.all(8),
+                              content: Row(
                                 children: [
-                                  Padding(
-                                    padding: const EdgeInsets.only(
-                                      top: 16,
-                                      bottom: 50,
-                                      right: 16,
-                                      left: 16,
-                                    ),
-                                    child: SingleChildScrollView(
-                                      child: Column(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceBetween,
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.stretch,
-                                        children: const [
-                                          Text(
-                                            "Title here",
-                                            style: TextStyle(
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 20,
-                                            ),
-                                          ),
-                                          Text(
-                                            "Lorem ipsum dolor sit amet, consectetur adipiscing elit. In suscipit vel augue eget varius. Integer sit amet porta augue. Vestibulum lacinia hendrerit mi. Quisque ac elementum enim, quis scelerisque orci. Donec non quam mauris. Suspendisse potenti. Vestibulum dignissim tempor lobortis. Ut est lectus, dictum vitae pharetra et, vestibulum scelerisque ligula. Nulla pretium, dolor vel auctor iaculis, est augue ornare ex, in cursus tellus risus ut nisl. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos.",
-                                            style: TextStyle(
-                                              fontWeight: FontWeight.w300,
-                                              fontSize: 15,
-                                            ),
-                                          ),
-                                          Text(
-                                            "Title here",
-                                            style: TextStyle(
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 20,
-                                            ),
-                                          ),
-                                          Text(
-                                            "Lorem ipsum dolor sit amet, consectetur adipiscing elit. In suscipit vel augue eget varius. Integer sit amet porta augue. Vestibulum lacinia hendrerit mi. Quisque ac elementum enim, quis scelerisque orci. Donec non quam mauris. Suspendisse potenti. Vestibulum dignissim tempor lobortis. Ut est lectus, dictum vitae pharetra et, vestibulum scelerisque ligula. Nulla pretium, dolor vel auctor iaculis, est augue ornare ex, in cursus tellus risus ut nisl. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos.",
-                                            style: TextStyle(
-                                              fontWeight: FontWeight.w300,
-                                              fontSize: 15,
-                                            ),
-                                          ),
-                                          Text(
-                                            "Title here",
-                                            style: TextStyle(
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 20,
-                                            ),
-                                          ),
-                                          Text(
-                                            "Lorem ipsum dolor sit amet, consectetur adipiscing elit. In suscipit vel augue eget varius. Integer sit amet porta augue. Vestibulum lacinia hendrerit mi. Quisque ac elementum enim, quis scelerisque orci. Donec non quam mauris. Suspendisse potenti. Vestibulum dignissim tempor lobortis. Ut est lectus, dictum vitae pharetra et, vestibulum scelerisque ligula. Nulla pretium, dolor vel auctor iaculis, est augue ornare ex, in cursus tellus risus ut nisl. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos.",
-                                            style: TextStyle(
-                                              fontWeight: FontWeight.w300,
-                                              fontSize: 15,
-                                            ),
-                                          ),
-                                          Text(
-                                            "Title here",
-                                            style: TextStyle(
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 20,
-                                            ),
-                                          ),
-                                          Text(
-                                            "Lorem ipsum dolor sit amet, consectetur adipiscing elit. In suscipit vel augue eget varius. Integer sit amet porta augue. Vestibulum lacinia hendrerit mi. Quisque ac elementum enim, quis scelerisque orci. Donec non quam mauris. Suspendisse potenti. Vestibulum dignissim tempor lobortis. Ut est lectus, dictum vitae pharetra et, vestibulum scelerisque ligula. Nulla pretium, dolor vel auctor iaculis, est augue ornare ex, in cursus tellus risus ut nisl. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos.",
-                                            style: TextStyle(
-                                              fontWeight: FontWeight.w300,
-                                              fontSize: 15,
-                                            ),
-                                          ),
-                                          Text(
-                                            "Title here",
-                                            style: TextStyle(
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 20,
-                                            ),
-                                          ),
-                                          Text(
-                                            "Lorem ipsum dolor sit amet, consectetur adipiscing elit. In suscipit vel augue eget varius. Integer sit amet porta augue. Vestibulum lacinia hendrerit mi. Quisque ac elementum enim, quis scelerisque orci. Donec non quam mauris. Suspendisse potenti. Vestibulum dignissim tempor lobortis. Ut est lectus, dictum vitae pharetra et, vestibulum scelerisque ligula. Nulla pretium, dolor vel auctor iaculis, est augue ornare ex, in cursus tellus risus ut nisl. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos.",
-                                            style: TextStyle(
-                                              fontWeight: FontWeight.w300,
-                                              fontSize: 15,
-                                            ),
-                                          ),
-                                          Text(
-                                            "Title here",
-                                            style: TextStyle(
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 20,
-                                            ),
-                                          ),
-                                          Text(
-                                            "Lorem ipsum dolor sit amet, consectetur adipiscing elit. In suscipit vel augue eget varius. Integer sit amet porta augue. Vestibulum lacinia hendrerit mi. Quisque ac elementum enim, quis scelerisque orci. Donec non quam mauris. Suspendisse potenti. Vestibulum dignissim tempor lobortis. Ut est lectus, dictum vitae pharetra et, vestibulum scelerisque ligula. Nulla pretium, dolor vel auctor iaculis, est augue ornare ex, in cursus tellus risus ut nisl. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos.",
-                                            style: TextStyle(
-                                              fontWeight: FontWeight.w300,
-                                              fontSize: 15,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
+                                  Checkbox(
+                                    value: isAgreed,
+                                    onChanged: (value) {
+                                      setState(() {
+                                        isAgreed = value!;
+                                      });
+                                    },
                                   ),
-                                  Positioned(
-                                    bottom: 0,
-                                    child: Row(
-                                      children: [
-                                        Checkbox(
-                                          value: isAgreed,
-                                          onChanged: (value) {
-                                            setState(() {
-                                              isAgreed = value!;
-                                            });
-                                          },
-                                        ),
-                                        const Text(
-                                          "I have read the Parking Guidelines thoroughly.",
-                                        ),
-                                      ],
+                                  const Expanded(
+                                    child: Text(
+                                      "I have read the Guidelines regarding renting a space thoroughly.",
                                     ),
                                   ),
                                 ],
@@ -317,14 +258,14 @@ class _RegisterAreaState extends State<RegisterArea> {
                         return;
                       }
 
-                      if (_addressState.currentState!.getCaretakerImage == null) {
-                        _showDialog(
-                          imageLink: "assets/icons/marker.png",
-                          message:
-                              "Please provide photo of your parking space's caretaker.",
-                        );
-                        return;
-                      }
+                      // if (_addressState.currentState!.getCaretakerImage == null) {
+                      //   _showDialog(
+                      //     imageLink: "assets/icons/marker.png",
+                      //     message:
+                      //         "Please provide photo of your parking space's caretaker.",
+                      //   );
+                      //   return;
+                      // }
 
                       bool valid = false;
 
@@ -336,13 +277,13 @@ class _RegisterAreaState extends State<RegisterArea> {
                         return;
                       }
 
-                      if (_addressState
-                          .currentState!.getCaretakerFormKey.currentState!
-                          .validate()) {
-                        valid = true;
-                      } else {
-                        return;
-                      }
+                      // if (_addressState
+                      //     .currentState!.getCaretakerFormKey.currentState!
+                      //     .validate()) {
+                      //   valid = true;
+                      // } else {
+                      //   return;
+                      // }
 
                       if (valid) {
                         globals.parkingSpace.setAddress =
@@ -350,19 +291,15 @@ class _RegisterAreaState extends State<RegisterArea> {
                                 ", " +
                                 globals.globalBarangay +
                                 ", Valenzuela";
-                        globals.parkingSpace.setCaretakerName =
-                            _addressState.currentState!.getCaretakerName;
-                        globals.parkingSpace.setCaretakerPhoneNumber =
-                            _addressState.currentState!.getCaretakerPhoneNumber;
                         getCoordinatesAndRefresh();
                         _currentStep += 1;
                       }
                     } else if (_currentStep == 1) {
-                      if (_locationState.currentState!.getImageFiles!.length < 4) {
+                      if (_locationState.currentState!.getImageFiles!.length <
+                          2) {
                         _showDialog(
                           imageLink: "assets/icons/marker.png",
-                          message:
-                              "Please provide the required business certificates.",
+                          message: "Please provide all the required documents.",
                         );
                         return;
                       }
@@ -370,7 +307,7 @@ class _RegisterAreaState extends State<RegisterArea> {
                       if (_locationState.currentState!.getImageFiles!.isEmpty) {
                         _showDialog(
                           imageLink: "assets/icons/marker.png",
-                          message: "Please provide business certificates.",
+                          message: "Please provide documents.",
                         );
                         return;
                       }
@@ -535,13 +472,13 @@ class _RegisterAreaState extends State<RegisterArea> {
       globals.parkingSpace.setImageUrl = url;
     });
 
-    await FirebaseServices.uploadImage(
-      _addressState.currentState!.getCaretakerImage!,
-      "avatar/" +
-          _addressState.currentState!.getCaretakerImage!.path.split('/').last,
-    ).then((url) {
-      globals.parkingSpace.setCaretakerPhotoUrl = url;
-    });
+    // await FirebaseServices.uploadImage(
+    //   _addressState.currentState!.getCaretakerImage!,
+    //   "avatar/" +
+    //       _addressState.currentState!.getCaretakerImage!.path.split('/').last,
+    // ).then((url) {
+    //   globals.parkingSpace.setCaretakerPhotoUrl = url;
+    // });
 
     await FirebaseServices.uploadFiles(
       _locationState.currentState!.getImageFiles!,
