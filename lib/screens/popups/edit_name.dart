@@ -76,26 +76,28 @@ class NameModifier extends StatelessWidget {
           Icons.check,
         ),
         onPressed: () async {
-          showDialog(
-            context: context,
-            barrierDismissible: false,
-            builder: (context) => WillPopScope(
-              onWillPop: () async => false,
-              child: const NoticeDialog(
-                imageLink: "assets/logo/lets-park-logo.png",
-                message: "We are now updating your profile. Please wait.",
-                forLoading: true,
+          if (key.currentState!.validate()) {
+            showDialog(
+              context: context,
+              barrierDismissible: false,
+              builder: (context) => WillPopScope(
+                onWillPop: () async => false,
+                child: const NoticeDialog(
+                  imageLink: "assets/logo/lets-park-logo.png",
+                  message: "We are now updating your profile. Please wait.",
+                  forLoading: true,
+                ),
               ),
-            ),
-          );
+            );
 
-          await FirebaseAuth.instance.currentUser!.updateDisplayName(
-              firstNameController.text.trim() +
-                  " " +
-                  lastNameController.text.trim());
+            await FirebaseAuth.instance.currentUser!.updateDisplayName(
+                firstNameController.text.trim() +
+                    " " +
+                    lastNameController.text.trim());
 
-          Navigator.pop(context);
-          Navigator.pop(context);
+            Navigator.pop(context);
+            Navigator.pop(context);
+          }
         },
       ),
     );

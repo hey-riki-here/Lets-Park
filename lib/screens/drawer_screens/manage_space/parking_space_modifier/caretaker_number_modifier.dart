@@ -67,7 +67,7 @@ class _CaretakerNumberModifierState extends State<CaretakerNumberModifier> {
                 action: TextInputAction.done,
                 controller: caretakerNumberController,
                 textInputType: TextInputType.number,
-                maxLength: 9,
+                maxLength: 10,
                 hintText: "182083028",
                 obscure: false,
                 icon: Row(
@@ -75,7 +75,7 @@ class _CaretakerNumberModifierState extends State<CaretakerNumberModifier> {
                   mainAxisSize: MainAxisSize.min,
                   children: const [
                     Text(
-                      "+639",
+                      "+63",
                       style: TextStyle(
                         fontSize: 16,
                         color: Colors.grey,
@@ -117,12 +117,12 @@ class _CaretakerNumberModifierState extends State<CaretakerNumberModifier> {
             );
 
             widget.space.setCaretakerPhoneNumber =
-                "09${caretakerNumberController.text.trim()}";
+                caretakerNumberController.text.trim();
 
             await Future.delayed(const Duration(seconds: 1));
             await ParkingSpaceServices.updateCaretakerPhoneNumber(
               widget.space.getSpaceId!,
-              "09${caretakerNumberController.text.trim()}",
+              caretakerNumberController.text.trim(),
             );
 
             Navigator.pop(context);

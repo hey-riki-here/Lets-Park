@@ -32,7 +32,7 @@ class SignInProvider extends ChangeNotifier {
         email: email,
         password: password,
       );
-      
+
       notifyListeners();
       navigatorKey.currentState!.popUntil((route) => route.isFirst);
     } on FirebaseAuthException catch (e) {
@@ -56,17 +56,32 @@ class SignInProvider extends ChangeNotifier {
       final UserCredential authResult = await _auth
           .createUserWithEmailAndPassword(email: email, password: password);
       await _auth.currentUser!.updateDisplayName(name);
-      await _auth.currentUser!.updatePhotoURL("https://cdn4.iconfinder.com/data/icons/user-people-2/48/5-512.png");
+      await _auth.currentUser!.updatePhotoURL(
+          "https://cdn4.iconfinder.com/data/icons/user-people-2/48/5-512.png");
       checkIsNewUser(authResult);
       notifyListeners();
       navigatorKey.currentState!.popUntil((route) => route.isFirst);
     } on FirebaseAuthException catch (e) {
       Navigator.pop(context);
-      await _showDialog(
-        context,
-        "assets/logo/lets-park-logo.png",
-        "Looks like the email you entered is already link to another account. Please try different email.",
-      );
+      if (e.code == 'invalid-email') {
+        await _showDialog(
+          context,
+          "assets/logo/lets-park-logo.png",
+          "The email is invalid. Please try creating an account with a valid email.",
+        );
+      } else if (e.code == 'email-already-in-use') {
+        await _showDialog(
+          context,
+          "assets/logo/lets-park-logo.png",
+          "Looks like the email you entered is already link to another account. Please try different email.",
+        );
+      } else {
+        await _showDialog(
+          context,
+          "assets/logo/lets-park-logo.png",
+          "Something went wrong. Please try again.",
+        );
+      }
     }
   }
 

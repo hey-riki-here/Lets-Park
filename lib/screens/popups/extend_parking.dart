@@ -205,7 +205,7 @@ class _ExtendParkingState extends State<ExtendParking> {
               );
 
               String url =
-                  "https://sample-paypal-payment-sandbox.herokuapp.com/${FirebaseAuth.instance.currentUser!.uid}";
+                  "https://letsparkpayment.up.railway.app/api/${FirebaseAuth.instance.currentUser!.uid}";
               if (await launcher.canLaunchUrl(Uri.parse(url))) {
                 await launcher.launchUrl(
                   Uri.parse(url),

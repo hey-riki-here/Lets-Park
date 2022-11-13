@@ -47,7 +47,7 @@ class _FeaturesModifierState extends State<FeaturesModifier> {
         elevation: 0,
         backgroundColor: Colors.white,
         foregroundColor: Colors.black,
-        title: const Text("Edit space reservability"),
+        title: const Text("Edit space features"),
         centerTitle: true,
         actions: [
           Padding(

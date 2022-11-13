@@ -97,7 +97,7 @@ class _NavigationDrawerState extends State<NavigationDrawer> {
                         currentPage: widget.currentPage,
                       )
                     : Item(
-                        title: 'Manage your space',
+                        title: 'My spaces',
                         id: 6,
                         currentPage: widget.currentPage,
                       ),
@@ -317,7 +317,7 @@ class Item extends StatelessWidget {
           );
         }
         break;
-      case 'Manage your space':
+      case 'My spaces':
         if (currentPage != id) {
           if (currentPage != 2) {
             navigatorKey.currentState!.popUntil((route) => route.isFirst);

@@ -208,42 +208,6 @@ class _SpaceState extends State<Space> {
                                                     .getDriver!,
                                                 style: textStyle,
                                               ),
-                                              Row(
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment.center,
-                                                children: [
-                                                  Icon(
-                                                    Icons.star,
-                                                    color:
-                                                        Colors.yellow.shade600,
-                                                    size: 15,
-                                                  ),
-                                                  Icon(
-                                                    Icons.star,
-                                                    color:
-                                                        Colors.yellow.shade600,
-                                                    size: 15,
-                                                  ),
-                                                  Icon(
-                                                    Icons.star,
-                                                    color:
-                                                        Colors.yellow.shade600,
-                                                    size: 15,
-                                                  ),
-                                                  Icon(
-                                                    Icons.star,
-                                                    color:
-                                                        Colors.yellow.shade600,
-                                                    size: 15,
-                                                  ),
-                                                  Icon(
-                                                    Icons.star,
-                                                    color:
-                                                        Colors.yellow.shade600,
-                                                    size: 15,
-                                                  ),
-                                                ],
-                                              ),
                                             ],
                                           ),
                                         ],
@@ -445,8 +409,9 @@ class _SpaceState extends State<Space> {
                                                 CircleAvatar(
                                                   backgroundColor: Colors.white,
                                                   backgroundImage: NetworkImage(
-                                                      reviews[index]
-                                                          .getDisplayPhoto!),
+                                                    reviews[index]
+                                                        .getDisplayPhoto!,
+                                                  ),
                                                   radius: 15,
                                                 ),
                                                 const SizedBox(width: 10),
@@ -456,22 +421,24 @@ class _SpaceState extends State<Space> {
                                                     fontWeight: FontWeight.w500,
                                                   ),
                                                 ),
-                                                Expanded(
-                                                  child: Row(
-                                                    mainAxisAlignment:
-                                                        MainAxisAlignment.end,
-                                                    children: const [
-                                                      Icon(
-                                                        Icons.more_vert_rounded,
-                                                        color: Colors.black54,
-                                                        size: 18,
-                                                      ),
-                                                    ],
-                                                  ),
-                                                ),
+                                                
                                               ],
                                             ),
                                             const SizedBox(height: 15),
+                                            Wrap(
+                                              alignment: WrapAlignment.start,
+                                              direction: Axis.horizontal,
+                                              runSpacing: 10,
+                                              children: reviews[index]
+                                                  .getQuickReviews!
+                                                  .map(
+                                                    (tag) => QuickReviewTile(
+                                                      label: tag,
+                                                    ),
+                                                  )
+                                                  .toList(),
+                                            ),
+                                            const SizedBox(height: 5),
                                             getStars(reviews[index]
                                                 .getRating!
                                                 .toInt()),
@@ -1058,6 +1025,46 @@ class _SpaceState extends State<Space> {
 
   double ratingsPercentage(double rating) {
     return rating / 5;
+  }
+}
+
+class QuickReviewTile extends StatelessWidget {
+  final String label;
+  const QuickReviewTile({
+    Key? key,
+    required this.label,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          height: 30,
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(50),
+            color: Colors.white,
+            border: Border.all(
+              color: Colors.black26,
+              width: 1,
+            ),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(6),
+            child: Text(
+              label,
+              style: const TextStyle(
+                color: Colors.black,
+                fontSize: 12,
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(width: 10),
+      ],
+    );
   }
 }
 

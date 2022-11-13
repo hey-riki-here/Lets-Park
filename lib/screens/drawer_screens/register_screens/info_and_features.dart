@@ -1,3 +1,4 @@
+import 'package:email_validator/email_validator.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:lets_park/screens/documents/guidelines.dart';
@@ -723,12 +724,7 @@ class PaypalState extends State<Paypal> {
                 borderRadius: BorderRadius.all(Radius.circular(12)),
               ),
             ),
-            validator: (value) {
-              if (value == null || value.isEmpty) {
-                return "Field is required.";
-              }
-              return null;
-            },
+            validator: (value) => EmailValidator.validate(value!) ? null : "Please enter a valid email",
           ),
         ],
       ),
@@ -777,7 +773,7 @@ class CaretakerPhoneState extends State<CaretakerPhone> {
               mainAxisSize: MainAxisSize.min,
               children: const [
                 Text(
-                  "+639",
+                  "+63",
                   style: TextStyle(
                     fontSize: 16,
                     color: Colors.grey,
@@ -788,7 +784,7 @@ class CaretakerPhoneState extends State<CaretakerPhone> {
             validator: (value) {
               if (value == null || value.isEmpty) {
                 return "Enter phone number";
-              } else if (value.length < 9) {
+              } else if (value.length < 10) {
                 return "Invalid phone number";
               }
               return null;

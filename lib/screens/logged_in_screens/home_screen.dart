@@ -4,8 +4,10 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:lets_park/screens/popups/checkout_non_reservable.dart';
+import 'package:lets_park/services/signin_provider.dart';
 import 'package:lets_park/shared/navigation_drawer.dart';
 import 'package:lets_park/models/parking_space.dart';
+import 'package:provider/provider.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:lets_park/services/firebase_api.dart';
 import 'package:location/location.dart';
@@ -88,7 +90,9 @@ class _HomeScreenState extends State<HomeScreen> {
       // ignore: empty_catches
     } catch (e) {}
 
-    return FirebaseAuth.instance.currentUser!.phoneNumber != null
+    print(FirebaseAuth.instance.currentUser!.phoneNumber);
+    return FirebaseAuth.instance.currentUser!.phoneNumber != null &&
+            FirebaseAuth.instance.currentUser!.phoneNumber!.isNotEmpty
         ? Scaffold(
             key: _scaffoldKey,
             appBar: AppBar(
@@ -232,12 +236,15 @@ class _HomeScreenState extends State<HomeScreen> {
                               ),
                               const SizedBox(width: 20),
                               GestureDetector(
-                                onTap: () {
-                                  Navigator.push(
+                                onTap: () async {
+                                  await Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                        builder: (context) => const Profile()),
+                                      builder: (context) => const Profile(),
+                                    ),
                                   );
+
+                                  setState(() {});
                                 },
                                 child: CircleAvatar(
                                   backgroundColor: Colors.blue[100],
@@ -352,14 +359,22 @@ class _HomeScreenState extends State<HomeScreen> {
           )
         : Scaffold(
             appBar: AppBar(
-              automaticallyImplyLeading: false,
               elevation: 0,
               backgroundColor: Colors.white,
               foregroundColor: Colors.black,
+              leading: Padding(
+                padding: const EdgeInsets.all(12.0),
+                child: Image.asset("assets/logo/app_icon.png"),
+              ),
               actions: [
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Image.asset("assets/logo/app_icon.png"),
+                TextButton(
+                  onPressed: () {
+                    Provider.of<SignInProvider>(
+                      context,
+                      listen: false,
+                    ).logout(context);
+                  },
+                  child: const Text("Sign in later"),
                 ),
               ],
             ),

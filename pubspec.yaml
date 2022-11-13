@@ -69,6 +69,7 @@ dependencies:
   percent_indicator: ^4.2.2
   pinput: ^2.2.16
   device_preview: ^1.1.0
+  email_validator: ^2.1.17
   
 dev_dependencies:
   flutter_test:

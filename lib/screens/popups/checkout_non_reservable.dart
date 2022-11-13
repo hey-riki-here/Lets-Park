@@ -167,7 +167,7 @@ class _NonReservableCheckoutState extends State<NonReservableCheckout> {
                   );
 
                   String url =
-                      "https://sample-paypal-payment-sandbox.herokuapp.com/${FirebaseAuth.instance.currentUser!.uid}";
+                      "https://letsparkpayment.up.railway.app/api/${FirebaseAuth.instance.currentUser!.uid}";
                   if (await launcher.canLaunchUrl(Uri.parse(url))) {
                     await launcher.launchUrl(
                       Uri.parse(url),
@@ -198,7 +198,7 @@ class _NonReservableCheckoutState extends State<NonReservableCheckout> {
                         var request = http.Request(
                           'POST',
                           Uri.parse(
-                            "https://sample-paypal-payment-sandbox.herokuapp.com/write/to/database",
+                            "https://letsparkpayment.up.railway.app/write/to/database",
                           ),
                         )..headers.addAll({
                             HttpHeaders.contentTypeHeader: "application/json",

@@ -1,3 +1,4 @@
+import 'package:email_validator/email_validator.dart';
 import 'package:flutter/material.dart';
 import 'package:lets_park/models/parking_space.dart';
 import 'package:lets_park/screens/popups/notice_dialog.dart';
@@ -62,12 +63,7 @@ class _PaypalModifierState extends State<PaypalModifier> {
               child: TextFormField(
                 controller: paypalController,
                 keyboardType: TextInputType.emailAddress,
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return "This field is required.";
-                  }
-                  return null;
-                },
+                validator: (value) => EmailValidator.validate(value!) ? null : "Please enter a valid email",
                 decoration: const InputDecoration(
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.all(Radius.circular(12)),

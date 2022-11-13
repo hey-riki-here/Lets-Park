@@ -494,7 +494,7 @@ class _UpdateParkingSpaceState extends State<UpdateParkingSpace> {
                       const SizedBox(height: 10),
                       _buildInfoField(
                         maxLines: 1,
-                        value: "09${space.getCaretakerPhoneNumber!}",
+                        value: "0${space.getCaretakerPhoneNumber!}",
                         onTap: () {
                           goToPage(
                             CaretakerNumberModifier(

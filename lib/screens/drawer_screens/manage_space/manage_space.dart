@@ -24,7 +24,7 @@ class ManageSpace extends StatelessWidget {
     return Scaffold(
       key: _scaffoldKey,
       appBar: _sharedWidgets.appbarDrawer(
-        title: "Manage your space",
+        title: "My spaces",
         onPressed: () {
           _scaffoldKey.currentState!.openDrawer();
         },
@@ -561,13 +561,13 @@ class Menu extends StatelessWidget {
             child: Column(
               children: [
                 buildMenuItem(
-                  label: "Your spaces",
+                  label: "Registered spaces",
                   insets: const EdgeInsets.all(10),
                   borderRadius: const BorderRadius.only(
                     topRight: Radius.circular(12),
                     topLeft: Radius.circular(12),
                   ),
-                  subLabel: "View all your spaces",
+                  subLabel: "View all your registered spaces",
                   onTap: () {
                     goToRoute(context, const YourSpace());
                   },
