@@ -714,6 +714,19 @@ class UserServices {
     return isAvailable;
   }
 
+  static Future<void> updatePrice(Parking session, num price, num extendPrice) async {
+    num newPrice = price + extendPrice;
+
+    await FirebaseFirestore.instance
+        .collection('user-data')
+        .doc(FirebaseAuth.instance.currentUser!.uid)
+        .collection("user-parkings")
+        .doc(session.getParkingId)
+        .update({
+      "price": newPrice,
+    });
+  }
+
   static Future<void> updateDepartureOnParkingSession(
       Parking session, int departure) async {
     await FirebaseFirestore.instance
@@ -811,7 +824,6 @@ class UserServices {
       "parkingAddress": parkingAddress,
     });
   }
-
 
   static Future<void> deletePaymentDoc() async {
     await FirebaseFirestore.instance

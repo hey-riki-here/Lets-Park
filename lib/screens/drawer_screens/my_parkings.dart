@@ -237,7 +237,7 @@ class InProgressState extends State<InProgress> {
                                 ),
                                 const SizedBox(height: 5),
                                 Text(
-                                  "${parkings[index].getPrice!.toString()}.00",
+                                  "${parkings[index].getPrice!.toInt().toString()}.00",
                                   style: textStyle,
                                 ),
                               ],
@@ -514,7 +514,7 @@ class InProgressState extends State<InProgress> {
                                                   children: [
                                                     IconButton(
                                                       onPressed: () async {
-                                                        Navigator.push(
+                                                        await Navigator.push(
                                                           context,
                                                           MaterialPageRoute(
                                                             fullscreenDialog:
@@ -525,7 +525,22 @@ class InProgressState extends State<InProgress> {
                                                                   index],
                                                             ),
                                                           ),
-                                                        );
+                                                        ).then((value) {
+                                                          if (value != null) {
+                                                            showDialog(
+                                                              context: context,
+                                                              builder:
+                                                                  (context) {
+                                                                return (const NoticeDialog(
+                                                                  imageLink:
+                                                                      "assets/logo/lets-park-logo.png",
+                                                                  message:
+                                                                      "Your parking session extension has been cancelled.",
+                                                                ));
+                                                              },
+                                                            );
+                                                          }
+                                                        });
                                                       },
                                                       icon: Icon(
                                                         Icons.more_time_rounded,
@@ -796,7 +811,7 @@ class _UpcomingState extends State<Upcoming> {
                                 ),
                                 const SizedBox(height: 5),
                                 Text(
-                                  "${parkings[index].getPrice!.toString()}.00",
+                                  parkings[index].getPrice!.toInt().toString(),
                                   style: textStyle,
                                 ),
                               ],
@@ -1154,7 +1169,7 @@ class _HistoryState extends State<History> {
                                   ),
                                   const SizedBox(height: 5),
                                   Text(
-                                    "${parkings[index].getPrice!.toString()}.00",
+                                    "${parkings[index].getPrice!.toInt().toString()}.00",
                                     style: textStyle,
                                   ),
                                 ],
@@ -1383,7 +1398,7 @@ class InfoPopup extends StatelessWidget {
             ),
             const SizedBox(height: 10),
             Text(
-              "${parking.getPrice.toString()}.00",
+              "${parking.getPrice!.toInt().toString()}.00",
               style: const TextStyle(
                 fontSize: 20,
               ),

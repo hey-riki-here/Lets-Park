@@ -37,6 +37,7 @@ class _ExtendParkingState extends State<ExtendParking> {
       Stream.periodic(const Duration(milliseconds: 1000), (int count) {
     return count;
   });
+  bool canPay = true;
 
   @override
   void dispose() {
@@ -80,250 +81,274 @@ class _ExtendParkingState extends State<ExtendParking> {
           horizontal: 80,
         ),
         child: ElevatedButton(
-          onPressed: () async {
-            bool isAvailable = await UserServices.extendParking(
-              _setupTimeState.currentState!.getHour!,
-              _setupTimeState.currentState!.getMinute!,
-              widget.parking,
-              context,
-            );
+          onPressed: canPay
+              ? () async {
+                  setState(() {
+                    canPay = false;
+                  });
 
-            if (isAvailable) {
-              if (!hasToPay(_setupTimeState.currentState!.getNewDuration)) {
-                showDialog(
-                  context: context,
-                  barrierDismissible: false,
-                  builder: (context) => WillPopScope(
-                    onWillPop: () async => false,
-                    child: const NoticeDialog(
-                      imageLink: "assets/logo/lets-park-logo.png",
-                      message: "Extending your parking session. Please wait.",
-                      forLoading: true,
-                    ),
-                  ),
-                );
-
-                await UserServices.updateDepartureOnParkingSession(
-                  widget.parking,
-                  _setupTimeState
-                      .currentState!.getDeparture!.millisecondsSinceEpoch,
-                );
-
-                await ParkingSpaceServices.updateDepartureOnParkingSession(
-                  widget.parking,
-                  _setupTimeState
-                      .currentState!.getDeparture!.millisecondsSinceEpoch,
-                );
-
-                await UserServices.updateDurationOnParkingSession(
-                  widget.parking,
-                  _setupTimeState.currentState!.getNewDuration,
-                );
-
-                await ParkingSpaceServices.updateDurationOnParkingSession(
-                  widget.parking,
-                  _setupTimeState.currentState!.getNewDuration,
-                );
-
-                DateTime now = DateTime(0, 0, 0, 0, 0);
-                await WorldTimeServices.getDateTimeNow().then((time) {
-                  now = DateTime(
-                    time.year,
-                    time.month,
-                    time.day,
-                    time.hour,
-                    time.minute,
+                  bool isAvailable = await UserServices.extendParking(
+                    _setupTimeState.currentState!.getHour!,
+                    _setupTimeState.currentState!.getMinute!,
+                    widget.parking,
+                    context,
                   );
-                });
 
-                final userNotif = UserNotification(
-                  "",
-                  widget.parking.getParkingSpaceId!,
-                  widget.parking.getParkingId!,
-                  FirebaseAuth.instance.currentUser!.photoURL ??
-                      "https://cdn4.iconfinder.com/data/icons/user-people-2/48/5-512.png",
-                  FirebaseAuth.instance.currentUser!.displayName!,
-                  "extend parking session on your space. Tap to view details.",
-                  true,
-                  false,
-                  now.millisecondsSinceEpoch,
-                  false,
-                  false,
-                  true,
-                  _setupTimeState.currentState!.getDuration!,
-                  getDateTime(widget.parking.getDeparture!),
-                  widget.parking.getDuration!,
-                  DateFormat('MMM. dd, yyyy h:mm a')
-                      .format(_setupTimeState.currentState!.getDeparture!),
-                  _setupTimeState.currentState!.getNewDuration,
-                  _setupTimeState.currentState!.getParkingPrice,
-                );
-
-                await UserServices.notifyUser(
-                  widget.parking.getParkingOwner!,
-                  userNotif,
-                );
-
-                await UserServices.setPayedToFalse(
-                    FirebaseAuth.instance.currentUser!.uid);
-
-                Navigator.pop(context);
-
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    fullscreenDialog: true,
-                    builder: (context) => const ParkingExtended(),
-                  ),
-                );
-
-                return;
-              }
-
-              int paymentDate = 0;
-              await WorldTimeServices.getDateOnlyNow().then((date) {
-                paymentDate = date.millisecondsSinceEpoch;
-              });
-
-              String paypalEmail =
-                  await ParkingSpaceServices.getSpacePaypalEmail(
-                widget.parking.getParkingSpaceId!,
-              );
-              await UserServices.setPaymentParams(
-                FirebaseAuth.instance.currentUser!.uid,
-                "$paypalEmail/${_setupTimeState.currentState!.getParkingPrice}",
-              );
-
-              await UserServices.addToPayExtend(
-                paymentDate,
-                widget.parking.getParkingId!,
-                _setupTimeState
-                    .currentState!.getDeparture!.millisecondsSinceEpoch,
-                _setupTimeState.currentState!.getDuration!,
-                _setupTimeState.currentState!.getParkingPrice,
-                widget.parking.getAddress!,
-              );
-
-              String url =
-                  "https://letsparkpayment.up.railway.app/api/${FirebaseAuth.instance.currentUser!.uid}";
-              if (await launcher.canLaunchUrl(Uri.parse(url))) {
-                await launcher.launchUrl(
-                  Uri.parse(url),
-                  mode: launcher.LaunchMode.externalApplication,
-                );
-              }
-              showAlertDialogWithLoading("Now paying...");
-
-              checkPayedStream = checkPayed.listen((event) {
-                UserServices.isPayed(FirebaseAuth.instance.currentUser!.uid)
-                    .then((payed) async {
-                  if (payed) {
-                    checkPayedStream!.cancel();
-
-                    Navigator.pop(context);
-                    showDialog(
-                      context: context,
-                      barrierDismissible: false,
-                      builder: (context) => WillPopScope(
-                        onWillPop: () async => false,
-                        child: const NoticeDialog(
-                          imageLink: "assets/logo/lets-park-logo.png",
-                          message:
-                              "Extending your parking session. Please wait.",
-                          forLoading: true,
+                  if (isAvailable) {
+                    if (!hasToPay(
+                        _setupTimeState.currentState!.getNewDuration)) {
+                      showDialog(
+                        context: context,
+                        barrierDismissible: false,
+                        builder: (context) => WillPopScope(
+                          onWillPop: () async => false,
+                          child: const NoticeDialog(
+                            imageLink: "assets/logo/lets-park-logo.png",
+                            message:
+                                "Extending your parking session. Please wait.",
+                            forLoading: true,
+                          ),
                         ),
-                      ),
-                    );
-
-                    await UserServices.updateDepartureOnParkingSession(
-                      widget.parking,
-                      _setupTimeState
-                          .currentState!.getDeparture!.millisecondsSinceEpoch,
-                    );
-
-                    await ParkingSpaceServices.updateDepartureOnParkingSession(
-                      widget.parking,
-                      _setupTimeState
-                          .currentState!.getDeparture!.millisecondsSinceEpoch,
-                    );
-
-                    await UserServices.updateDurationOnParkingSession(
-                      widget.parking,
-                      _setupTimeState.currentState!.getNewDuration,
-                    );
-
-                    await ParkingSpaceServices.updateDurationOnParkingSession(
-                      widget.parking,
-                      _setupTimeState.currentState!.getNewDuration,
-                    );
-
-                    DateTime now = DateTime(0, 0, 0, 0, 0);
-                    await WorldTimeServices.getDateTimeNow().then((time) {
-                      now = DateTime(
-                        time.year,
-                        time.month,
-                        time.day,
-                        time.hour,
-                        time.minute,
                       );
+
+                      await UserServices.updateDepartureOnParkingSession(
+                        widget.parking,
+                        _setupTimeState
+                            .currentState!.getDeparture!.millisecondsSinceEpoch,
+                      );
+
+                      await ParkingSpaceServices
+                          .updateDepartureOnParkingSession(
+                        widget.parking,
+                        _setupTimeState
+                            .currentState!.getDeparture!.millisecondsSinceEpoch,
+                      );
+
+                      await UserServices.updateDurationOnParkingSession(
+                        widget.parking,
+                        _setupTimeState.currentState!.getNewDuration,
+                      );
+
+                      await ParkingSpaceServices.updateDurationOnParkingSession(
+                        widget.parking,
+                        _setupTimeState.currentState!.getNewDuration,
+                      );
+
+                      DateTime now = DateTime(0, 0, 0, 0, 0);
+                      await WorldTimeServices.getDateTimeNow().then((time) {
+                        now = DateTime(
+                          time.year,
+                          time.month,
+                          time.day,
+                          time.hour,
+                          time.minute,
+                        );
+                      });
+
+                      final userNotif = UserNotification(
+                        "",
+                        widget.parking.getParkingSpaceId!,
+                        widget.parking.getParkingId!,
+                        FirebaseAuth.instance.currentUser!.photoURL ??
+                            "https://cdn4.iconfinder.com/data/icons/user-people-2/48/5-512.png",
+                        FirebaseAuth.instance.currentUser!.displayName!,
+                        "extend parking session on your space. Tap to view details.",
+                        true,
+                        false,
+                        now.millisecondsSinceEpoch,
+                        false,
+                        false,
+                        true,
+                        _setupTimeState.currentState!.getDuration!,
+                        getDateTime(widget.parking.getDeparture!),
+                        widget.parking.getDuration!,
+                        DateFormat('MMM. dd, yyyy h:mm a').format(
+                            _setupTimeState.currentState!.getDeparture!),
+                        _setupTimeState.currentState!.getNewDuration,
+                        _setupTimeState.currentState!.getParkingPrice,
+                      );
+
+                      await UserServices.notifyUser(
+                        widget.parking.getParkingOwner!,
+                        userNotif,
+                      );
+
+                      await UserServices.setPayedToFalse(
+                        FirebaseAuth.instance.currentUser!.uid,
+                      );
+
+                      Navigator.pop(context);
+
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          fullscreenDialog: true,
+                          builder: (context) => const ParkingExtended(),
+                        ),
+                      );
+
+                      return;
+                    }
+
+                    int paymentDate = 0;
+                    await WorldTimeServices.getDateOnlyNow().then((date) {
+                      paymentDate = date.millisecondsSinceEpoch;
                     });
 
-                    final userNotif = UserNotification(
-                      "",
+                    String paypalEmail =
+                        await ParkingSpaceServices.getSpacePaypalEmail(
                       widget.parking.getParkingSpaceId!,
+                    );
+                    await UserServices.setPaymentParams(
+                      FirebaseAuth.instance.currentUser!.uid,
+                      "$paypalEmail/${_setupTimeState.currentState!.getParkingPrice}",
+                    );
+
+                    await UserServices.addToPayExtend(
+                      paymentDate,
                       widget.parking.getParkingId!,
-                      FirebaseAuth.instance.currentUser!.photoURL ??
-                          "https://cdn4.iconfinder.com/data/icons/user-people-2/48/5-512.png",
-                      FirebaseAuth.instance.currentUser!.displayName!,
-                      "extend parking session on your space. Tap to view details.",
-                      true,
-                      false,
-                      now.millisecondsSinceEpoch,
-                      false,
-                      false,
-                      true,
+                      _setupTimeState
+                          .currentState!.getDeparture!.millisecondsSinceEpoch,
                       _setupTimeState.currentState!.getDuration!,
-                      getDateTime(widget.parking.getDeparture!),
-                      widget.parking.getDuration!,
-                      DateFormat('MMM. dd, yyyy h:mm a')
-                          .format(_setupTimeState.currentState!.getDeparture!),
-                      _setupTimeState.currentState!.getNewDuration,
                       _setupTimeState.currentState!.getParkingPrice,
+                      widget.parking.getAddress!,
                     );
 
-                    await UserServices.notifyUser(
-                      widget.parking.getParkingOwner!,
-                      userNotif,
-                    );
+                    String url =
+                        "https://letsparkpayment.up.railway.app/api/${FirebaseAuth.instance.currentUser!.uid}";
+                    if (await launcher.canLaunchUrl(Uri.parse(url))) {
+                      await launcher.launchUrl(
+                        Uri.parse(url),
+                        mode: launcher.LaunchMode.externalApplication,
+                      );
+                    }
+                    showAlertDialogWithLoading("Now paying...");
 
-                    await UserServices.setPayedToFalse(
-                        FirebaseAuth.instance.currentUser!.uid);
+                    checkPayedStream = checkPayed.listen((event) {
+                      UserServices.isPayed(
+                              FirebaseAuth.instance.currentUser!.uid)
+                          .then((payed) async {
+                        if (payed) {
+                          checkPayedStream!.cancel();
 
-                    Navigator.pop(context);
+                          Navigator.pop(context);
+                          showDialog(
+                            context: context,
+                            barrierDismissible: false,
+                            builder: (context) => WillPopScope(
+                              onWillPop: () async => false,
+                              child: const NoticeDialog(
+                                imageLink: "assets/logo/lets-park-logo.png",
+                                message:
+                                    "Extending your parking session. Please wait.",
+                                forLoading: true,
+                              ),
+                            ),
+                          );
 
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        fullscreenDialog: true,
-                        builder: (context) => const ParkingExtended(),
-                      ),
-                    );
+                          await UserServices.updateDepartureOnParkingSession(
+                            widget.parking,
+                            _setupTimeState.currentState!.getDeparture!
+                                .millisecondsSinceEpoch,
+                          );
+
+                          await ParkingSpaceServices
+                              .updateDepartureOnParkingSession(
+                            widget.parking,
+                            _setupTimeState.currentState!.getDeparture!
+                                .millisecondsSinceEpoch,
+                          );
+
+                          await UserServices.updateDurationOnParkingSession(
+                            widget.parking,
+                            _setupTimeState.currentState!.getNewDuration,
+                          );
+
+                          await ParkingSpaceServices
+                              .updateDurationOnParkingSession(
+                            widget.parking,
+                            _setupTimeState.currentState!.getNewDuration,
+                          );
+
+                          await UserServices.updatePrice(
+                            widget.parking,
+                            widget.parking.getPrice!,
+                            _setupTimeState.currentState!.getParkingPrice,
+                          );
+
+                          DateTime now = DateTime(0, 0, 0, 0, 0);
+                          await WorldTimeServices.getDateTimeNow().then((time) {
+                            now = DateTime(
+                              time.year,
+                              time.month,
+                              time.day,
+                              time.hour,
+                              time.minute,
+                            );
+                          });
+
+                          final userNotif = UserNotification(
+                            "",
+                            widget.parking.getParkingSpaceId!,
+                            widget.parking.getParkingId!,
+                            FirebaseAuth.instance.currentUser!.photoURL ??
+                                "https://cdn4.iconfinder.com/data/icons/user-people-2/48/5-512.png",
+                            FirebaseAuth.instance.currentUser!.displayName!,
+                            "extend parking session on your space. Tap to view details.",
+                            true,
+                            false,
+                            now.millisecondsSinceEpoch,
+                            false,
+                            false,
+                            true,
+                            _setupTimeState.currentState!.getDuration!,
+                            getDateTime(widget.parking.getDeparture!),
+                            widget.parking.getDuration!,
+                            DateFormat('MMM. dd, yyyy h:mm a').format(
+                                _setupTimeState.currentState!.getDeparture!),
+                            _setupTimeState.currentState!.getNewDuration,
+                            _setupTimeState.currentState!.getParkingPrice,
+                          );
+
+                          await UserServices.notifyUser(
+                            widget.parking.getParkingOwner!,
+                            userNotif,
+                          );
+
+                          await UserServices.setPayedToFalse(
+                              FirebaseAuth.instance.currentUser!.uid);
+
+                          Navigator.pop(context);
+
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              fullscreenDialog: true,
+                              builder: (context) => const ParkingExtended(),
+                            ),
+                          );
+                        }
+                      });
+                    });
+                  } else {
+                    await showDialog(
+                      context: context,
+                      builder: (context) {
+                        return (const NoticeDialog(
+                          imageLink: "assets/logo/lets-park-logo.png",
+                          message:
+                              "We're sorry, but the time alloted is not available. Please try different time.",
+                        ));
+                      },
+                    ).then((value) {
+                      setState(() {
+                        canPay = true;
+                      });
+                    });
+                    ;
                   }
-                });
-              });
-            } else {
-              showDialog(
-                context: context,
-                builder: (context) {
-                  return (const NoticeDialog(
-                    imageLink: "assets/logo/lets-park-logo.png",
-                    message:
-                        "We're sorry, but the time alloted is not available. Please try different time.",
-                  ));
-                },
-              );
-            }
-          },
+                }
+              : null,
           child: const Text(
             "Pay now",
             style: TextStyle(
@@ -422,9 +447,17 @@ class _ExtendParkingState extends State<ExtendParking> {
         ),
         actions: [
           TextButton(
-            onPressed: () {
-              checkPayedStream!.cancel();
+            onPressed: () async {
+              await checkPayedStream!.cancel();
+              await UserServices.setPayedToFalse(
+                FirebaseAuth.instance.currentUser!.uid,
+              );
+              await UserServices.deletePaymentDoc();
+              setState(() {
+                canPay = true;
+              });
               Navigator.pop(context);
+              Navigator.pop(context, "non-null-callback");
             },
             child: const Text("Cancel Payment"),
           ),
@@ -489,7 +522,10 @@ class SetUpTimeState extends State<SetUpTime> {
     _departureTime = DateFormat("h:mm a").format(_selectedDepartureDateTime!);
 
     setDuration();
-    getPrice();
+    if (originalHour <= 8) {
+      getPrice();
+    }
+
     getNewParkingDuration();
     super.initState();
   }
@@ -796,25 +832,29 @@ class SetUpTimeState extends State<SetUpTime> {
   }
 
   void getPrice() {
-    int hour = 0;
-    List<String> elements = widget.parking.getDuration!.trim().split(" ");
+    int hour = originalHour;
+    // List<String> elements = widget.parking.getDuration!.trim().split(" ");
 
-    if (elements.length == 2) {
-      if (elements[1].compareTo("hour") == 0 ||
-          elements[1].compareTo("hours") == 0) {
-        hour = int.parse(elements[0]);
-      }
-    } else {
-      hour = int.parse(elements[0]);
-    }
-
+    // if (elements.length == 2) {
+    //   if (elements[1].compareTo("hour") == 0 ||
+    //       elements[1].compareTo("hours") == 0) {
+    //     hour = int.parse(elements[0]);
+    //   }
+    // } else {
+    //   hour = int.parse(elements[0]);
+    // }
+    print(hour);
     setState(() {
-      hour += _selectedHour;
-      if (hour > 8) {
-        price = 10;
-        price *= hour - 8;
+      if (originalHour <= 8) {
+        hour += _selectedHour;
+        if (hour > 8) {
+          price = 10;
+          price *= hour - 8;
+        } else {
+          price = 0.0;
+        }
       } else {
-        price = 0.0;
+        price *= _selectedHour;
       }
     });
   }
