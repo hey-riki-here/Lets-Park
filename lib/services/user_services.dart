@@ -714,7 +714,8 @@ class UserServices {
     return isAvailable;
   }
 
-  static Future<void> updatePrice(Parking session, num price, num extendPrice) async {
+  static Future<void> updatePrice(
+      Parking session, num price, num extendPrice) async {
     num newPrice = price + extendPrice;
 
     await FirebaseFirestore.instance
@@ -832,6 +833,21 @@ class UserServices {
         .collection('payments')
         .doc(paymentId)
         .delete();
+  }
+
+  static Future<int> checkForUnreadNotification() async {
+    int size = 0;
+    await FirebaseFirestore.instance
+        .collection('user-data')
+        .doc(FirebaseAuth.instance.currentUser!.uid)
+        .collection('notifications')
+        .where('hasRead', isEqualTo: false)
+        .get()
+        .then((value) {
+      size = value.size;
+    });
+
+    return size;
   }
 
   StreamSubscription get getParkingSessionsStream => parkingSessionsStreams;

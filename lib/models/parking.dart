@@ -12,6 +12,7 @@ class Parking {
   String? _driverId;
   String? _driverImage;
   String? _driverPhone;
+  String? _caretakerPhone;
   int? _stars;
   String? _address;
   LatLng? _latLng;
@@ -38,6 +39,7 @@ class Parking {
     String? driverId,
     String? driverImage,
     String? driverPhone,
+    String? caretakerPhone,
     int? stars,
     String? address,
     List geoposition,
@@ -63,6 +65,7 @@ class Parking {
     _driverId = driverId;
     _driverImage = driverImage;
     _driverPhone = driverPhone;
+    _caretakerPhone = caretakerPhone;
     _stars = stars;
     _address = address;
     _latLng = LatLng(geoposition[0], geoposition[1]);
@@ -99,6 +102,8 @@ class Parking {
   String? get getDriverImage => _driverImage;
 
   String? get getDriverPhone => _driverPhone;
+
+  String? get getCaretakerPhone => _caretakerPhone;
 
   int? get getStars => _stars;
 
@@ -195,6 +200,7 @@ class Parking {
         'driverId': _driverId,
         'driverImage': _driverImage,
         'driverPhone': _driverPhone,
+        'caretakerPhone': _caretakerPhone,
         'stars': _stars,
         'address': _address,
         'geoposition': [_latLng!.latitude, _latLng!.longitude],
@@ -223,6 +229,7 @@ class Parking {
       json['driverId'],
       json['driverImage'],
       json['driverPhone'],
+      json['caretakerPhone'],
       json['stars'],
       json['address'],
       json['geoposition'],

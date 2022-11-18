@@ -77,11 +77,11 @@ class _NavigationDrawerState extends State<NavigationDrawer> {
                   id: 4,
                   currentPage: widget.currentPage,
                 ),
-                Item(
-                  title: 'Messages',
-                  id: 5,
-                  currentPage: widget.currentPage,
-                ),
+                // Item(
+                //   title: 'Messages',
+                //   id: 5,
+                //   currentPage: widget.currentPage,
+                // ),
                 const SizedBox(height: 20),
                 const Text(
                   "Earn",

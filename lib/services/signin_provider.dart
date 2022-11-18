@@ -116,13 +116,21 @@ class SignInProvider extends ChangeNotifier {
     _showLoading(context);
     try {
       final result = await FacebookAuth.instance.login();
-      final fbUserCredentials =
-          FacebookAuthProvider.credential(result.accessToken!.token);
-      final UserCredential authResult =
-          await _auth.signInWithCredential(fbUserCredentials);
-      checkIsNewUser(
-        authResult,
-      );
+      if (result.accessToken != null) {
+        final fbUserCredentials =
+            FacebookAuthProvider.credential(result.accessToken!.token);
+        final UserCredential authResult =
+            await _auth.signInWithCredential(fbUserCredentials);
+        checkIsNewUser(
+          authResult,
+        );
+      } else {
+        await _showDialog(
+          context,
+          "assets/logo/lets-park-logo.png",
+          "Something went wrong. Try logging in instead.",
+        );
+      }
     } on Exception catch (e) {
       await _showDialog(
         context,

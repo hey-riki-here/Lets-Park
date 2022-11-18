@@ -16,6 +16,7 @@ import 'package:lets_park/screens/popups/checkout.dart';
 import 'package:lets_park/screens/popups/checkout_monthly.dart';
 import 'package:lets_park/screens/popups/notice_dialog.dart';
 import 'package:lets_park/screens/popups/extend_parking.dart';
+import 'package:url_launcher/url_launcher.dart' as launcher;
 
 class MyParkings extends StatefulWidget {
   final int _pageId = 3;
@@ -441,11 +442,15 @@ class InProgressState extends State<InProgress> {
                                                                         .black54,
                                                                   ),
                                                                   onPressed: () =>
-                                                                      Navigator.pop(
-                                                                          context,
-                                                                          'Cancel'),
-                                                                  child: const Text(
-                                                                      'Cancel'),
+                                                                      Navigator
+                                                                          .pop(
+                                                                    context,
+                                                                    'Cancel',
+                                                                  ),
+                                                                  child:
+                                                                      const Text(
+                                                                    'Cancel',
+                                                                  ),
                                                                 ),
                                                                 Padding(
                                                                   padding:
@@ -471,6 +476,10 @@ class InProgressState extends State<InProgress> {
                                                                           .pop(
                                                                         context,
                                                                         "Confirm",
+                                                                      );
+                                                                      Navigator
+                                                                          .pop(
+                                                                        context,
                                                                       );
 
                                                                       isLoading =
@@ -559,7 +568,57 @@ class InProgressState extends State<InProgress> {
                                                 Column(
                                                   children: [
                                                     IconButton(
-                                                      onPressed: () async {},
+                                                      onPressed: () async {
+                                                        showDialog<void>(
+                                                            barrierDismissible:
+                                                                false,
+                                                            context: context,
+                                                            builder: (context) {
+                                                              return WillPopScope(
+                                                                onWillPop:
+                                                                    () async =>
+                                                                        false,
+                                                                child:
+                                                                    AlertDialog(
+                                                                  content: Row(
+                                                                    children: const [
+                                                                      SizedBox(
+                                                                        height:
+                                                                            30,
+                                                                        width:
+                                                                            30,
+                                                                        child:
+                                                                            CircularProgressIndicator(
+                                                                          color:
+                                                                              Colors.grey,
+                                                                          strokeWidth:
+                                                                              2,
+                                                                        ),
+                                                                      ),
+                                                                      SizedBox(
+                                                                          width:
+                                                                              20),
+                                                                      Text(
+                                                                        "Opening messages...",
+                                                                        style:
+                                                                            TextStyle(
+                                                                          fontStyle:
+                                                                              FontStyle.italic,
+                                                                        ),
+                                                                      ),
+                                                                    ],
+                                                                  ),
+                                                                ),
+                                                              );
+                                                            });
+
+                                                        await messageCaretaker(
+                                                          parkings[index]
+                                                              .getCaretakerPhone!,
+                                                        );
+
+                                                        Navigator.pop(context);
+                                                      },
                                                       icon: Icon(
                                                         Icons.message_outlined,
                                                         color: Colors
@@ -747,6 +806,15 @@ class InProgressState extends State<InProgress> {
       DateTime.now().day,
     );
   }
+
+  Future<void> messageCaretaker(String caretakerPhoneNumber) async {
+    final url = "sms:+63$caretakerPhoneNumber";
+    if (await launcher.canLaunchUrl(Uri.parse(url))) {
+      await launcher.launchUrl(Uri.parse(url));
+    } else {
+      throw 'Could not launch $url';
+    }
+  }
 }
 
 class Upcoming extends StatefulWidget {
@@ -905,7 +973,57 @@ class _UpcomingState extends State<Upcoming> {
                                                 Column(
                                                   children: [
                                                     IconButton(
-                                                      onPressed: () {},
+                                                      onPressed: () async {
+                                                        showDialog<void>(
+                                                            barrierDismissible:
+                                                                false,
+                                                            context: context,
+                                                            builder: (context) {
+                                                              return WillPopScope(
+                                                                onWillPop:
+                                                                    () async =>
+                                                                        false,
+                                                                child:
+                                                                    AlertDialog(
+                                                                  content: Row(
+                                                                    children: const [
+                                                                      SizedBox(
+                                                                        height:
+                                                                            30,
+                                                                        width:
+                                                                            30,
+                                                                        child:
+                                                                            CircularProgressIndicator(
+                                                                          color:
+                                                                              Colors.grey,
+                                                                          strokeWidth:
+                                                                              2,
+                                                                        ),
+                                                                      ),
+                                                                      SizedBox(
+                                                                          width:
+                                                                              20),
+                                                                      Text(
+                                                                        "Opening messages...",
+                                                                        style:
+                                                                            TextStyle(
+                                                                          fontStyle:
+                                                                              FontStyle.italic,
+                                                                        ),
+                                                                      ),
+                                                                    ],
+                                                                  ),
+                                                                ),
+                                                              );
+                                                            });
+
+                                                        await messageCaretaker(
+                                                          parkings[index]
+                                                              .getCaretakerPhone!,
+                                                        );
+
+                                                        Navigator.pop(context);
+                                                      },
                                                       icon: Icon(
                                                         Icons.message_outlined,
                                                         color: Colors
@@ -1104,6 +1222,15 @@ class _UpcomingState extends State<Upcoming> {
       DateTime.now().day,
     );
   }
+
+  Future<void> messageCaretaker(String caretakerPhoneNumber) async {
+    final url = "sms:+63$caretakerPhoneNumber";
+    if (await launcher.canLaunchUrl(Uri.parse(url))) {
+      await launcher.launchUrl(Uri.parse(url));
+    } else {
+      throw 'Could not launch $url';
+    }
+  }
 }
 
 class History extends StatefulWidget {
@@ -1142,75 +1269,101 @@ class _HistoryState extends State<History> {
                     Radius.circular(12),
                   ),
                 ),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 8,
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              Image.asset(
-                                "assets/icons/parking-marker.png",
-                                scale: 2.7,
-                              ),
-                              const SizedBox(width: 10),
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    parkings[index].getAddress!,
-                                    style: textStyle,
-                                  ),
-                                  const SizedBox(height: 5),
-                                  Text(
-                                    "${parkings[index].getPrice!.toInt().toString()}.00",
-                                    style: textStyle,
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 10),
-                          Row(
-                            children: [
-                              const Icon(
-                                FontAwesomeIcons.carAlt,
-                                color: Colors.blue,
-                                size: 30,
-                              ),
-                              const SizedBox(width: 15),
-                              Text(
-                                parkings[index].getPlateNumber!,
-                                style: textStyle,
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                      Center(
-                        child: IconButton(
-                          onPressed: () => Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              fullscreenDialog: true,
-                              builder: (context) => InfoPopup(
-                                parking: parkings[index],
-                              ),
-                            ),
-                          ),
-                          icon: const Icon(
-                            Icons.info_outline,
-                            color: Colors.black54,
-                          ),
+                child: InkWell(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        fullscreenDialog: true,
+                        builder: (context) => InfoPopup(
+                          parking: parkings[index],
                         ),
-                      )
-                    ],
+                      ),
+                    );
+                  },
+                  borderRadius: const BorderRadius.all(Radius.circular(12)),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 8,
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Image.asset(
+                                  "assets/icons/parking-marker.png",
+                                  scale: 2.7,
+                                ),
+                                const SizedBox(width: 10),
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    parkings[index].getAddress!.length <= 25
+                                        ? Text(
+                                            parkings[index].getAddress!,
+                                            style: const TextStyle(
+                                              fontSize: 15,
+                                            ),
+                                          )
+                                        : Text(
+                                            parkings[index]
+                                                    .getAddress!
+                                                    .substring(0, 24) +
+                                                "...",
+                                            style: const TextStyle(
+                                              fontSize: 15,
+                                            ),
+                                          ),
+                                    const SizedBox(height: 5),
+                                    Text(
+                                      "${parkings[index].getPrice!.toInt().toString()}.00",
+                                      style: textStyle,
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 10),
+                            Row(
+                              children: [
+                                const Icon(
+                                  FontAwesomeIcons.carAlt,
+                                  color: Colors.blue,
+                                  size: 30,
+                                ),
+                                const SizedBox(width: 15),
+                                Text(
+                                  parkings[index].getPlateNumber!,
+                                  style: textStyle,
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                        // Center(
+                        //   child: IconButton(
+                        //     onPressed: () => Navigator.push(
+                        //       context,
+                        //       MaterialPageRoute(
+                        //         fullscreenDialog: true,
+                        //         builder: (context) => InfoPopup(
+                        //           parking: parkings[index],
+                        //         ),
+                        //       ),
+                        //     ),
+                        //     icon: const Icon(
+                        //       Icons.info_outline,
+                        //       color: Colors.black54,
+                        //     ),
+                        //   ),
+                        // )
+                      ],
+                    ),
                   ),
                 ),
               );
@@ -1256,213 +1409,271 @@ class InfoPopup extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Parking Information"),
-        actions: [
-          PopupMenuButton<MenuItem>(
-            itemBuilder: (context) => [
-              ...MenuItems.items.map(buildItem).toList(),
-            ],
-            onSelected: (item) => onSelected(context, item, parking),
-          ),
-        ],
+        // actions: [
+        //   PopupMenuButton<MenuItem>(
+        //     itemBuilder: (context) => [
+        //       ...MenuItems.items.map(buildItem).toList(),
+        //     ],
+        //     onSelected: (item) => onSelected(context, item, parking),
+        //   ),
+        // ],
       ),
       body: Padding(
         padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Center(
-              child: Container(
-                width: 250,
-                height: 150,
-                decoration: BoxDecoration(
-                  border: Border.all(width: 1),
-                  borderRadius: const BorderRadius.all(Radius.circular(12)),
-                ),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(12),
-                  child: Image.network(
-                    parking.getImageUrl!,
-                    fit: BoxFit.fill,
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: Container(
+                  width: 250,
+                  height: 150,
+                  decoration: BoxDecoration(
+                    border: Border.all(width: 1),
+                    borderRadius: const BorderRadius.all(Radius.circular(12)),
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(12),
+                    child: Image.network(
+                      parking.getImageUrl!,
+                      fit: BoxFit.fill,
+                    ),
                   ),
                 ),
               ),
-            ),
-            const SizedBox(height: 10),
-            const Text(
-              "Location",
-              style: _labelStyle,
-            ),
-            const SizedBox(height: 10),
-            Row(
-              children: [
-                Image.asset(
-                  "assets/icons/parking-marker.png",
-                  scale: 2.7,
-                ),
-                const SizedBox(width: 10),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      parking.getAddress!,
-                      style: _infoStyle,
-                    ),
-                  ],
-                ),
-              ],
-            ),
-            const SizedBox(height: 10),
-            const Text(
-              "Car",
-              style: _labelStyle,
-            ),
-            const SizedBox(height: 10),
-            Row(
-              children: [
-                const Icon(
-                  FontAwesomeIcons.carAlt,
-                  color: Colors.blue,
-                  size: 30,
-                ),
-                const SizedBox(width: 15),
-                Text(
-                  parking.getPlateNumber!,
-                  style: _infoStyle,
-                ),
-              ],
-            ),
-            const SizedBox(height: 10),
-            const Text(
-              "Duration",
-              style: _labelStyle,
-            ),
-            const SizedBox(height: 10),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Text(
-                      "Arrived:",
-                      style: _infoStyle,
-                    ),
-                    Text(
-                      _getFormattedTime(
-                        DateTime.fromMillisecondsSinceEpoch(
-                          parking.getArrival!,
-                        ),
-                      ),
-                      style: _infoStyle,
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 5),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Text(
-                      "Departed:",
-                      style: _infoStyle,
-                    ),
-                    Text(
-                      _getFormattedTime(
-                        DateTime.fromMillisecondsSinceEpoch(
-                          parking.getDeparture!,
-                        ),
-                      ),
-                      style: _infoStyle,
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 5),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Text(
-                      "Duration:",
-                      style: _infoStyle,
-                    ),
-                    Text(
-                      parking.getDuration!,
-                      style: _infoStyle,
-                    ),
-                  ],
-                ),
-              ],
-            ),
-            const SizedBox(height: 10),
-            const Text(
-              "Paid",
-              style: _labelStyle,
-            ),
-            const SizedBox(height: 10),
-            Text(
-              "${parking.getPrice!.toInt().toString()}.00",
-              style: const TextStyle(
-                fontSize: 20,
+              const SizedBox(height: 10),
+              const Text(
+                "Location",
+                style: _labelStyle,
               ),
+              const SizedBox(height: 10),
+              Row(
+                children: [
+                  Image.asset(
+                    "assets/icons/parking-marker.png",
+                    scale: 2.7,
+                  ),
+                  const SizedBox(width: 10),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        parking.getAddress!,
+                        style: _infoStyle,
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+              const SizedBox(height: 10),
+              const Text(
+                "Car",
+                style: _labelStyle,
+              ),
+              const SizedBox(height: 10),
+              Row(
+                children: [
+                  const Icon(
+                    FontAwesomeIcons.carAlt,
+                    color: Colors.blue,
+                    size: 30,
+                  ),
+                  const SizedBox(width: 15),
+                  Text(
+                    parking.getPlateNumber!,
+                    style: _infoStyle,
+                  ),
+                ],
+              ),
+              const SizedBox(height: 10),
+              const Text(
+                "Duration",
+                style: _labelStyle,
+              ),
+              const SizedBox(height: 10),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        "Arrived:",
+                        style: _infoStyle,
+                      ),
+                      Text(
+                        _getFormattedTime(
+                          DateTime.fromMillisecondsSinceEpoch(
+                            parking.getArrival!,
+                          ),
+                        ),
+                        style: _infoStyle,
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 5),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        "Departed:",
+                        style: _infoStyle,
+                      ),
+                      Text(
+                        _getFormattedTime(
+                          DateTime.fromMillisecondsSinceEpoch(
+                            parking.getDeparture!,
+                          ),
+                        ),
+                        style: _infoStyle,
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 5),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        "Duration:",
+                        style: _infoStyle,
+                      ),
+                      Text(
+                        parking.getDuration!,
+                        style: _infoStyle,
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+              const SizedBox(height: 10),
+              const Text(
+                "Paid",
+                style: _labelStyle,
+              ),
+              const SizedBox(height: 10),
+              Text(
+                "${parking.getPrice!.toInt().toString()}.00",
+                style: const TextStyle(
+                  fontSize: 20,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+      bottomNavigationBar: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: OutlinedButton.icon(
+          onPressed: () async {
+            ParkingSpace space = await ParkingSpaceServices.getParkingSpace(
+              parking.getParkingSpaceId!,
+            );
+
+            globals.nonReservable = space;
+            space.getDailyOrMonthly!.compareTo("Monthly") == 0
+                ? Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      fullscreenDialog: true,
+                      builder: (context) => CheckoutMonthly(
+                        parkingSpace: space,
+                      ),
+                    ),
+                  )
+                : space.getType!.compareTo("Reservable") == 0
+                    ? Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          fullscreenDialog: true,
+                          builder: (context) => Checkout(
+                            parkingSpace: space,
+                          ),
+                        ),
+                      )
+                    : showDialog(
+                        context: context,
+                        barrierDismissible: true,
+                        builder: (context) => NoticeDialog(
+                          imageLink: "assets/logo/lets-park-logo.png",
+                          header:
+                              "You're about to rent a non-reservable space...",
+                          parkingAreaAddress: space.getAddress!,
+                          message:
+                              "Please confirm that you are currently at the parking location.",
+                          forNonreservableConfirmation: true,
+                        ),
+                      );
+          },
+          icon: const Icon(Icons.book),
+          label: const Text("Book on this space again"),
+          style: ElevatedButton.styleFrom(
+            fixedSize: const Size(
+              250,
+              20,
             ),
-          ],
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8.0),
+            ),
+          ),
         ),
       ),
     );
   }
 
-  PopupMenuItem<MenuItem> buildItem(MenuItem item) => PopupMenuItem<MenuItem>(
-        value: item,
-        child: Row(
-          children: [
-            Icon(item.icon, color: Colors.black54, size: 20),
-            const SizedBox(width: 15),
-            Text(item.text),
-          ],
-        ),
-      );
+  // PopupMenuItem<MenuItem> buildItem(MenuItem item) => PopupMenuItem<MenuItem>(
+  //       value: item,
+  //       child: Row(
+  //         children: [
+  //           Icon(item.icon, color: Colors.black54, size: 20),
+  //           const SizedBox(width: 15),
+  //           Text(item.text),
+  //         ],
+  //       ),
+  //     );
 
-  void onSelected(BuildContext context, MenuItem item, Parking parking) async {
-    switch (item) {
-      case MenuItems.itemBookAgain:
-        ParkingSpace space = await ParkingSpaceServices.getParkingSpace(
-            parking.getParkingSpaceId!);
+  // void onSelected(BuildContext context, MenuItem item, Parking parking) async {
+  //   switch (item) {
+  //     case MenuItems.itemBookAgain:
+  //       ParkingSpace space = await ParkingSpaceServices.getParkingSpace(
+  //           parking.getParkingSpaceId!);
 
-        globals.nonReservable = space;
-        space.getDailyOrMonthly!.compareTo("Monthly") == 0
-            ? Navigator.push(
-                context,
-                MaterialPageRoute(
-                  fullscreenDialog: true,
-                  builder: (context) => CheckoutMonthly(
-                    parkingSpace: space,
-                  ),
-                ),
-              )
-            : space.getType!.compareTo("Reservable") == 0
-                ? Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      fullscreenDialog: true,
-                      builder: (context) => Checkout(
-                        parkingSpace: space,
-                      ),
-                    ),
-                  )
-                : showDialog(
-                    context: context,
-                    barrierDismissible: true,
-                    builder: (context) => NoticeDialog(
-                      imageLink: "assets/logo/lets-park-logo.png",
-                      header: "You're about to rent a non-reservable space...",
-                      parkingAreaAddress: space.getAddress!,
-                      message:
-                          "Please confirm that you are currently at the parking location.",
-                      forNonreservableConfirmation: true,
-                    ),
-                  );
+  //       globals.nonReservable = space;
+  //       space.getDailyOrMonthly!.compareTo("Monthly") == 0
+  //           ? Navigator.push(
+  //               context,
+  //               MaterialPageRoute(
+  //                 fullscreenDialog: true,
+  //                 builder: (context) => CheckoutMonthly(
+  //                   parkingSpace: space,
+  //                 ),
+  //               ),
+  //             )
+  //           : space.getType!.compareTo("Reservable") == 0
+  //               ? Navigator.push(
+  //                   context,
+  //                   MaterialPageRoute(
+  //                     fullscreenDialog: true,
+  //                     builder: (context) => Checkout(
+  //                       parkingSpace: space,
+  //                     ),
+  //                   ),
+  //                 )
+  //               : showDialog(
+  //                   context: context,
+  //                   barrierDismissible: true,
+  //                   builder: (context) => NoticeDialog(
+  //                     imageLink: "assets/logo/lets-park-logo.png",
+  //                     header: "You're about to rent a non-reservable space...",
+  //                     parkingAreaAddress: space.getAddress!,
+  //                     message:
+  //                         "Please confirm that you are currently at the parking location.",
+  //                     forNonreservableConfirmation: true,
+  //                   ),
+  //                 );
 
-        break;
-    }
-  }
+  //       break;
+  //   }
+  // }
 
   String _getFormattedTime(DateTime time) {
     String formattedTime = "";

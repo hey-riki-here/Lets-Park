@@ -79,142 +79,150 @@ class _ReviewParkingAreaState extends State<ReviewParkingArea> {
         ),
         body: Padding(
           padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      address.isEmpty
-                          ? const SizedBox(
-                              width: 15,
-                              height: 15,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                              ),
-                            )
-                          : Text(
-                              address,
-                              style: const TextStyle(
-                                color: Colors.black54,
-                                fontWeight: FontWeight.w500,
+          child: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        address.isEmpty
+                            ? const SizedBox(
+                                width: 15,
+                                height: 15,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                ),
+                              )
+                            : address.length <= 25
+                                ? Text(
+                                    address,
+                                    style: const TextStyle(
+                                      fontSize: 15,
+                                    ),
+                                  )
+                                : Text(
+                                    address.substring(0, 24) + "...",
+                                    style: const TextStyle(
+                                      fontSize: 15,
+                                    ),
+                                  ),
+                        const SizedBox(height: 5),
+                        Row(
+                          children: [
+                            ParkingSpaceServices.getStars(spaceRating),
+                            const SizedBox(width: 5),
+                            Text("($reviewsQty)"),
+                          ],
+                        ),
+                        const Text(
+                          "Reservable",
+                          style: TextStyle(
+                            color: Colors.blue,
+                          ),
+                        ),
+                      ],
+                    ),
+                    imageUrl.isEmpty
+                        ? const SizedBox(
+                            width: 40,
+                            height: 40,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 4,
+                            ),
+                          )
+                        : SizedBox(
+                            width: 100,
+                            height: 80,
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(12),
+                              child: Image.network(
+                                imageUrl,
+                                fit: BoxFit.fill,
                               ),
                             ),
-                      const SizedBox(height: 5),
-                      Row(
-                        children: [
-                          ParkingSpaceServices.getStars(spaceRating),
-                          const SizedBox(width: 5),
-                          Text("($reviewsQty)"),
-                        ],
-                      ),
-                      const Text(
-                        "Reservable",
+                          ),
+                  ],
+                ),
+                const SizedBox(height: 20),
+                Row(
+                  children: const [
+                    Icon(
+                      Icons.info_outline,
+                      color: Colors.grey,
+                      size: 20,
+                    ),
+                    SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        "Your review will greatly help this parking space to improve. Tell us about your parking experience.",
                         style: TextStyle(
-                          color: Colors.blue,
+                          color: Colors.grey,
                         ),
                       ),
-                    ],
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 20),
+                Center(
+                  child: RatingBar.builder(
+                    minRating: 1,
+                    itemBuilder: (context, _) => const Icon(
+                      Icons.star,
+                      color: Colors.amber,
+                    ),
+                    onRatingUpdate: (double value) {
+                      setState(() {
+                        rate = value;
+                      });
+                    },
                   ),
-                  imageUrl.isEmpty
-                      ? const SizedBox(
-                          width: 40,
-                          height: 40,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 4,
+                ),
+                const SizedBox(height: 20),
+                Center(
+                  child: Wrap(
+                    alignment: WrapAlignment.center,
+                    direction: Axis.horizontal,
+                    runSpacing: 10,
+                    children: [
+                      "Safe and Secure",
+                      "Will park again!",
+                      "Accomodating",
+                      "Clean Parking",
+                      "Easy to find",
+                    ]
+                        .map(
+                          (tag) => QuickReviewTile(
+                            label: tag,
+                            onTagSelected: (tagSelected) {
+                              if (tagSelected) {
+                                selectedTags.add(tag);
+                              } else {
+                                selectedTags.remove(tag);
+                              }
+                            },
                           ),
                         )
-                      : SizedBox(
-                          width: 100,
-                          height: 80,
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(12),
-                            child: Image.network(
-                              imageUrl,
-                              fit: BoxFit.fill,
-                            ),
-                          ),
-                        ),
-                ],
-              ),
-              const SizedBox(height: 20),
-              Row(
-                children: const [
-                  Icon(
-                    Icons.info_outline,
-                    color: Colors.grey,
-                    size: 20,
+                        .toList(),
                   ),
-                  SizedBox(width: 10),
-                  Expanded(
-                    child: Text(
-                      "Your review will greatly help this parking space to improve. Tell us about your parking experience.",
-                      style: TextStyle(
-                        color: Colors.grey,
-                      ),
+                ),
+                const SizedBox(height: 20),
+                TextFormField(
+                  controller: _infoController,
+                  maxLines: 5,
+                  textInputAction: TextInputAction.done,
+                  decoration: const InputDecoration(
+                    hintText: "Tell us more about your experience (Optional)",
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(12)),
                     ),
                   ),
-                ],
-              ),
-              const SizedBox(height: 20),
-              Center(
-                child: RatingBar.builder(
-                  minRating: 1,
-                  itemBuilder: (context, _) => const Icon(
-                    Icons.star,
-                    color: Colors.amber,
-                  ),
-                  onRatingUpdate: (double value) {
-                    setState(() {
-                      rate = value;
-                    });
-                  },
                 ),
-              ),
-              const SizedBox(height: 20),
-              Center(
-                child: Wrap(
-                  alignment: WrapAlignment.center,
-                  direction: Axis.horizontal,
-                  runSpacing: 10,
-                  children: [
-                    "Safe and Secure",
-                    "Will park again!",
-                    "Accomodating",
-                    "Clean Parking",
-                    "Easy to find",
-                  ]
-                  .map(
-                    (tag) => QuickReviewTile(
-                      label: tag,
-                      onTagSelected: (tagSelected) {
-                        if (tagSelected) {
-                          selectedTags.add(tag);
-                        } else {
-                          selectedTags.remove(tag);
-                        }
-                      },
-                    ),
-                  )
-                  .toList(),
-                ),
-              ),
-              const SizedBox(height: 20),
-              TextFormField(
-                controller: _infoController,
-                maxLines: 5,
-                textInputAction: TextInputAction.done,
-                decoration: const InputDecoration(
-                  hintText: "Tell us more about your experience (Optional)",
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.all(Radius.circular(12)),
-                  ),
-                ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
         bottomNavigationBar: Padding(
@@ -223,7 +231,9 @@ class _ReviewParkingAreaState extends State<ReviewParkingArea> {
             horizontal: 80,
           ),
           child: ElevatedButton(
-            onPressed: rate == 0 ? null : () async {
+            onPressed: rate == 0
+                ? null
+                : () async {
                     int points = 0;
 
                     showDialog(
@@ -239,10 +249,9 @@ class _ReviewParkingAreaState extends State<ReviewParkingArea> {
                       ),
                     );
 
-                    if (rate == 5){
+                    if (rate == 5) {
                       selectedTags.isNotEmpty ? points = 3 : points = 2;
-                      
-                    } else if (rate == 4){
+                    } else if (rate == 4) {
                       selectedTags.isNotEmpty ? points = 2 : points = 1;
                     }
 
@@ -271,8 +280,9 @@ class _ReviewParkingAreaState extends State<ReviewParkingArea> {
                       widget.spaceId,
                       points,
                     );
-                    
-                    navigatorKey.currentState!.popUntil((route) => route.isFirst);
+
+                    navigatorKey.currentState!
+                        .popUntil((route) => route.isFirst);
                     showDialog(
                       context: context,
                       barrierDismissible: false,

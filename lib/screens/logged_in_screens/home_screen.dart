@@ -90,7 +90,6 @@ class _HomeScreenState extends State<HomeScreen> {
       // ignore: empty_catches
     } catch (e) {}
 
-    print(FirebaseAuth.instance.currentUser!.phoneNumber);
     return FirebaseAuth.instance.currentUser!.phoneNumber != null &&
             FirebaseAuth.instance.currentUser!.phoneNumber!.isNotEmpty
         ? Scaffold(
@@ -211,27 +210,54 @@ class _HomeScreenState extends State<HomeScreen> {
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                        builder: (context) => const Messages()),
+                                      builder: (context) =>
+                                          const Notifications(),
+                                    ),
                                   );
                                 },
-                                child: const Icon(
-                                  Icons.message,
-                                  color: Colors.white,
-                                ),
-                              ),
-                              const SizedBox(width: 20),
-                              GestureDetector(
-                                onTap: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: (context) =>
-                                            const Notifications()),
-                                  );
-                                },
-                                child: const Icon(
-                                  Icons.notifications_rounded,
-                                  color: Colors.white,
+                                child: StreamBuilder<bool>(
+                                  stream: checkUnreadNotifications(
+                                    const Duration(seconds: 1),
+                                  ),
+                                  builder: (context, snapshot) {
+                                    if (snapshot.hasData) {
+                                      if (snapshot.data!) {
+                                        return Stack(
+                                          alignment: Alignment.topRight,
+                                          children: [
+                                            const Icon(
+                                              Icons.notifications_rounded,
+                                              color: Colors.white,
+                                            ),
+                                            Padding(
+                                              padding: const EdgeInsets.only(
+                                                top: 3,
+                                                right: 3,
+                                              ),
+                                              child: CircleAvatar(
+                                                backgroundColor: Colors.red.shade100,
+                                                  radius: 6,
+                                                child: CircleAvatar(
+                                                  backgroundColor: Colors.red.shade700,
+                                                  radius: 4,
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        );
+                                      } else {
+                                        return const Icon(
+                                          Icons.notifications_rounded,
+                                          color: Colors.white,
+                                        );
+                                      }
+                                    } else {
+                                      return const Icon(
+                                        Icons.notifications_rounded,
+                                        color: Colors.white,
+                                      );
+                                    }
+                                  },
                                 ),
                               ),
                               const SizedBox(width: 20),
@@ -478,6 +504,18 @@ class _HomeScreenState extends State<HomeScreen> {
     nearbySpacesViewState.currentState!.getNearbySpaces();
     topSpacesGridState.currentState!.getTopParkingSpaces();
     monthlyParkingSpaceGridState.currentState!.getMonthlyParkingSpaces();
+  }
+
+  Stream<bool> checkUnreadNotifications(Duration duration) async* {
+    while (true) {
+      int size = await UserServices.checkForUnreadNotification()
+          .then((value) => value);
+      if (size > 0) {
+        yield true;
+      } else {
+        yield false;
+      }
+    }
   }
 }
 
@@ -1105,7 +1143,7 @@ class NearbySpaces extends StatelessWidget {
                                 ),
                                 const SizedBox(width: 7),
                                 Text(
-                                  "${space.getRating!.toInt()} • ${getDistance(distance)} • ${space.getType}",
+                                  "${space.getRating!.toInt()} • ${getDistance(distance)} • ${space.getDailyOrMonthly!.compareTo("Monthly") == 0 ? space.getDailyOrMonthly : space.getType}",
                                   style: const TextStyle(
                                     fontSize: 15,
                                     fontWeight: FontWeight.w400,

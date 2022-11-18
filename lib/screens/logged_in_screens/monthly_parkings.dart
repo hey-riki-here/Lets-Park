@@ -17,16 +17,23 @@ class MonthlyParkingsPage extends StatefulWidget {
 
 class _MonthlyParkingsPageState extends State<MonthlyParkingsPage> {
   List<ParkingSpace> spaces = [];
+  List<ParkingSpace> filteredSpaces = [];
+  String query = "";
+  bool isFiltered = false;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          iconTheme: const IconThemeData(
+      appBar: AppBar(
+        iconTheme: const IconThemeData(
           color: Colors.black,
         ),
         leading: IconButton(
           onPressed: () => Navigator.pop(context),
-          icon: const Icon(Icons.arrow_back, size: 17,),
+          icon: const Icon(
+            Icons.arrow_back,
+            size: 17,
+          ),
         ),
         elevation: 0,
         backgroundColor: Colors.white,
@@ -42,14 +49,22 @@ class _MonthlyParkingsPageState extends State<MonthlyParkingsPage> {
           child: Padding(
             padding: const EdgeInsets.all(16),
             child: TextField(
+              onChanged: (value) {
+                if (value.isEmpty) {
+                  setState(() {
+                    isFiltered = false;
+                  });
+                } else {
+                  query = value;
+                }
+              },
+              onSubmitted: (value) => filterList(value),
               textAlign: TextAlign.start,
               maxLines: 1,
               decoration: InputDecoration(
                 suffixIcon: IconButton(
-                onPressed: () {
-                  
-                },
-                icon: const Icon(
+                  onPressed: () => filterList(query),
+                  icon: const Icon(
                     Icons.search,
                     color: Colors.black54,
                     size: 20,
@@ -60,7 +75,7 @@ class _MonthlyParkingsPageState extends State<MonthlyParkingsPage> {
                 fillColor: Colors.white,
                 enabledBorder: OutlineInputBorder(
                   borderSide: BorderSide(
-                    width: 3, 
+                    width: 3,
                     color: Colors.grey.shade200,
                   ),
                 ),
@@ -74,34 +89,86 @@ class _MonthlyParkingsPageState extends State<MonthlyParkingsPage> {
         ),
       ),
       body: FutureBuilder<QuerySnapshot<Map<String, dynamic>>>(
-        future: FirebaseServices.getMonthlyParkingSpaces(), 
+        future: FirebaseServices.getMonthlyParkingSpaces(),
         builder: (context, snapshot) {
           if (snapshot.hasData) {
             spaces.clear();
             snapshot.data!.docs.forEach((space) {
               spaces.add(ParkingSpace.fromJson(space.data()));
             });
-            return SingleChildScrollView(
-                child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: MonthlyParkingSpaceGrid(spaces: spaces),
-              ),
-            );
+            return spaces.isEmpty || (isFiltered && filteredSpaces.isEmpty)
+                ? Center(
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: const [
+                        Icon(
+                          Icons.info_outline,
+                          color: Colors.grey,
+                        ),
+                        SizedBox(width: 10),
+                        Text(
+                          "No monthly parking spaces found.",
+                          style: TextStyle(
+                            color: Colors.grey,
+                            fontSize: 16,
+                          ),
+                        ),
+                      ],
+                    ),
+                  )
+                : SingleChildScrollView(
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: GridView.count(
+                        physics: const NeverScrollableScrollPhysics(),
+                        padding: const EdgeInsets.all(0),
+                        crossAxisCount: 2,
+                        mainAxisSpacing: 12,
+                        crossAxisSpacing: 12,
+                        shrinkWrap: true,
+                        children: isFiltered
+                            ? filteredSpaces
+                                .map((space) => MonthlyParkingSpaceCard(
+                                      space: space,
+                                    ))
+                                .toList()
+                            : spaces
+                                .map((space) => MonthlyParkingSpaceCard(
+                                      space: space,
+                                    ))
+                                .toList(),
+                      ),
+                    ),
+                  );
           } else {
-            return const Center( child: CircularProgressIndicator());
+            return const Center(child: CircularProgressIndicator());
           }
         },
       ),
     );
   }
+
+  void filterList(String query) {
+    filteredSpaces.clear();
+    spaces.forEach((space) {
+      if (space.getAddress!.contains(query)) {
+        filteredSpaces.add(space);
+      }
+    });
+    setState(() {
+      isFiltered = true;
+    });
+  }
 }
 
 class MonthlyParkingSpaceGrid extends StatefulWidget {
   final List<ParkingSpace> spaces;
-  const MonthlyParkingSpaceGrid({Key? key, required this.spaces}) : super(key: key);
+  const MonthlyParkingSpaceGrid({Key? key, required this.spaces})
+      : super(key: key);
 
   @override
-  State<MonthlyParkingSpaceGrid> createState() => MonthlyParkingSpaceGridState();
+  State<MonthlyParkingSpaceGrid> createState() =>
+      MonthlyParkingSpaceGridState();
 }
 
 class MonthlyParkingSpaceGridState extends State<MonthlyParkingSpaceGrid> {
@@ -111,6 +178,7 @@ class MonthlyParkingSpaceGridState extends State<MonthlyParkingSpaceGrid> {
   @override
   void initState() {
     spaces = widget.spaces;
+    print(spaces);
     super.initState();
   }
 
@@ -172,21 +240,20 @@ class MonthlyParkingSpaceCard extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Icon(
-                      Icons.location_on_rounded ,
+                      Icons.location_on_rounded,
                       color: Colors.blue.shade100,
                       size: 20,
                     ),
                     const SizedBox(width: 5),
                     Expanded(
                       child: Text(
-                      space.getAddress!,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 14,
+                        space.getAddress!,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 14,
+                        ),
                       ),
                     ),
-                    ),
-                    
                   ],
                 ),
                 Row(

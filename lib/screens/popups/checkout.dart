@@ -169,6 +169,7 @@ class _CheckoutState extends State<Checkout> {
                     FirebaseAuth.instance.currentUser!.uid,
                     FirebaseAuth.instance.currentUser!.photoURL,
                     FirebaseAuth.instance.currentUser!.phoneNumber!,
+                    widget.parkingSpace.getCaretakerPhoneNumber,
                     widget.parkingSpace.getRating!.toInt(),
                     widget.parkingSpace.getAddress,
                     [
