@@ -138,12 +138,13 @@ class _ProfileState extends State<Profile> {
               Menu(notifyParent: refresh),
               const SizedBox(height: 20),
               const Text(
-                "OTHER",
+                "LEGAL AND POLICIES",
                 style: TextStyle(
                   color: Colors.grey,
                   fontSize: 14,
                 ),
               ),
+              const SizedBox(height: 10),
               const MenuTD(),
             ],
           ),

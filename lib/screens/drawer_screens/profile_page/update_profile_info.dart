@@ -36,7 +36,8 @@ class _UpdateProfileState extends State<UpdateProfile> {
 
   @override
   void initState() {
-    _numberController = TextEditingController(text: FirebaseAuth.instance.currentUser!.phoneNumber);
+    _numberController = TextEditingController(
+        text: FirebaseAuth.instance.currentUser!.phoneNumber);
     if (user.photoURL != null) {
       photoUrl = user.photoURL!;
     }
@@ -72,7 +73,7 @@ class _UpdateProfileState extends State<UpdateProfile> {
                   children: [
                     CircleAvatar(
                       backgroundImage: NetworkImage(
-                       photoUrl,
+                        photoUrl,
                       ),
                       radius: 40,
                     ),
@@ -182,7 +183,8 @@ class _UpdateProfileState extends State<UpdateProfile> {
                                           await user.updatePhotoURL(newUrl);
                                           Navigator.pop(context);
                                           setState(() {
-                                            user = FirebaseAuth.instance.currentUser!;
+                                            user = FirebaseAuth
+                                                .instance.currentUser!;
                                             photoUrl = user.photoURL!;
                                             widget.notifyParent();
                                           });
@@ -286,9 +288,29 @@ class _UpdateProfileState extends State<UpdateProfile> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            "EMAIL",
-                            style: _textStyle,
+                          Row(
+                            children: [
+                              Text(
+                                "EMAIL",
+                                style: _textStyle,
+                              ),
+                              const SizedBox(
+                                width: 10,
+                              ),
+                              FirebaseAuth.instance.currentUser!.emailVerified
+                                  ? const Icon(
+                                      Icons.verified,
+                                      color: Colors.blue,
+                                      size: 16,
+                                    )
+                                  : const Text(
+                                      "Email unverified",
+                                      style: TextStyle(
+                                        color: Colors.red,
+                                        fontSize: 12,
+                                      ),
+                                    ),
+                            ],
                           ),
                           const SizedBox(height: 5),
                           Text(
@@ -341,5 +363,5 @@ class _UpdateProfileState extends State<UpdateProfile> {
         ),
       ),
     );
-  }  
+  }
 }

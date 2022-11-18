@@ -1360,9 +1360,11 @@ class InfoReviewsCaretaker extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(width: 10),
-                    const Expanded(
+                    Expanded(
                       child: Text(
-                        "This parking space is not reservable so make sure that you are at the parking area as you are paying.",
+                        type.compareTo("Reservable") == 0
+                            ? "Specify your time of arrival and complete the payment process. Check your Upcoming Parkings for the directions to the space."
+                            : "This parking space is not reservable so make sure that you are at the parking area as you are paying.",
                       ),
                     ),
                   ],

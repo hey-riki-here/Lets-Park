@@ -84,11 +84,25 @@ class EnableLocationService extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: 10),
-              const Text(
-                "Maybe later",
-                style: TextStyle(
-                  color: Colors.blue,
-                  fontSize: 15,
+              GestureDetector(
+                onTap: () async {
+                  final prefs = await SharedPreferences.getInstance();
+                  await prefs.setBool("firstOpen", false);
+                  Navigator.pushReplacement(
+                    context,
+                    PageTransition(
+                      type: PageTransitionType.rightToLeftJoined,
+                      childCurrent: this,
+                      child: const Wrapper(),
+                    ),
+                  );
+                },
+                child: const Text(
+                  "Maybe later",
+                  style: TextStyle(
+                    color: Colors.blue,
+                    fontSize: 15,
+                  ),
                 ),
               ),
             ],

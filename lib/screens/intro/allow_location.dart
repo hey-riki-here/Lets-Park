@@ -81,11 +81,23 @@ class AllowLocationPermission extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: 10),
-              const Text(
-                "Maybe later",
-                style: TextStyle(
-                  color: Colors.blue,
-                  fontSize: 15,
+              GestureDetector(
+                onTap: () {
+                  Navigator.pushReplacement(
+                    context,
+                    PageTransition(
+                      type: PageTransitionType.rightToLeftJoined,
+                      childCurrent: this,
+                      child: const EnableLocationService(),
+                    ),
+                  );
+                },
+                child: const Text(
+                  "Maybe later",
+                  style: TextStyle(
+                    color: Colors.blue,
+                    fontSize: 15,
+                  ),
                 ),
               ),
             ],
