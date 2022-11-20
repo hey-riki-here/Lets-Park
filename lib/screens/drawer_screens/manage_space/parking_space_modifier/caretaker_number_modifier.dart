@@ -24,7 +24,7 @@ class _CaretakerNumberModifierState extends State<CaretakerNumberModifier> {
   @override
   void initState() {
     caretakerNumberController =
-        TextEditingController(text: _removeFirstTwoDigits());
+        TextEditingController(text: widget.space.getCaretakerPhoneNumber!);
     super.initState();
   }
 
@@ -131,18 +131,5 @@ class _CaretakerNumberModifierState extends State<CaretakerNumberModifier> {
         },
       ),
     );
-  }
-
-  String _removeFirstTwoDigits() {
-    String number = "";
-
-    List runes = widget.space.getCaretakerPhoneNumber!.runes.toList();
-
-    for (int i = 0; i < runes.length; i++) {
-      if (i > 1) {
-        number += String.fromCharCode(runes[i]);
-      }
-    }
-    return number;
   }
 }

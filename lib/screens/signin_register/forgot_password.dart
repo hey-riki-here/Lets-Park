@@ -3,10 +3,14 @@ import 'package:lets_park/shared/shared_widgets.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:lets_park/screens/signin_register/email_sent.dart';
+import 'package:email_validator/email_validator.dart';
 
 class ForgotPassword extends StatefulWidget {
   final String email;
-  const ForgotPassword({Key? key, this.email = "",}) : super(key: key);
+  const ForgotPassword({
+    Key? key,
+    this.email = "",
+  }) : super(key: key);
 
   @override
   State<ForgotPassword> createState() => _ForgotPasswordState();
@@ -19,7 +23,7 @@ class _ForgotPasswordState extends State<ForgotPassword> {
   bool canResend = true;
 
   @override
-  initState(){
+  initState() {
     emailController = TextEditingController(text: widget.email);
     super.initState();
   }
@@ -76,32 +80,30 @@ class _ForgotPasswordState extends State<ForgotPassword> {
               const SizedBox(height: 10),
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
-                children: canResend ? [
-                  TextButton(
-                    onPressed: (){
-                      Navigator.pop(context);
-                    },
-                    child: const Text(
-                      "Cancel"
-                    ),
-                  ),
-                  const SizedBox(width: 5),
-                  ElevatedButton(
-                    onPressed: resetPassword,
-                    child: const Text(
-                      "Reset password"
-                    ),
-                  ),
-                ] : [
-                  SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: CircularProgressIndicator(
-                      color: Colors.grey.shade500,
-                      strokeWidth: 3,
-                    ),
-                  ),
-                ],
+                children: canResend
+                    ? [
+                        TextButton(
+                          onPressed: () {
+                            Navigator.pop(context);
+                          },
+                          child: const Text("Cancel"),
+                        ),
+                        const SizedBox(width: 5),
+                        ElevatedButton(
+                          onPressed: resetPassword,
+                          child: const Text("Reset password"),
+                        ),
+                      ]
+                    : [
+                        SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                            color: Colors.grey.shade500,
+                            strokeWidth: 3,
+                          ),
+                        ),
+                      ],
               ),
             ],
           ),
@@ -126,12 +128,9 @@ class _ForgotPasswordState extends State<ForgotPassword> {
                     label: 'Email',
                     textInputType: TextInputType.emailAddress,
                     icon: const Icon(Icons.person),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return "Please enter your email";
-                      }
-                      return null;
-                    },
+                    validator: (value) => EmailValidator.validate(value!)
+                        ? null
+                        : "Please enter a valid email",
                   ),
                 ],
               ),
@@ -142,33 +141,31 @@ class _ForgotPasswordState extends State<ForgotPassword> {
     );
   }
 
-  void showToast() {  
-    Fluttertoast.showToast(  
-      msg: 'Password reset email sent.',  
+  void showToast() {
+    Fluttertoast.showToast(
+      msg: 'Password reset email sent.',
       toastLength: Toast.LENGTH_LONG,
       backgroundColor: Colors.grey[200],
       textColor: Colors.black,
-    );  
-  }  
+    );
+  }
 
   void resetPassword() async {
+    if (_formKey.currentState!.validate()) {
+      setState(() {
+        canResend = false;
+      });
 
-    if (_formKey.currentState!.validate()){
+      await FirebaseAuth.instance
+          .sendPasswordResetEmail(email: emailController!.text.trim());
 
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const PasswordResetSent(),
+        ),
+      );
+      showToast();
     }
-    setState((){
-      canResend = false;
-    });
-
-    await FirebaseAuth.instance.sendPasswordResetEmail(email: emailController!.text.trim());
-    
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(
-        builder: (context) => const PasswordResetSent(),
-      ),
-    );
-    showToast();
-    
   }
 }

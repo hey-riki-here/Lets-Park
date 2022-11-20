@@ -4,6 +4,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:lets_park/screens/popups/checkout_non_reservable.dart';
+import 'package:lets_park/screens/popups/email_verification.dart';
 import 'package:lets_park/services/signin_provider.dart';
 import 'package:lets_park/shared/navigation_drawer.dart';
 import 'package:lets_park/models/parking_space.dart';
@@ -235,10 +236,12 @@ class _HomeScreenState extends State<HomeScreen> {
                                                 right: 3,
                                               ),
                                               child: CircleAvatar(
-                                                backgroundColor: Colors.red.shade100,
-                                                  radius: 6,
+                                                backgroundColor:
+                                                    Colors.red.shade100,
+                                                radius: 6,
                                                 child: CircleAvatar(
-                                                  backgroundColor: Colors.red.shade700,
+                                                  backgroundColor:
+                                                      Colors.red.shade700,
                                                   radius: 4,
                                                 ),
                                               ),
@@ -458,7 +461,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       validator: (value) {
                         if (value == null || value.isEmpty) {
                           return "Enter phone number";
-                        } else if (value.length < 10) {
+                        } else if (value.length != 10) {
                           return "Invalid phone number";
                         }
                         return null;
@@ -1176,6 +1179,14 @@ class NearbySpaces extends StatelessWidget {
                 return;
               }
 
+              if (FirebaseAuth.instance.currentUser!.emailVerified == false) {
+                showAlertDialogVerify(
+                  context,
+                  "Looks like your email is not yet verified. Please verify the email to continue renting the parking space.",
+                );
+                return;
+              }
+
               bool verified =
                   await ParkingSpaceServices.isVerified(space.getSpaceId!);
               bool? proceed = true;
@@ -1395,6 +1406,81 @@ class NearbySpaces extends StatelessWidget {
       newDistance = distance.toInt();
       return "$newDistance km";
     }
+  }
+
+  void showAlertDialogVerify(BuildContext context, String message) {
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: Center(
+          child: Image.asset(
+            "assets/logo/app_icon.png",
+            scale: 20,
+          ),
+        ),
+        content: Column(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text(
+              "Verify Email Address",
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: Colors.blue,
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 10),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.blue[50],
+                borderRadius: const BorderRadius.all(Radius.circular(8)),
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.info,
+                    color: Colors.blue.shade700,
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      message,
+                      style: const TextStyle(
+                        fontSize: 15,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+            },
+            child: const Text("MAYBE LATER"),
+          ),
+          TextButton(
+            onPressed: () async {
+              Navigator.pop(context);
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  fullscreenDialog: true,
+                  builder: (context) => const EmailVerification(),
+                ),
+              );
+            },
+            child: const Text("VERIFY EMAIL NOW"),
+          ),
+        ],
+      ),
+    );
   }
 }
 

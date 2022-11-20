@@ -66,6 +66,8 @@ class _CapacityModifierState extends State<CapacityModifier> {
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return "This field is required.";
+                  } else if (int.parse(value) < 10){
+                    return "No capacity less than 10.";
                   }
                   return null;
                 },

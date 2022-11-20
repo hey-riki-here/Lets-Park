@@ -1,10 +1,11 @@
 // ignore_for_file: avoid_function_literals_in_foreach_calls
 
 import 'package:flutter/material.dart';
+import 'package:lets_park/screens/popups/parking_area_information.dart';
 import 'package:lets_park/services/firebase_api.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:lets_park/models/parking_space.dart';
-import 'package:lets_park/screens/popups/parking_area_info.dart';
+import 'package:lets_park/services/parking_space_services.dart';
 
 class MonthlyParkingsPage extends StatefulWidget {
   const MonthlyParkingsPage({
@@ -277,13 +278,17 @@ class MonthlyParkingSpaceCard extends StatelessWidget {
                   ],
                 ),
                 OutlinedButton(
-                  onPressed: () {
+                  onPressed: () async {
+                    bool verified = await ParkingSpaceServices.isVerified(
+                      space.getSpaceId!,
+                    );
+
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        fullscreenDialog: true,
-                        builder: (context) => ParkingAreaInfo(
+                        builder: (context) => ParkingAreaInformation(
                           parkingSpace: space,
+                          verified: verified && space.getRating! >= 4,
                         ),
                       ),
                     );

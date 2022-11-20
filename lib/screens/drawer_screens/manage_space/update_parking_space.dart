@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:lets_park/models/parking_space.dart';
+import 'package:lets_park/screens/documents/guidelines.dart';
 import 'package:lets_park/screens/drawer_screens/manage_space/parking_space_modifier/address_modifier.dart';
 import 'package:lets_park/screens/drawer_screens/manage_space/parking_space_modifier/capacity_modifier.dart';
 import 'package:lets_park/screens/drawer_screens/manage_space/parking_space_modifier/features_modifier.dart';
@@ -944,7 +945,12 @@ class _UpdateParkingSpaceState extends State<UpdateParkingSpace> {
           ),
           TextButton(
             onPressed: () {
-              Navigator.pop(context);
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                  builder: ((context) => const Guidelines()),
+                ),
+              );
             },
             child: const Text("Learn more"),
           ),

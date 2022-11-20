@@ -21,10 +21,8 @@ class _FeaturesModifierState extends State<FeaturesModifier> {
   final GlobalKey<FeaturesState> _featuresState = GlobalKey();
 
   final featuresItems = <FeaturesItem>[
-    FeaturesItem(title: "With gate"),
     FeaturesItem(title: "CCTV"),
     FeaturesItem(title: "Covered Parking"),
-    FeaturesItem(title: "Lighting"),
   ];
   List<String> features = [];
 

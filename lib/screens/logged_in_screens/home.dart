@@ -124,7 +124,8 @@ class SearchBox extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final _controller = TextEditingController();
-
+    String query = "";
+    
     return Expanded(
       child: Material(
         borderRadius: const BorderRadius.all(Radius.circular(15)),
@@ -137,13 +138,17 @@ class SearchBox extends StatelessWidget {
           child: TextField(
             controller: _controller,
             textInputAction: TextInputAction.done,
-            onSubmitted: (query) {
+            onSubmitted: (value) {
+              query = value;
               gMapKey.currentState!.goToLocation(query + ", Valenzuela");
+            },
+            onChanged: (value){
+              query = value;
             },
             decoration: InputDecoration(
               suffixIcon: IconButton(
                   onPressed: () {
-                    //gMapKey.currentState!.goToLocation(query + ", Valenzuela");
+                    gMapKey.currentState!.goToLocation(query + ", Valenzuela");
                   },
                   icon: const Icon(
                     Icons.search,
