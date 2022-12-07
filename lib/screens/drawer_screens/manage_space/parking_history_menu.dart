@@ -31,6 +31,8 @@ class _ParkingHistoryMenuState extends State<ParkingHistoryMenu> {
           return SpaceCard(
             space: parkingSpaces![index],
             index: index,
+            spaceId: parkingSpaces![index].getSpaceId!,
+            address: parkingSpaces![index].getAddress!,
           );
         },
       ),
@@ -41,8 +43,15 @@ class _ParkingHistoryMenuState extends State<ParkingHistoryMenu> {
 class SpaceCard extends StatefulWidget {
   final ParkingSpace space;
   final int index;
-  const SpaceCard({Key? key, required this.space, required this.index})
-      : super(key: key);
+  final String spaceId;
+  final String address;
+  const SpaceCard({
+    Key? key,
+    required this.space,
+    required this.index,
+    required this.spaceId,
+    required this.address,
+  }) : super(key: key);
 
   @override
   State<SpaceCard> createState() => _SpaceCardState();
@@ -53,6 +62,8 @@ class _SpaceCardState extends State<SpaceCard> {
   Widget build(BuildContext context) {
     final space = widget.space;
     final index = widget.index + 1;
+    final spaceId = widget.spaceId;
+    final address = widget.address;
     int totalParkings = 0;
 
     return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
@@ -87,6 +98,8 @@ class _SpaceCardState extends State<SpaceCard> {
                     builder: (context) => ParkingHistory(
                       space: space,
                       index: index,
+                      spaceId: spaceId,
+                      address: address,
                     ),
                   ),
                 );
@@ -111,6 +124,13 @@ class _SpaceCardState extends State<SpaceCard> {
                               style: const TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                            const SizedBox(height: 5),
+                            Text(
+                              "Space ID: $spaceId",
+                              style: const TextStyle(
+                                fontSize: 13,
                               ),
                             ),
                             const SizedBox(height: 5),

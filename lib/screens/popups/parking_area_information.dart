@@ -59,7 +59,7 @@ class _ParkingAreaInformationState extends State<ParkingAreaInformation> {
     _added = globals.favorites.contains(widget.parkingSpace.getSpaceId!)
         ? true
         : false;
-
+        
     toDestination();
     super.initState();
   }

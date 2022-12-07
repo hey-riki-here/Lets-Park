@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_windowmanager/flutter_windowmanager.dart';
 import 'package:galleryimage/galleryimage.dart';
 import 'package:lets_park/models/parking_space.dart';
 
@@ -11,6 +12,7 @@ class SpaceCertificates extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    FlutterWindowManager.addFlags(FlutterWindowManager.FLAG_SECURE);
     return Scaffold(
       appBar: AppBar(
         iconTheme: const IconThemeData(
