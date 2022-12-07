@@ -8,8 +8,8 @@ class ParkingInformation extends StatelessWidget {
   final int notificationDate;
   const ParkingInformation({
     Key? key,
-   required this.parking,
-   required this.notificationDate,
+    required this.parking,
+    required this.notificationDate,
   }) : super(key: key);
 
   @override
@@ -37,14 +37,18 @@ class ParkingInformation extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        parking.getDriver!, 
+                        parking.getDriver!,
                         style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
                       Text(
-                        getStatus().compareTo("In Progress") == 0 ? "Parking for ${parking.getDuration!}" : getStatus().compareTo("Upcoming") == 0 ? "Will park for ${parking.getDuration!}" : "Parked for ${parking.getDuration!}",
+                        getStatus().compareTo("In Progress") == 0
+                            ? "Parking for ${parking.getDuration!}"
+                            : getStatus().compareTo("Upcoming") == 0
+                                ? "Will park for ${parking.getDuration!}"
+                                : "Parked for ${parking.getDuration!}",
                         style: const TextStyle(
                           color: Colors.black54,
                         ),
@@ -57,32 +61,34 @@ class ParkingInformation extends StatelessWidget {
               Row(
                 children: [
                   Expanded(
-                  child: ElevatedButton.icon(
-                    onPressed: () async {
-                      final url = "tel:${parking.getDriverPhone!}";
-                      if (await launcher.canLaunchUrl(Uri.parse(url))) {
-                        await launcher.launchUrl(Uri.parse(url));
-                      } else {
-                        throw 'Could not launch $url';
-                      }
-                    },
-                    icon: const Icon(Icons.phone_outlined,),
-                    label: Text("Call ${parking.getDriver!}"),
-                    style: ElevatedButton.styleFrom(
-                      elevation: 0,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8.0),
+                    child: ElevatedButton.icon(
+                      onPressed: () async {
+                        final url = "tel:${parking.getDriverPhone!}";
+                        if (await launcher.canLaunchUrl(Uri.parse(url))) {
+                          await launcher.launchUrl(Uri.parse(url));
+                        } else {
+                          throw 'Could not launch $url';
+                        }
+                      },
+                      icon: const Icon(
+                        Icons.phone_outlined,
+                      ),
+                      label: Text("Call ${parking.getDriver!}"),
+                      style: ElevatedButton.styleFrom(
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8.0),
+                        ),
                       ),
                     ),
                   ),
-                ),
                 ],
               ),
               const SizedBox(height: 10),
               const Divider(),
               const SizedBox(height: 10),
               Text(
-                "${parking.getDriver!} booked on your space", 
+                "${parking.getDriver!} booked on your space",
                 style: const TextStyle(
                   fontSize: 15,
                   fontWeight: FontWeight.bold,
@@ -99,14 +105,18 @@ class ParkingInformation extends StatelessWidget {
                   Text(
                     " • ${getStatus()}",
                     style: TextStyle(
-                      color: getStatus().compareTo("In Progress") == 0 ? Colors.green : getStatus().compareTo("Upcoming") == 0 ? Colors.blue : Colors.red,
+                      color: getStatus().compareTo("In Progress") == 0
+                          ? Colors.green
+                          : getStatus().compareTo("Upcoming") == 0
+                              ? Colors.blue
+                              : Colors.red,
                     ),
                   ),
                 ],
               ),
               const SizedBox(height: 10),
               const Text(
-                "Parking ID", 
+                "Parking ID",
                 style: TextStyle(
                   fontSize: 15,
                   fontWeight: FontWeight.bold,
@@ -122,7 +132,7 @@ class ParkingInformation extends StatelessWidget {
               const Divider(),
               const SizedBox(height: 10),
               const Text(
-                "Booking information", 
+                "Booking information",
                 style: TextStyle(
                   fontSize: 15,
                   fontWeight: FontWeight.bold,
@@ -174,7 +184,7 @@ class ParkingInformation extends StatelessWidget {
               const Divider(),
               const SizedBox(height: 10),
               const Text(
-                "Paid through", 
+                "Paid through",
                 style: TextStyle(
                   fontSize: 15,
                   fontWeight: FontWeight.bold,
@@ -196,12 +206,12 @@ class ParkingInformation extends StatelessWidget {
                 child: Row(
                   children: [
                     Image.asset(
-                      "assets/icons/gpay-logo.png",
-                      width: 40,
+                      "assets/icons/paypal_logo.png",
+                      width: 30,
                     ),
                     const SizedBox(width: 10),
                     const Text(
-                      "Paypal", 
+                      "Paypal",
                       style: TextStyle(
                         fontSize: 15,
                       ),
@@ -211,7 +221,7 @@ class ParkingInformation extends StatelessWidget {
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: [
                           Text(
-                            "${parking.getPrice!}.00", 
+                            "${parking.getPrice!}.00",
                             style: const TextStyle(
                               fontWeight: FontWeight.bold,
                             ),
@@ -229,24 +239,26 @@ class ParkingInformation extends StatelessWidget {
     );
   }
 
-  String getDate(int date){
-    return DateFormat('MMM. dd, yyyy').format(DateTime.fromMillisecondsSinceEpoch(date));
+  String getDate(int date) {
+    return DateFormat('MMM. dd, yyyy')
+        .format(DateTime.fromMillisecondsSinceEpoch(date));
   }
 
-  String getDateTime(int date){
-    return DateFormat('MMM. dd, yyyy h:mm a').format(DateTime.fromMillisecondsSinceEpoch(date));
+  String getDateTime(int date) {
+    return DateFormat('MMM. dd, yyyy h:mm a')
+        .format(DateTime.fromMillisecondsSinceEpoch(date));
   }
 
-  String getStatus(){
-    if (parking.isInProgress!){
+  String getStatus() {
+    if (parking.isInProgress!) {
       return "In Progress";
     }
 
-    if (parking.isUpcoming!){
+    if (parking.isUpcoming!) {
       return "Upcoming";
     }
 
-    if (parking.isInHistory!){
+    if (parking.isInHistory!) {
       return "Finished";
     }
 

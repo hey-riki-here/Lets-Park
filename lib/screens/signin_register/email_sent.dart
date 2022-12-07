@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class PasswordResetSent extends StatelessWidget {
@@ -51,9 +52,11 @@ class PasswordResetSent extends StatelessWidget {
             onPressed: () {
               Navigator.pop(context);
             },
-            child: const Text(
-              "Continue to Login",
-              style: TextStyle(
+            child: Text(
+              FirebaseAuth.instance.currentUser != null
+                  ? "Continue"
+                  : "Continue to Login",
+              style: const TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.w400,
               ),
@@ -69,5 +72,4 @@ class PasswordResetSent extends StatelessWidget {
       ),
     );
   }
-
 }
