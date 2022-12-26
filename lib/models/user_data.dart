@@ -6,6 +6,8 @@ import 'package:lets_park/models/parking_space.dart';
 
 class UserData {
   String? _id;
+  String? _name;
+  String? _email;
   String? _phoneNumber;
   String? _imageUrl;
   List<ParkingSpace>? _ownedParkingSpace = [];
@@ -20,6 +22,8 @@ class UserData {
 
   UserData.fromDatabase(
     String? id,
+    String? name,
+    String? email,
     String? phoneNumber,
     String? imageUrl,
     int? stars,
@@ -28,6 +32,8 @@ class UserData {
     String paymentParams,
   ) {
     _id = id;
+    _name = name;
+    _email = email;
     _phoneNumber = phoneNumber;
     _imageUrl = imageUrl;
     _stars = stars;
@@ -39,6 +45,14 @@ class UserData {
   String? get getUserId => _id;
 
   set setUserId(String? id) => _id = id;
+
+  String? get getUserName => _name;
+
+  set setUserName(String? name) => _name = name;
+
+  String? get getEmail => _email;
+
+  set setEmail(String? email) => _email = email;
 
   String? get getPhoneNumber => _phoneNumber;
 
@@ -94,6 +108,8 @@ class UserData {
 
   Map<String, dynamic> toJson() => {
         'id': _id,
+        'name': _name,
+        'email': _email,
         'phoneNumber': _phoneNumber,
         'imageUrl': _imageUrl,
         'stars': _stars,
@@ -109,6 +125,8 @@ class UserData {
 
     return UserData.fromDatabase(
       json['id'],
+      json['name'],
+      json['email'],
       json['phoneNumber'],
       json['imageUrl'],
       json['stars'],

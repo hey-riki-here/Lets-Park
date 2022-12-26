@@ -22,6 +22,7 @@ class ParkingSpace {
   bool? _disabled = false;
   int? _creditScore = 10;
   int? _spacePoints = 0;
+  bool? _approved = false;
 
   ParkingSpace();
 
@@ -31,7 +32,6 @@ class ParkingSpace {
     String? ownerName,
     String? imageUrl,
     String? address,
-
     String? caretakerPhoneNumber,
     List geoposition,
     int? capacity,
@@ -47,13 +47,13 @@ class ParkingSpace {
     List<String>? certificates,
     int? creditScore,
     int? spacePoints,
+    bool? approved,
   ) {
     _id = id;
     _ownerId = ownerId;
     _ownerName = ownerName;
     _imageUrl = imageUrl;
     _address = address;
-
     _caretakerPhoneNumber = caretakerPhoneNumber;
     _latLng = LatLng(geoposition[0], geoposition[1]);
     _capacity = capacity;
@@ -69,6 +69,7 @@ class ParkingSpace {
     _certificates = certificates;
     _creditScore = creditScore;
     _spacePoints = spacePoints;
+    _approved = approved;
   }
 
   String? get getSpaceId => _id;
@@ -193,6 +194,8 @@ class ParkingSpace {
 
   int? get getSpacePoints => _spacePoints;
 
+  bool? get isApproved => _approved;
+
 
   @override
   String toString() {
@@ -221,6 +224,7 @@ class ParkingSpace {
         'certificates' : _certificates,
         'creditScore' : _creditScore,
         'spacePoints' : _spacePoints,
+        'approved' : _approved,
       };
 
   static ParkingSpace fromJson(Map<String, dynamic> json) {
@@ -253,6 +257,7 @@ class ParkingSpace {
       certificates,
       json['creditScore'],
       json['spacePoints'],
+      json['approved'],
     );
   }
 }

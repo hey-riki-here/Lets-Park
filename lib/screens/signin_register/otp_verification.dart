@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:pinput/pinput.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:lets_park/services/user_services.dart';
 
 class OTPVerification extends StatefulWidget {
   final String phoneNumber;
@@ -168,9 +169,12 @@ class OTPVerificationState extends State<OTPVerification> {
         );
 
         try {
-          await FirebaseAuth.instance.currentUser!.linkWithCredential(
-              PhoneAuthProvider.credential(
-                  verificationId: verifId, smsCode: pin));
+          await FirebaseAuth.instance.currentUser!
+              .linkWithCredential(PhoneAuthProvider.credential(
+            verificationId: verifId,
+            smsCode: pin,
+          ));
+          await UserServices.updateUserPhoneNumber(widget.phoneNumber);
           Navigator.pop(context);
           Navigator.pop(context, "non-null-callback");
         } on FirebaseAuthException catch (e) {

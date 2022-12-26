@@ -65,6 +65,9 @@ class UserServices {
     final docUser = FirebaseFirestore.instance.collection('user-data').doc(id);
 
     globals.userData.setUserId = id;
+    globals.userData.setUserName =
+        FirebaseAuth.instance.currentUser!.displayName;
+    globals.userData.setEmail = FirebaseAuth.instance.currentUser!.email;
     globals.userData.setImageURL = FirebaseAuth.instance.currentUser!.photoURL;
 
     await docUser.set(globals.userData.toJson());
@@ -80,6 +83,14 @@ class UserServices {
         .doc(parking.getParkingId);
 
     await docUser.set(parking.toJson());
+  }
+
+  static Future<void> updateUserPhoneNumber(String phoneNumber) async {
+    String docId = FirebaseAuth.instance.currentUser!.uid;
+
+    await FirebaseFirestore.instance.collection('user-data').doc(docId).update({
+      'phoneNumber': phoneNumber,
+    });
   }
 
   Stream<DocumentSnapshot<Map<String, dynamic>>>? getUserData() {
